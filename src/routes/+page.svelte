@@ -43,7 +43,7 @@
   // Filter controls
   let propertyType = "all";
   let priceLevel = "median";
-  let affordabilityData = null;
+  let affordabilityData = {};
   let colorExpression = null;
   let colorBreaks = [];
   let mapLoading = false;
@@ -56,7 +56,7 @@
     ],
   };
 
-  let mapStyle = null;
+  let mapStyle = {};
   let allAreaNames = [];
   let selectedValue = null;
   let clearInput;
@@ -97,11 +97,11 @@
   }
 
   // Separate reactive for when map loads
-  $: if (map && !mapStyle) {
+  $: if (map && Object.keys(mapStyle).length > 0) {
     console.log("Map component loaded, waiting for layers...");
   }
   
-  $: if (map && mapStyle) {
+  $: if (map && Object.keys(mapStyle).length > 0) {
     console.log("Map fully initialized");
     // Trigger color map load if not already triggered
     if (propertyType && priceLevel && !mapLoading && Object.keys(affordabilityData).length === 0) {

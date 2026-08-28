@@ -27,8 +27,6 @@
   } from "../lib/map-utils.js";
   import ColorLegend from "../lib/components/ColorLegend.svelte";
 
-  console.log("DEBUG: Page component loading...");
-
   let map;
   let geojson;
   let laGeojson;

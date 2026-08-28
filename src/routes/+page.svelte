@@ -67,7 +67,6 @@
   let selectElement;
 
   onMount(async () => {
-    console.log("Page mounted, initializing map...");
     try {
       await loadTopoJSON();
 
@@ -81,35 +80,25 @@
       // Load the style
       const styleResponse = await fetch("/style.json");
       mapStyle = await styleResponse.json();
-      console.log("Map style and data loaded");
 
       loading = false;
     } catch (e) {
       error = "Failed to load map data";
       loading = false;
-      console.error("Mount error:", e);
     }
   });
 
   // Reactive: Load affordability data and update map colors when filters change
   $: {
-    console.log('Reactive check: map =', !!map, 'propertyType =', propertyType, 'priceLevel =', priceLevel);
     if (map && propertyType && priceLevel) {
-      console.log('Triggering loadAndColorMap with:', { propertyType, priceLevel });
       loadAndColorMap(propertyType, priceLevel);
     }
   }
 
   // Separate reactive for when map loads
   $: if (map && Object.keys(mapStyle).length > 0) {
-    console.log("Map component loaded, waiting for layers...");
-  }
-  
-  $: if (map && Object.keys(mapStyle).length > 0) {
-    console.log("Map fully initialized");
     // Trigger color map load if not already triggered
     if (propertyType && priceLevel && !mapLoading && Object.keys(affordabilityData).length === 0) {
-      console.log("Explicitly triggering loadAndColorMap after map ready");
       loadAndColorMap(propertyType, priceLevel);
     }
   }
@@ -160,25 +149,18 @@
   }
 
   async function loadAndColorMap(pType, pLevel) {
-    console.log("=== Starting loadAndColorMap ===", { pType, pLevel });
     mapLoading = true;
     try {
-      console.log("Fetching affordability data...");
       affordabilityData = await loadAffordabilityData(pType, pLevel);
-      console.log(`Loaded affordability data: ${Object.keys(affordabilityData).length} MSOAs`);
       
       if (Object.keys(affordabilityData).length === 0) {
-        console.error("CRITICAL: affordabilityData is empty! Check console for loadAffordabilityData errors.");
-        error = "Failed to load affordability data - check console";
+        error = "Failed to load affordability data";
         mapLoading = false;
         return;
       }
       
       colorBounds = calculateColorBreaks(affordabilityData);
-      console.log("Color bounds:", colorBounds);
-      
       colorExpression = createColorExpression();
-      console.log("Color expression created:", colorExpression.length > 0);
       
       // Wait for both source and layer to exist in the map
       if (map) {
@@ -199,8 +181,6 @@
             layerExists = false;
           }
           
-          console.log("Waiting for source/layer...", attempts, { sourceExists, layerExists });
-          
           if (!sourceExists || !layerExists) {
             await new Promise(resolve => setTimeout(resolve, 100));
             attempts++;
@@ -210,23 +190,20 @@
         }
         
         if (!sourceExists) {
-          console.error("msoa-source never appeared in map");
+          error = "Map source failed to load";
           mapLoading = false;
           return;
         }
         
         if (!layerExists) {
-          console.error("msoa-fill layer never appeared in map");
+          error = "Map layer failed to load";
           mapLoading = false;
           return;
         }
-        
-        console.log("Source and layer found, updating styles");
       }
       
       // First, update feature states on map so they're available when paint expression evaluates
       if (map && affordabilityData) {
-        console.log("Setting feature states for", Object.keys(affordabilityData).length, "MSOAs");
         updateMapFeatureStates(map, "msoa-source", affordabilityData, colorBounds);
         
         // Apply the color expression to the layer
@@ -238,21 +215,15 @@
             "rgba(255, 255, 255, 0)"
           ];
           map.setPaintProperty("msoa-fill", "fill-color", expr);
-          console.log("Fill color paint expression applied");
         } catch (e) {
-          console.warn("Could not apply fill-color expression:", e);
+          console.error("Could not apply fill-color expression:", e.message);
         }
       }
 
       mapLoading = false;
     } catch (e) {
-      console.error("Error in loadAndColorMap - Full error:", e);
-      console.error("Error message:", e.message);
-      console.error("Error stack:", e.stack);
-      console.error("affordabilityData state:", affordabilityData);
-      console.error("colorBounds state:", colorBounds);
-      console.error("colorExpression state:", colorExpression);
-      error = `Failed to load affordability data: ${e.message}`;
+      console.error("Error loading map colors:", e.message);
+      error = "Failed to load map data";
       mapLoading = false;
     }
   }
@@ -329,9 +300,8 @@
               { source: "msoa-source", sourceLayer: "msoa", id: msoaCode },
               { selected: true }
             );
-            console.log("MSOA selected:", msoaCode);
           } catch (e) {
-            console.warn("Could not set feature state:", e);
+            console.error("Could not set MSOA feature state:", e.message);
           }
         }
         
@@ -514,7 +484,7 @@
             }
           }
         } catch (e) {
-          console.warn("Could not query MSOA from vector tiles:", e);
+          console.error("Could not query MSOA from vector tiles:", e.message);
         }
       }
 
@@ -561,9 +531,8 @@
             { source: "msoa-source", sourceLayer: "msoa", id: msoaCode },
             { selected: true }
           );
-          console.log("MSOA selected from postcode:", msoaCode);
         } catch (e) {
-          console.warn("Could not set feature state:", e);
+          console.error("Could not set MSOA feature state from postcode:", e.message);
         }
         
         // Populate search box

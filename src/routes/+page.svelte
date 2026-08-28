@@ -148,6 +148,24 @@
       colorExpression = createColorExpression(affordabilityData);
       console.log("Color expression created:", colorExpression.length > 0);
       
+      // Wait for the map layer to be added to the map
+      if (map) {
+        let attempts = 0;
+        while (!map.getLayer("msoa-fill") && attempts < 50) {
+          console.log("Waiting for msoa-fill layer to be added...", attempts);
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+        
+        if (!map.getLayer("msoa-fill")) {
+          console.error("msoa-fill layer never appeared in map");
+          mapLoading = false;
+          return;
+        }
+        
+        console.log("msoa-fill layer found, updating styles");
+      }
+      
       // First, update feature states on map so they're available when paint expression evaluates
       if (map && affordabilityData) {
         console.log("Setting feature states for", Object.keys(affordabilityData).length, "MSOAs");
@@ -159,6 +177,7 @@
         try {
           console.log("Applying color expression to msoa-fill layer");
           map.setPaintProperty("msoa-fill", "fill-color", colorExpression);
+          console.log("Paint property applied successfully");
         } catch (e) {
           console.warn("Could not update layer paint property:", e);
         }

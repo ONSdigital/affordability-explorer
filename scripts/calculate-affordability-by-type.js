@@ -17,21 +17,23 @@ const OUTPUT_DIR = path.join(__dirname, '../static/data');
 const PROPERTY_TYPES = ['all', 'detached', 'semi-detached', 'terraced', 'flats'];
 
 /**
- * Read LA-level earnings
+ * Read LA-level earnings AND region mapping
  */
-function readLAEarnings() {
-  console.log('Reading LA-level earnings...');
+function readLAEarningsAndRegions() {
+  console.log('Reading LA-level earnings and region mappings...');
   
   const workbook = XLSX.readFile(path.join(DATA_DIR, 'aff2ratioofhousepricetoresidencebasedearnings.xlsx'));
   
   const earnings = {};
+  const regions = {};
   
-  // Sheet 5b: Median earnings
+  // Sheet 5b: Median earnings + Region mapping
   const ws5b = workbook.Sheets['5b'];
   const range5b = XLSX.utils.decode_range(ws5b['!ref']);
   
   for (let row = 2; row <= range5b.e.r; row++) {
     const regionCode = ws5b[XLSX.utils.encode_cell({ r: row, c: 0 })]?.v;
+    const regionName = ws5b[XLSX.utils.encode_cell({ r: row, c: 1 })]?.v;
     const laCode = ws5b[XLSX.utils.encode_cell({ r: row, c: 2 })]?.v;
     const laName = ws5b[XLSX.utils.encode_cell({ r: row, c: 3 })]?.v;
     
@@ -45,11 +47,12 @@ function readLAEarnings() {
       }
     }
     
-    if (laCode && typeof laCode === 'string' && latestEarnings) {
+    if (laCode && typeof laCode === 'string') {
       if (!earnings[laCode]) {
-        earnings[laCode] = { name: laName, median: null, lq: null };
+        earnings[laCode] = { name: laName, median: null, lq: null, region_code: regionCode, region_name: regionName };
       }
       earnings[laCode].median = latestEarnings;
+      regions[laCode] = { code: regionCode, name: regionName };
     }
   }
   
@@ -79,7 +82,7 @@ function readLAEarnings() {
   }
   
   console.log(`  Loaded earnings for ${Object.keys(earnings).length} LAs\n`);
-  return earnings;
+  return { earnings, regions };
 }
 
 /**
@@ -94,7 +97,7 @@ function getLatestValue(timeSeries, priceLevel) {
 /**
  * Calculate affordability and enrich LA files for a property type
  */
-function enrichPropertyType(propType, earnings) {
+function enrichPropertyType(propType, earnings, regions) {
   console.log(`Calculating affordability for: ${propType}`);
   
   const typeDir = path.join(OUTPUT_DIR, propType);
@@ -107,6 +110,7 @@ function enrichPropertyType(propType, earnings) {
   
   const laFiles = fs.readdirSync(laDir).filter(f => f.endsWith('.json'));
   let processed = 0;
+  const startTime = Date.now();
   
   for (const filename of laFiles) {
     const laCode = filename.replace('.json', '');
@@ -114,7 +118,12 @@ function enrichPropertyType(propType, earnings) {
     const laData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     
     const laEarnings = earnings[laCode];
+    const laRegion = regions[laCode];
     if (!laEarnings) continue;
+    
+    // Add region information to LA
+    laData.region_code = laRegion?.code || null;
+    laData.region_name = laRegion?.name || null;
     
     // Calculate affordability for each MSOA
     const laStats = { median: { prices: [], earnings_vals: [] }, lq: { prices: [], earnings_vals: [] } };
@@ -175,6 +184,17 @@ function enrichPropertyType(propType, earnings) {
     
     fs.writeFileSync(filePath, JSON.stringify(laData, null, 2));
     processed++;
+    
+    // Progress indicator every 50 files
+    if (processed % 50 === 0) {
+      const elapsedMs = Date.now() - startTime;
+      const avgTimePerFile = elapsedMs / processed;
+      const remainingFiles = laFiles.length - processed;
+      const estimatedMs = remainingFiles * avgTimePerFile;
+      const estimatedSec = Math.round(estimatedMs / 1000);
+      const pct = Math.round((processed / laFiles.length) * 100);
+      console.log(`  [${pct}%] ${processed}/${laFiles.length} | ETA: ${estimatedSec}s`);
+    }
   }
   
   console.log(`  ✓ Updated ${processed} LA files\n`);
@@ -185,11 +205,11 @@ async function main() {
   console.log('='.repeat(60) + '\n');
   
   try {
-    const earnings = readLAEarnings();
+    const { earnings, regions } = readLAEarningsAndRegions();
     
     // Process each property type
     for (const propType of PROPERTY_TYPES) {
-      enrichPropertyType(propType, earnings);
+      enrichPropertyType(propType, earnings, regions);
     }
     
     console.log('='.repeat(60));

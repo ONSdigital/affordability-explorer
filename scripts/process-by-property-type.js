@@ -128,17 +128,23 @@ async function processPropertyType(propType, sheetLetter) {
   
   // Read all three files
   console.log('Reading median prices...');
+  let startTime = Date.now();
   const medianData = readSheet(path.join(DATA_DIR, 'medianpricepaidmsoa.xlsx'), sheetName);
-  console.log(`  ${Object.keys(medianData).length} MSOAs`);
+  console.log(`  ${Object.keys(medianData).length} MSOAs (${Math.round((Date.now() - startTime) / 1000)}s)`);
   
   console.log('Reading LQ prices...');
+  startTime = Date.now();
   const lqData = readSheet(path.join(DATA_DIR, 'lowerquartilepricepaidmsoa.xlsx'), sheetName);
+  console.log(`  (${Math.round((Date.now() - startTime) / 1000)}s)`);
   
   console.log('Reading sales...');
+  startTime = Date.now();
   const salesData = readSheet(path.join(DATA_DIR, 'salesmsoa.xlsx'), sheetName);
+  console.log(`  (${Math.round((Date.now() - startTime) / 1000)}s)`);
   
   // Organize by LA
   console.log('Organizing by LA...');
+  startTime = Date.now();
   const laMap = {};
   
   for (const msoaCode in medianData) {
@@ -187,16 +193,24 @@ async function processPropertyType(propType, sheetLetter) {
   
   // Write LA files
   console.log(`Writing ${Object.keys(laMap).length} LA files...`);
+  startTime = Date.now();
+  let written = 0;
   for (const laCode in laMap) {
     const laData = laMap[laCode];
     fs.writeFileSync(
       path.join(laDir, `${laCode}.json`),
       JSON.stringify(laData, null, 2)
     );
+    written++;
+    if (written % 100 === 0) {
+      console.log(`  [${Math.round((written / 318) * 100)}%] ${written}/318`);
+    }
   }
+  console.log(`  (${Math.round((Date.now() - startTime) / 1000)}s)`);
   
   // Write authorities index
   console.log('Writing authorities.json...');
+  startTime = Date.now();
   const authorities = Object.values(laMap).map(la => ({
     code: la.code,
     name: la.name,

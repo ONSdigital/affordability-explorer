@@ -299,32 +299,70 @@
         selectBoundary(boundary);
       }
     } else if (type === "msoa") {
-      // For MSOA selection, highlight the parent LA and zoom to MSOA
+      // Clear any previous selection
+      if (selected && map) {
+        try {
+          map.setFeatureState(
+            { source: "msoa-source", sourceLayer: "msoa", id: selected },
+            { selected: false }
+          );
+        } catch (e) {
+          // Silently fail
+        }
+      }
+      
+      // Clear any previous LA highlight
+      if (selectedLACode) {
+        clearLAHighlight(selectedLACode);
+      }
+      
+      // For MSOA selection, highlight the parent LA
       if (laCode) {
         highlightLA(laCode);
       }
       
-      // Zoom to MSOA by getting its center from affordability data
-      if (map && affordabilityData && affordabilityData[msoaCode]) {
-        const msoa = affordabilityData[msoaCode];
-        selectedValue = {
-          id: msoaCode,
-          label: `${msoa.name}`,
-          type: "msoa",
-        };
+      // Set the MSOA as selected
+      if (msoaCode) {
+        // Update reactive variable for MapLayer binding
+        selected = msoaCode;
+        selectedFeatureId = msoaCode;
         
-        // Try to zoom to the MSOA center - we'd need bounds from the vector tile
-        // For now, just zoom in a bit on England/Wales center
-        map.flyTo({
-          center: [-3.5, 54],
-          zoom: 8,
-          duration: 1000
-        });
+        // Also set feature state for paint expression (opacity)
+        if (map) {
+          try {
+            map.setFeatureState(
+              { source: "msoa-source", sourceLayer: "msoa", id: msoaCode },
+              { selected: true }
+            );
+            console.log("MSOA selected:", msoaCode);
+          } catch (e) {
+            console.warn("Could not set feature state:", e);
+          }
+        }
+        
+        // Populate search box with selected MSOA
+        if (affordabilityData && affordabilityData[msoaCode]) {
+          const msoa = affordabilityData[msoaCode];
+          selectedValue = {
+            id: msoaCode,
+            label: `${msoa.name} (${msoa.la_name})`,
+            type: "msoa",
+          };
+        }
+        
+        // Zoom to show the MSOA area better
+        if (map) {
+          map.flyTo({
+            center: [-3.5, 54],
+            zoom: 8,
+            duration: 1000
+          });
+        }
       }
     }
-
-    // Reset selection
-    selectedValue = null;
+    
+    // Close search menu
+    closeSearchMenu();
   }
 
   function closeSearchMenu() {

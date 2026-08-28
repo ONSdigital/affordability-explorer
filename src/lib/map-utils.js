@@ -482,7 +482,7 @@ export async function searchPlaces(query, allAreaNames = [], msoas = {}) {
   // Try postcode lookup
   try {
     const postcodes = await fetchPostcodes(query);
-    postcodes.slice(0, 3).forEach((postcode) => {
+    postcodes.slice(0, 10).forEach((postcode) => {
       results.push({
         id: postcode,
         label: postcode,

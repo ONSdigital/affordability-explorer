@@ -499,6 +499,16 @@
         selected = msoaCode;
         selectedFeatureId = msoaCode;
         
+        // Also set selectedBoundary for UI (clear button visibility)
+        selectedBoundary = {
+          id: msoaCode,
+          name: msoa.name,
+          bounds: [
+            [-3.5, 54],
+            [-3.5, 54]
+          ]
+        };
+        
         try {
           map.setFeatureState(
             { source: "msoa-source", sourceLayer: "msoa", id: msoaCode },
@@ -516,11 +526,11 @@
           type: "msoa",
         };
         
-        // Zoom to the MSOA
+        // Zoom to show the parent LA and MSOA - use zoom 7 for better context
         if (map) {
           map.flyTo({
             center: [lon, lat],
-            zoom: 8,
+            zoom: 7,
             duration: 1000
           });
         }

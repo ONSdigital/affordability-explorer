@@ -20,9 +20,11 @@
     findBoundaryAtPoint,
     loadAffordabilityData,
     createColorExpression,
+    calculateColorBreaks,
     updateMapFeatureStates,
     searchPlaces,
   } from "../lib/map-utils.js";
+  import ColorLegend from "../lib/components/ColorLegend.svelte";
 
   let map;
   let geojson;
@@ -40,6 +42,7 @@
   let priceLevel = "median";
   let affordabilityData = null;
   let colorExpression = null;
+  let colorBreaks = [];
   let mapLoading = false;
 
   // UK bounds
@@ -123,7 +126,13 @@
     mapLoading = true;
     try {
       affordabilityData = await loadAffordabilityData(pType, pLevel);
+      console.log(`Loaded affordability data: ${Object.keys(affordabilityData).length} MSOAs`);
+      
+      colorBreaks = calculateColorBreaks(affordabilityData);
+      console.log("Color breaks:", colorBreaks);
+      
       colorExpression = createColorExpression(affordabilityData);
+      console.log("Color expression created:", colorExpression.length > 0);
       
       // Update map layers with new color expression
       if (map && colorExpression) {
@@ -371,7 +380,7 @@
             <MapSource
               id="msoa-source"
               type="vector"
-              url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/"
+              url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{z}/{x}/{y}.pbf"
               layer="msoa"
               promoteId="areacd"
             >
@@ -423,7 +432,7 @@
             <MapSource
               id="la-source"
               type="vector"
-              url="https://cdn.ons.gov.uk/maptiles/administrative/2021/lad/v2/boundaries/"
+              url="https://cdn.ons.gov.uk/maptiles/administrative/2021/lad/v2/boundaries/{z}/{x}/{y}.pbf"
               layer="lad"
               promoteId="areacd"
             >
@@ -451,6 +460,7 @@
         </Map>
       {/if}
     </div>
+
     {#if selectedBoundary}
       <div class="selection-info">
         <p>
@@ -464,18 +474,26 @@
       </div>
     {/if}
 
-    <p class="map-info">
-      <strong>Map Info:</strong>
-      Zoom: {zoom ? zoom.toFixed(1) : "—"} | Lng: {center.lng
-        ? center.lng.toFixed(2)
-        : "—"} | Lat: {center.lat ? center.lat.toFixed(2) : "—"}
-      {#if hovered}
-        | Hovered: {hovered}
+    <div class="map-footer">
+      <div class="map-info">
+        <strong>Map Info:</strong>
+        Zoom: {zoom ? zoom.toFixed(1) : "—"} | Lng: {center.lng
+          ? center.lng.toFixed(2)
+          : "—"} | Lat: {center.lat ? center.lat.toFixed(2) : "—"}
+        {#if hovered}
+          | Hovered: {hovered}
+        {/if}
+        {#if mapLoading}
+          | <span class="status-loading">Loading data...</span>
+        {/if}
+      </div>
+
+      {#if affordabilityData && colorBreaks.length > 0}
+        <div class="legend-container">
+          <ColorLegend breaks={colorBreaks} />
+        </div>
       {/if}
-      {#if mapLoading}
-        | <span class="status-loading">Loading data...</span>
-      {/if}
-    </p>
+    </div>
   </Container>
 </Section>
 
@@ -557,22 +575,6 @@
     background-color: #f0f0f0;
   }
 
-  .map-info {
-    font-size: 12px;
-    color: #666;
-    margin: 16px 0 0 0;
-    padding: 8px 12px;
-    background-color: #f9f9f9;
-    border-radius: 3px;
-    border: 1px solid #ddd;
-    font-family: "Courier New", monospace;
-  }
-
-  .status-loading {
-    color: #0078d4;
-    font-weight: 500;
-  }
-
   .map-wrapper {
     height: 600px;
     border-radius: 4px;
@@ -601,6 +603,34 @@
     margin: 0;
   }
 
+  .map-footer {
+    margin-top: 12px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .map-info {
+    font-size: 12px;
+    color: #666;
+    padding: 8px 12px;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    font-family: "Courier New", monospace;
+    flex: 1;
+    margin: 0;
+  }
+
+  .legend-container {
+    max-width: 300px;
+  }
+
+  .status-loading {
+    color: #0078d4;
+    font-weight: 500;
+  }
+
   .map-wrapper :global(.mapboxgl-canvas) {
     cursor: pointer;
   }
@@ -613,6 +643,14 @@
     .selection-info {
       flex-direction: column;
       align-items: flex-start;
+    }
+
+    .map-footer {
+      flex-direction: column;
+    }
+
+    .legend-container {
+      max-width: 100%;
     }
   }
 </style>

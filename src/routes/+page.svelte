@@ -479,6 +479,22 @@
   </Container>
 </Section>
 
+<Section title="Affordability snapshot">
+  <Grid width="full">
+    <Card title="House price to earnings ratio"></Card>
+    <Card title="Comparisons"></Card>
+    <Card title="Property sales over time"></Card>
+  </Grid>
+</Section>
+
+<Section title="What would I need to buy?">
+  <Grid width="full">
+    <Card title="Property cost"></Card>
+    <Card title="Income required"></Card>
+    <Card title="Total savings needed"></Card>
+  </Grid>
+</Section>
+
 <style>
   .error-message {
     padding: 12px 16px;

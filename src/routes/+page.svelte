@@ -127,64 +127,95 @@
 
   function highlightLA(laCode) {
     // Highlight the LA boundary when MSOA is selected using feature state
-    if (!map || !laCode) return;
+    if (!map || !laCode || !laGeojson) return;
 
     try {
-      // Set feature state on GeoJSON source
-      map.setFeatureState(
-        { source: "la-geojson", id: laCode },
-        { highlighted: true }
-      );
-      selectedLACode = laCode;
+      // Only try to highlight if the source exists on the map
+      if (map.getSource("la-geojson")) {
+        map.setFeatureState(
+          { source: "la-geojson", id: laCode },
+          { highlighted: true }
+        );
+        selectedLACode = laCode;
+      }
     } catch (e) {
       console.warn("Could not highlight LA boundary:", e);
     }
   }
 
   function clearLAHighlight(laCode) {
-    if (!map || !laCode) return;
+    if (!map || !laCode || !laGeojson) return;
 
     try {
-      map.setFeatureState(
-        { source: "la-geojson", id: laCode },
-        { highlighted: false }
-      );
+      // Only try to clear if the source exists on the map
+      if (map.getSource("la-geojson")) {
+        map.setFeatureState(
+          { source: "la-geojson", id: laCode },
+          { highlighted: false }
+        );
+      }
     } catch (e) {
       // Silently fail
     }
   }
 
   async function loadAndColorMap(pType, pLevel) {
+    console.log("=== Starting loadAndColorMap ===", { pType, pLevel });
     mapLoading = true;
     try {
+      console.log("Fetching affordability data...");
       affordabilityData = await loadAffordabilityData(pType, pLevel);
       console.log(`Loaded affordability data: ${Object.keys(affordabilityData).length} MSOAs`);
+      
+      if (Object.keys(affordabilityData).length === 0) {
+        console.error("CRITICAL: affordabilityData is empty! Check console for loadAffordabilityData errors.");
+        error = "Failed to load affordability data - check console";
+        mapLoading = false;
+        return;
+      }
       
       colorBounds = calculateColorBreaks(affordabilityData);
       console.log("Color bounds:", colorBounds);
       
-      colorExpression = createColorExpression(affordabilityData);
+      colorExpression = createColorExpression();
       console.log("Color expression created:", colorExpression.length > 0);
       
       // Wait for both source and layer to exist in the map
       if (map) {
         let attempts = 0;
-        while ((!map.getSource("msoa-source") || !map.getLayer("msoa-fill")) && attempts < 50) {
-          console.log("Waiting for source/layer...", attempts, {
-            sourceExists: !!map.getSource("msoa-source"),
-            layerExists: !!map.getLayer("msoa-fill")
-          });
-          await new Promise(resolve => setTimeout(resolve, 100));
-          attempts++;
+        let sourceExists = false;
+        let layerExists = false;
+        
+        while ((!sourceExists || !layerExists) && attempts < 50) {
+          try {
+            sourceExists = !!map.getSource("msoa-source");
+          } catch (e) {
+            sourceExists = false;
+          }
+          
+          try {
+            layerExists = !!map.getLayer("msoa-fill");
+          } catch (e) {
+            layerExists = false;
+          }
+          
+          console.log("Waiting for source/layer...", attempts, { sourceExists, layerExists });
+          
+          if (!sourceExists || !layerExists) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+          } else {
+            break;
+          }
         }
         
-        if (!map.getSource("msoa-source")) {
+        if (!sourceExists) {
           console.error("msoa-source never appeared in map");
           mapLoading = false;
           return;
         }
         
-        if (!map.getLayer("msoa-fill")) {
+        if (!layerExists) {
           console.error("msoa-fill layer never appeared in map");
           mapLoading = false;
           return;
@@ -196,24 +227,32 @@
       // First, update feature states on map so they're available when paint expression evaluates
       if (map && affordabilityData) {
         console.log("Setting feature states for", Object.keys(affordabilityData).length, "MSOAs");
-        updateMapFeatureStates(map, "msoa-source", "msoa-fill", affordabilityData);
-      }
-      
-      // Then update map layers with new color expression
-      if (map && colorExpression) {
+        updateMapFeatureStates(map, "msoa-source", affordabilityData, colorBounds);
+        
+        // Apply the color expression to the layer
         try {
-          console.log("Applying color expression to msoa-fill layer");
-          map.setPaintProperty("msoa-fill", "fill-color", colorExpression);
-          console.log("Paint property applied successfully");
+          const expr = [
+            "case",
+            ["!=", ["feature-state", "color"], null],
+            ["feature-state", "color"],
+            "rgba(255, 255, 255, 0)"
+          ];
+          map.setPaintProperty("msoa-fill", "fill-color", expr);
+          console.log("Fill color paint expression applied");
         } catch (e) {
-          console.warn("Could not update layer paint property:", e);
+          console.warn("Could not apply fill-color expression:", e);
         }
       }
 
       mapLoading = false;
     } catch (e) {
-      console.error("Error loading affordability data:", e);
-      error = "Failed to load affordability data";
+      console.error("Error in loadAndColorMap - Full error:", e);
+      console.error("Error message:", e.message);
+      console.error("Error stack:", e.stack);
+      console.error("affordabilityData state:", affordabilityData);
+      console.error("colorBounds state:", colorBounds);
+      console.error("colorExpression state:", colorExpression);
+      error = `Failed to load affordability data: ${e.message}`;
       mapLoading = false;
     }
   }
@@ -430,7 +469,7 @@
         <Map
           id="mapsearch-map"
           style={mapStyle}
-          location={{ center: { lng: -3.5, lat: 54 }, zoom: 6 }}
+          location={{ lng: -3.5, lat: 54, zoom: 6 }}
           bind:map
           bind:zoom
           bind:center
@@ -442,7 +481,7 @@
           <MapSource
             id="msoa-source"
             type="vector"
-            url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{z}/{x}/{y}.pbf"
+            url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{'{z}/{x}/{y}'}.pbf"
             layer="msoa"
             promoteId="areacd"
           >
@@ -454,7 +493,6 @@
               select={true}
               bind:selected
               paint={{
-                "fill-color": colorExpression || "#ccc",
                 "fill-opacity": [
                   "case",
                   ["==", ["feature-state", "selected"], true],

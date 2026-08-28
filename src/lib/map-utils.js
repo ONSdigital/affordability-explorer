@@ -241,8 +241,10 @@ export async function loadAffordabilityData(propertyType = 'all', priceLevel = '
 
   try {
     const response = await fetch(`/data/${propertyType}/msoas-latest.json`);
+    console.log(`Fetching /data/${propertyType}/msoas-latest.json - Status: ${response.status}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    console.log(`Loaded data structure - msoas array:`, data.msoas ? data.msoas.length : 'no msoas key');
 
     // Create a map: MSOA code -> affordability ratio
     const msoas = {};
@@ -260,13 +262,15 @@ export async function loadAffordabilityData(propertyType = 'all', priceLevel = '
         };
       });
     }
+    console.log(`Processed ${Object.keys(msoas).length} MSOAs for cache key: ${cacheKey}`);
 
     affordabilityCache[cacheKey] = msoas;
     return msoas;
-  } catch (error) {
-    console.error(`Failed to load affordability data for ${propertyType}/${priceLevel}:`, error);
-    return {};
-  }
+    } catch (error) {
+      console.error(`Failed to load affordability data for ${propertyType}/${priceLevel}:`, error.message, error.stack);
+      console.error("Full error object:", error);
+      return {};
+    }
 }
 
 /**
@@ -309,78 +313,33 @@ export function calculateColorBreaks(msoas, numColors = 7) {
 }
 
 /**
- * Create a Maplibre GL paint expression for data-driven coloring
- * @param {object} msoas - Map of MSOA code -> {ratio: number}
+ * Create a simple paint expression for data-driven coloring using feature state colors
  * @param {array} colorPalette - Color array (default: affordability palette)
  * @returns {array} Maplibre GL paint expression
  */
-export function createColorExpression(msoas, colorPalette = null) {
+export function createColorExpression(colorPalette = null) {
   if (!colorPalette) {
     colorPalette = ["#E92730", "#f0702f", "#f6ae35", "#f1ec37", "#95ca53", "#2ea949", "#0a8647"];
   }
 
-  const bounds = calculateColorBreaks(msoas, colorPalette.length);
-  const colorUnavailable = "#ccc";
-
-  // If no bounds, return default color expression
-  if (bounds.length === 0) {
-    console.warn("No valid bounds calculated, using default unavailable color");
-    return [
-      "case",
-      ["!=", ["feature-state", "ratio"], null],
-      colorUnavailable,
-      colorUnavailable
-    ];
-  }
-
-  // Build expression: ["case", [condition], color, [condition], color, ..., defaultColor]
-  const expression = ["case"];
-
-  // Handle missing/null data first
-  expression.push(["==", ["feature-state", "ratio"], null]);
-  expression.push(colorUnavailable);
-
-  // Add conditions for each color range
-  // bounds has (numColors + 1) values, so we have numColors ranges
-  for (let i = 0; i < colorPalette.length; i++) {
-    const lowerBound = bounds[i];
-    const upperBound = bounds[i + 1];
-    const color = colorPalette[i];
-
-    if (i === 0) {
-      // First range: ratio < upperBound
-      expression.push(["<", ["feature-state", "ratio"], upperBound]);
-      expression.push(color);
-    } else if (i === colorPalette.length - 1) {
-      // Last range: ratio >= lowerBound
-      expression.push([">=", ["feature-state", "ratio"], lowerBound]);
-      expression.push(color);
-    } else {
-      // Middle ranges: lowerBound <= ratio < upperBound
-      expression.push([
-        "all",
-        [">=", ["feature-state", "ratio"], lowerBound],
-        ["<", ["feature-state", "ratio"], upperBound],
-      ]);
-      expression.push(color);
-    }
-  }
-
-  // Default fallback
-  expression.push(colorUnavailable);
-
-  console.log("Color expression built with", breaks.length + 1, "color ranges");
-  return expression;
+  // Simple expression: if feature-state color is set, use it; otherwise transparent
+  return [
+    "case",
+    ["!=", ["feature-state", "color"], null],
+    ["feature-state", "color"],
+    "rgba(255, 255, 255, 0)"
+  ];
 }
 
 /**
  * Set feature states on a map for affordability visualization
  * @param {object} map - Maplibre GL map instance
- * @param {string} sourceId - Source ID (e.g., 'msoa-tiles')
- * @param {string} layerId - Layer ID (e.g., 'msoa-fill')
+ * @param {string} sourceId - Source ID (e.g., 'msoa-source')
  * @param {object} msoas - Map of MSOA code -> {ratio: number}
+ * @param {array} colorBounds - Bounds array for color breaks
+ * @param {array} colorPalette - Color palette
  */
-export function updateMapFeatureStates(map, sourceId, layerId, msoas) {
+export function updateMapFeatureStates(map, sourceId, msoas, colorBounds, colorPalette) {
   if (!map || !msoas) {
     console.warn("updateMapFeatureStates: map or msoas missing");
     return;
@@ -389,27 +348,65 @@ export function updateMapFeatureStates(map, sourceId, layerId, msoas) {
   const source = map.getSource(sourceId);
   if (!source) {
     console.warn("updateMapFeatureStates: source not found:", sourceId);
+    console.warn("Available sources:", Object.keys(map.getStyle().sources || {}));
     return;
+  }
+
+  if (!colorPalette) {
+    colorPalette = ["#E92730", "#f0702f", "#f6ae35", "#f1ec37", "#95ca53", "#2ea949", "#0a8647"];
   }
 
   let successCount = 0;
   let errorCount = 0;
+  let loggedErrors = [];
   
-  // Update feature state for each MSOA
+  // Sample first few MSOAs
+  const msoacdKeys = Object.keys(msoas).slice(0, 3);
+  console.log("Sample MSOAs for feature state:", msoacdKeys);
+  
+  // Update feature state for each MSOA with its color
   Object.entries(msoas).forEach(([msoacd, data]) => {
     try {
+      // Calculate the color for this MSOA based on its ratio
+      let color = "#ccc"; // default unavailable
+      
+      if (data.ratio !== null && colorBounds.length > 0) {
+        // Find which color range this ratio falls into
+        for (let i = 0; i < colorPalette.length; i++) {
+          const lowerBound = colorBounds[i];
+          const upperBound = colorBounds[i + 1];
+          
+          if (i === 0 && data.ratio < upperBound) {
+            color = colorPalette[i];
+            break;
+          } else if (i === colorPalette.length - 1 && data.ratio >= lowerBound) {
+            color = colorPalette[i];
+            break;
+          } else if (data.ratio >= lowerBound && data.ratio < upperBound) {
+            color = colorPalette[i];
+            break;
+          }
+        }
+      }
+      
       map.setFeatureState(
         { source: sourceId, sourceLayer: 'msoa', id: msoacd },
-        { ratio: data.ratio }
+        { color: color }
       );
       successCount++;
     } catch (e) {
       errorCount++;
+      if (loggedErrors.length < 3) {
+        loggedErrors.push(e.message);
+      }
       // Feature may not exist on current zoom level
     }
   });
   
   console.log(`Feature states set: ${successCount} success, ${errorCount} errors`);
+  if (loggedErrors.length > 0) {
+    console.warn("Sample errors:", loggedErrors);
+  }
 }
 
 /**

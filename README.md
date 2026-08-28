@@ -60,11 +60,15 @@ This processes:
 - 7,264 MSOAs across 318 Local Authorities
 - Calculates affordability ratios (price ÷ earnings)
 - Creates time series data (119 quarters: 1995-Q4 to 2025-Q2)
-- Generates map-ready files with national/regional aggregates
+- Generates map-ready files with property-type-specific aggregates
+- Creates shared geography files (authorities + regions)
 
 **Output**: ~834 MB of JSON files in `static/data/` (not committed to git)
+- Shared geography folder: authorities.json + regions.json
+- 5 property-type directories: each with LA files + msoas-latest + national aggregates
+- 1,607 JSON files total
 
-**Time**: ~9 minutes (5 min process + 2 min calculate + 2 min generate)
+**Time**: ~9 minutes (5 min parse + 2 min calculate + 2 min generate)
 
 For detailed information about the data pipeline, see [PIPELINE.md](./PIPELINE.md)
 

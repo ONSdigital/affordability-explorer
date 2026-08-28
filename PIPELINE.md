@@ -18,29 +18,35 @@ static/data/
 ├── all/
 │   ├── la/                          (318 LA files with all affordability data)
 │   ├── msoas-latest.json            (7,264 MSOAs with latest affordability)
-│   ├── national/
-│   │   ├── england.json
-│   │   └── wales.json
-│   └── authorities.json             (318 LAs - for backward compatibility)
+│   └── national/
+│       ├── england.json
+│       └── wales.json
 ├── detached/
 │   ├── la/                          (318 LA files)
 │   ├── msoas-latest.json
-│   ├── national/
-│   │   ├── england.json
-│   │   └── wales.json
-│   └── authorities.json
+│   └── national/
+│       ├── england.json
+│       └── wales.json
 ├── semi-detached/
+│   ├── la/
+│   ├── msoas-latest.json
+│   └── national/
 ├── terraced/
+│   ├── la/
+│   ├── msoas-latest.json
+│   └── national/
 └── flats/
+    ├── la/
+    ├── msoas-latest.json
+    └── national/
 ```
 
 ### Total Data
-- **Shared geography**: 2 files (authorities.json + regions.json)
+- **Shared geography**: 2 files (authorities.json with 318 LAs + region codes, regions.json with 10 regions)
 - **1,590 LA files** (318 LAs × 5 property types)
 - **5 msoas-latest.json** (7,264 MSOAs each)
 - **10 national files** (england.json + wales.json per property type)
-- **5 authorities.json** (one per property type for backward compatibility)
-- **834 MB total** (not committed to git; generate with `npm run generate-data`)
+- **1,607 JSON files total** (not committed to git; generate with `npm run generate-data`)
 
 ## Processing Pipeline
 
@@ -97,13 +103,22 @@ Located in `static/data/geography/` (shared across all property types):
 }
 ```
 
-**regions.json** - 10 regions (9 in England + Wales)
+**regions.json** - 10 regions with country hierarchy
 ```json
 {
   "regions": [
-    { "code": "E12000001", "name": "North East" },
-    { "code": "E12000002", "name": "North West" },
-    ...
+    {
+      "code": "E12000001",
+      "name": "North East",
+      "country_code": "E92000001",
+      "country_name": "England"
+    },
+    {
+      "code": "W92000004",
+      "name": "Wales",
+      "country_code": "W92000004",
+      "country_name": "Wales"
+    }
   ]
 }
 ```
@@ -144,6 +159,10 @@ Located in `static/data/geography/` (shared across all property types):
 ```javascript
 // For selected property type (e.g., 'all')
 const propType = 'all';
+
+// Load geography (shared across all property types)
+const authorities = await fetch(`/static/data/geography/authorities.json`).then(r => r.json());
+const regions = await fetch(`/static/data/geography/regions.json`).then(r => r.json());
 
 // For map visualization
 const msoasLatest = await fetch(`/static/data/${propType}/msoas-latest.json`).then(r => r.json());

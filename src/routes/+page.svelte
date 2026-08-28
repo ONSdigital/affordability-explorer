@@ -438,15 +438,107 @@
         return;
       }
 
-      // Find the LTLA boundary containing this postcode
-      const ltla = findBoundaryAtPoint(lon, lat, "ltla");
-      if (ltla) {
-        selectBoundary(ltla);
+      // Try to find MSOA from vector tiles using map querySourceFeatures
+      let msoaCode = null;
+      if (map) {
+        try {
+          const features = map.querySourceFeatures("msoa-source", {
+            sourceLayer: "msoa",
+          });
+          
+          // Find the feature containing this point
+          for (const feature of features) {
+            if (feature.geometry && feature.geometry.type === "Polygon") {
+              // Check if point is in polygon (simple bounding box check first)
+              const bounds = feature.geometry.coordinates[0];
+              let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+              
+              bounds.forEach(coord => {
+                minX = Math.min(minX, coord[0]);
+                maxX = Math.max(maxX, coord[0]);
+                minY = Math.min(minY, coord[1]);
+                maxY = Math.max(maxY, coord[1]);
+              });
+              
+              if (lon >= minX && lon <= maxX && lat >= minY && lat <= maxY) {
+                msoaCode = feature.id || feature.properties?.areacd;
+                if (msoaCode) break;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Could not query MSOA from vector tiles:", e);
+        }
+      }
+
+      // If we found an MSOA, select it
+      if (msoaCode && affordabilityData && affordabilityData[msoaCode]) {
+        const msoa = affordabilityData[msoaCode];
+        
+        // Clear any previous selection
+        if (selected && map) {
+          try {
+            map.setFeatureState(
+              { source: "msoa-source", sourceLayer: "msoa", id: selected },
+              { selected: false }
+            );
+          } catch (e) {
+            // Silently fail
+          }
+        }
+        
+        // Clear previous LA highlight
+        if (selectedLACode) {
+          clearLAHighlight(selectedLACode);
+        }
+        
+        // Highlight the parent LA
+        highlightLA(msoa.la_code);
+        
+        // Select the MSOA
+        selected = msoaCode;
+        selectedFeatureId = msoaCode;
+        
+        try {
+          map.setFeatureState(
+            { source: "msoa-source", sourceLayer: "msoa", id: msoaCode },
+            { selected: true }
+          );
+          console.log("MSOA selected from postcode:", msoaCode);
+        } catch (e) {
+          console.warn("Could not set feature state:", e);
+        }
+        
+        // Populate search box
+        selectedValue = {
+          id: msoaCode,
+          label: `${msoa.name} (${msoa.la_name})`,
+          type: "msoa",
+        };
+        
+        // Zoom to the MSOA
+        if (map) {
+          map.flyTo({
+            center: [lon, lat],
+            zoom: 8,
+            duration: 1000
+          });
+        }
+        
+        // Close search menu
+        closeSearchMenu();
       } else {
-        error = "Area not found for this postcode";
+        // Fallback: find the LTLA boundary containing this postcode
+        const ltla = findBoundaryAtPoint(lon, lat, "ltla");
+        if (ltla) {
+          selectBoundary(ltla);
+        } else {
+          error = "Area not found for this postcode";
+        }
       }
     } catch (e) {
       error = "Area unavailable";
+      console.error("Postcode error:", e);
     }
   }
 

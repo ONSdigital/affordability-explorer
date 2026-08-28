@@ -75,13 +75,7 @@ function generateForPropertyType(propType) {
     }
   }
   
-  // Write authorities.json
-  fs.writeFileSync(
-    path.join(typeDir, 'authorities.json'),
-    JSON.stringify({ authorities }, null, 2)
-  );
-  
-  console.log(`  ✓ authorities.json (${authorities.length} LAs with region info)`);
+  // Note: authorities.json is now generated once in geography/ folder (see main function)
   
   // Generate msoas-latest.json
   msoas.sort((a, b) => {

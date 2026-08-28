@@ -377,8 +377,20 @@ export function createColorExpression(msoas, colorPalette = null) {
  * @param {object} msoas - Map of MSOA code -> {ratio: number}
  */
 export function updateMapFeatureStates(map, sourceId, layerId, msoas) {
-  if (!map || !msoas) return;
+  if (!map || !msoas) {
+    console.warn("updateMapFeatureStates: map or msoas missing");
+    return;
+  }
+  
+  const source = map.getSource(sourceId);
+  if (!source) {
+    console.warn("updateMapFeatureStates: source not found:", sourceId);
+    return;
+  }
 
+  let successCount = 0;
+  let errorCount = 0;
+  
   // Update feature state for each MSOA
   Object.entries(msoas).forEach(([msoacd, data]) => {
     try {
@@ -386,10 +398,14 @@ export function updateMapFeatureStates(map, sourceId, layerId, msoas) {
         { source: sourceId, sourceLayer: 'msoa', id: msoacd },
         { ratio: data.ratio }
       );
+      successCount++;
     } catch (e) {
+      errorCount++;
       // Feature may not exist on current zoom level
     }
   });
+  
+  console.log(`Feature states set: ${successCount} success, ${errorCount} errors`);
 }
 
 /**

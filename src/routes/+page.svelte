@@ -148,13 +148,22 @@
       colorExpression = createColorExpression(affordabilityData);
       console.log("Color expression created:", colorExpression.length > 0);
       
-      // Wait for the map layer to be added to the map
+      // Wait for both source and layer to exist in the map
       if (map) {
         let attempts = 0;
-        while (!map.getLayer("msoa-fill") && attempts < 50) {
-          console.log("Waiting for msoa-fill layer to be added...", attempts);
+        while ((!map.getSource("msoa-source") || !map.getLayer("msoa-fill")) && attempts < 50) {
+          console.log("Waiting for source/layer...", attempts, {
+            sourceExists: !!map.getSource("msoa-source"),
+            layerExists: !!map.getLayer("msoa-fill")
+          });
           await new Promise(resolve => setTimeout(resolve, 100));
           attempts++;
+        }
+        
+        if (!map.getSource("msoa-source")) {
+          console.error("msoa-source never appeared in map");
+          mapLoading = false;
+          return;
         }
         
         if (!map.getLayer("msoa-fill")) {
@@ -163,7 +172,7 @@
           return;
         }
         
-        console.log("msoa-fill layer found, updating styles");
+        console.log("Source and layer found, updating styles");
       }
       
       // First, update feature states on map so they're available when paint expression evaluates

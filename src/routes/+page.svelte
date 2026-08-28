@@ -96,6 +96,20 @@
     }
   }
 
+  // Separate reactive for when map loads
+  $: if (map && !mapStyle) {
+    console.log("Map component loaded, waiting for layers...");
+  }
+  
+  $: if (map && mapStyle) {
+    console.log("Map fully initialized");
+    // Trigger color map load if not already triggered
+    if (propertyType && priceLevel && !mapLoading && Object.keys(affordabilityData).length === 0) {
+      console.log("Explicitly triggering loadAndColorMap after map ready");
+      loadAndColorMap(propertyType, priceLevel);
+    }
+  }
+
   // When selected changes, update selectedBoundary and zoom
   $: if (selected !== null && selected !== undefined) {
     const boundary = getBoundaryById(selected);

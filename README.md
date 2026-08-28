@@ -9,7 +9,10 @@ An interactive data visualization application for exploring UK housing affordabi
 - **Property Type Filtering**: Switch between "All", Detached, Semi-detached, Terraced, and Flats
 - **Price Level Filtering**: View Median or Lower Quartile affordability ratios
 - **Dynamic Legend**: Shows affordability ratio ranges with automatic color breaks calculated from data
+- **Smart Search**: Find Lower Tier Local Authorities, MSOAs, or postcodes with autocomplete
+- **Interactive Selection**: Click search results to zoom to location and highlight parent Local Authority
 - **Responsive Design**: Works on desktop and mobile devices
+- **Hover & Select Feedback**: Visual feedback when hovering over or selecting MSOAs
 
 ## Getting Started
 
@@ -99,11 +102,22 @@ Uses equal-interval method to divide affordability ratios into 7 color ranges:
 Breaks are calculated dynamically based on the minimum and maximum affordability ratios in the selected property type and price level.
 
 ### Map Features
-- Zoom: 6 (centered on England and Wales)
+- Zoom: 6 (centered on England and Wales) with minzoom constraint
 - Vector tile layer: `msoa` with feature IDs from `areacd` (MSOA codes)
 - Feature state: Each MSOA has a `color` property set based on affordability ratio
 - Paint expression: Simple case statement using feature state color
 - Hover/select: Visual feedback when hovering or selecting MSOAs
+- Feature opacity responds to selection state (0.7 normal, 0.85 hover, 0.9 selected)
+
+### Search & Selection
+- Searches across Lower Tier Local Authorities and MSOAs
+- Includes MSOA names (hclnm) with parent Local Authority for context
+- Postcode lookup support to find relevant MSOA
+- Selection automatically:
+  - Sets MSOA as highlighted on map with darker color
+  - Outlines parent Local Authority boundary
+  - Zooms to level 8 for better visibility
+  - Keeps selection in search box for context
 
 ### Code Quality
 

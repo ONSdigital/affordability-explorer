@@ -350,13 +350,64 @@
           };
         }
         
-        // Zoom to show the MSOA area better
+        // Query the MSOA feature to get its bounds and center
         if (map) {
-          map.flyTo({
-            center: [-3.5, 54],
-            zoom: 8,
-            duration: 1000
-          });
+          try {
+            const features = map.querySourceFeatures("msoa-source", {
+              sourceLayer: "msoa",
+              filter: ["==", ["id"], msoaCode]
+            });
+            
+            if (features.length > 0) {
+              const feature = features[0];
+              const bounds = feature.properties.bounds || feature.geometry.coordinates;
+              
+              // Calculate center of feature
+              let centerLng = -3.5;
+              let centerLat = 54;
+              
+              if (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon") {
+                let minLng = Infinity, maxLng = -Infinity;
+                let minLat = Infinity, maxLat = -Infinity;
+                
+                const coords = feature.geometry.type === "Polygon" 
+                  ? feature.geometry.coordinates[0] 
+                  : feature.geometry.coordinates[0][0];
+                
+                coords.forEach(([lng, lat]) => {
+                  minLng = Math.min(minLng, lng);
+                  maxLng = Math.max(maxLng, lng);
+                  minLat = Math.min(minLat, lat);
+                  maxLat = Math.max(maxLat, lat);
+                });
+                
+                centerLng = (minLng + maxLng) / 2;
+                centerLat = (minLat + maxLat) / 2;
+              }
+              
+              // Zoom to show the MSOA and parent LA
+              map.flyTo({
+                center: [centerLng, centerLat],
+                zoom: 9,
+                duration: 1000
+              });
+            } else {
+              // Fallback if feature not found
+              map.flyTo({
+                center: [-3.5, 54],
+                zoom: 7,
+                duration: 1000
+              });
+            }
+          } catch (e) {
+            console.warn("Could not query MSOA bounds:", e);
+            // Fallback zoom
+            map.flyTo({
+              center: [-3.5, 54],
+              zoom: 7,
+              duration: 1000
+            });
+          }
         }
       }
     }

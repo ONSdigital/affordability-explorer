@@ -56,7 +56,11 @@
     ],
   };
 
-  let mapStyle = {};
+  let mapStyle = {
+    version: 8,
+    sources: {},
+    layers: [],
+  };
   let allAreaNames = [];
   let selectedValue = null;
   let clearInput;

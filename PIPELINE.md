@@ -12,29 +12,35 @@ All 7,264 MSOAs across 318 Local Authorities in England and Wales have been proc
 ### Generated Files (in `static/data/`)
 ```
 static/data/
+├── geography/                       (Shared across all property types)
+│   ├── authorities.json             (318 LAs with region codes/names)
+│   └── regions.json                 (10 regions: 9 England + Wales)
 ├── all/
-│   ├── la/                          (318 LA files)
+│   ├── la/                          (318 LA files with all affordability data)
 │   ├── msoas-latest.json            (7,264 MSOAs with latest affordability)
 │   ├── national/
 │   │   ├── england.json
 │   │   └── wales.json
-│   ├── authorities.json
-│   └── regions.json
+│   └── authorities.json             (318 LAs - for backward compatibility)
 ├── detached/
 │   ├── la/                          (318 LA files)
 │   ├── msoas-latest.json
-│   ├── national/...
-│   └── ...
+│   ├── national/
+│   │   ├── england.json
+│   │   └── wales.json
+│   └── authorities.json
 ├── semi-detached/
 ├── terraced/
 └── flats/
 ```
 
 ### Total Data
+- **Shared geography**: 2 files (authorities.json + regions.json)
 - **1,590 LA files** (318 LAs × 5 property types)
 - **5 msoas-latest.json** (7,264 MSOAs each)
 - **10 national files** (england.json + wales.json per property type)
-- **834 MB total** (not committed to git; generate with scripts)
+- **5 authorities.json** (one per property type for backward compatibility)
+- **834 MB total** (not committed to git; generate with `npm run generate-data`)
 
 ## Processing Pipeline
 
@@ -57,8 +63,9 @@ Computes affordability ratios for each property type:
 - **LQ ratio** = Lower quartile price ÷ LQ earnings
 - **LA average** = Mean of all MSOAs in LA
 - LA-level earnings from Excel (1 year per LA)
+- **Region info enrichment** - Adds region_code and region_name to each LA
 
-**Output**: Enhanced LA files with affordability{median, lq} objects added to each MSOA
+**Output**: Enhanced LA files with affordability{median, lq} objects and region info added to each MSOA
 
 ### 3. Map & National Files
 **Script**: `scripts/generate-final-files.js`
@@ -66,8 +73,44 @@ Computes affordability ratios for each property type:
 - **msoas-latest.json** - Extract latest data for all MSOAs (for map layer)
 - **england.json** - Aggregate affordability for all England LAs
 - **wales.json** - Aggregate affordability for all Wales LAs
+- **Shared geography files** - Creates single authorities.json and regions.json in geography/ folder
 
 **Output**: Map-ready files with all 7,264 MSOAs + national comparisons
+
+## Geographic Data
+
+### Shared Geography Files
+Located in `static/data/geography/` (shared across all property types):
+
+**authorities.json** - 318 Local Authorities with region information
+```json
+{
+  "authorities": [
+    {
+      "code": "E06000001",
+      "name": "Hartlepool",
+      "region_code": "E12000001",
+      "region_name": "North East",
+      "msoa_count": 11
+    }
+  ]
+}
+```
+
+**regions.json** - 10 regions (9 in England + Wales)
+```json
+{
+  "regions": [
+    { "code": "E12000001", "name": "North East" },
+    { "code": "E12000002", "name": "North West" },
+    ...
+  ]
+}
+```
+
+### Region Codes (ONS Standard)
+- `E12000001-E12000009` - English regions
+- `W92000004` - Wales
 
 ## Time Series Data
 

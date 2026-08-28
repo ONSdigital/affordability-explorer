@@ -479,19 +479,23 @@ export async function searchPlaces(query, allAreaNames = [], msoas = {}) {
     }
   });
 
-  // Try postcode lookup
-  try {
-    const postcodes = await fetchPostcodes(query);
-    postcodes.slice(0, 10).forEach((postcode) => {
-      results.push({
-        id: postcode,
-        label: postcode,
-        type: "postcode",
-        priority: 0,
+  // Try postcode lookup only if query has at least 1-2 letters and a number
+  // UK postcodes start with 1-2 letters followed by a digit
+  const postcodePattern = /^[a-z]{1,2}\d/i;
+  if (postcodePattern.test(query)) {
+    try {
+      const postcodes = await fetchPostcodes(query);
+      postcodes.slice(0, 10).forEach((postcode) => {
+        results.push({
+          id: postcode,
+          label: postcode,
+          type: "postcode",
+          priority: 0,
+        });
       });
-    });
-  } catch (e) {
-    // Silently fail on postcode lookup
+    } catch (e) {
+      // Silently fail on postcode lookup
+    }
   }
 
   // Sort by priority, then by query match position

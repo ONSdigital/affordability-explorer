@@ -13,6 +13,7 @@
   import {
     loadTopoJSON,
     getBoundariesGeoJSON,
+    getLocalAuthorityGeoJSON,
     getBoundaryById,
     getBoundaryByName,
     getAreaNames,
@@ -28,10 +29,12 @@
 
   let map;
   let geojson;
+  let laGeojson;
   let selectedBoundary = null;
   let selectedFeatureId = null;
   let hovered = null;
   let selected = null;
+  let selectedLACode = null;
   let zoom;
   let center = {};
   let loading = true;
@@ -67,6 +70,9 @@
 
       geojson = getBoundariesGeoJSON();
 
+      // Extract LA boundaries from topoJSON for highlighting
+      laGeojson = getLocalAuthorityGeoJSON();
+
       // Load the style
       const styleResponse = await fetch("/style.json");
       mapStyle = await styleResponse.json();
@@ -95,15 +101,16 @@
   }
 
   function highlightLA(laCode) {
-    // Highlight the LA boundary when MSOA is selected
+    // Highlight the LA boundary when MSOA is selected using feature state
     if (!map || !laCode) return;
 
     try {
-      // Set feature state for LA outline layer
+      // Set feature state on GeoJSON source
       map.setFeatureState(
-        { source: "la-source", sourceLayer: "lad", id: laCode },
+        { source: "la-geojson", id: laCode },
         { highlighted: true }
       );
+      selectedLACode = laCode;
     } catch (e) {
       console.warn("Could not highlight LA boundary:", e);
     }
@@ -114,7 +121,7 @@
 
     try {
       map.setFeatureState(
-        { source: "la-source", sourceLayer: "lad", id: laCode },
+        { source: "la-geojson", id: laCode },
         { highlighted: false }
       );
     } catch (e) {
@@ -287,8 +294,9 @@
     error = null;
 
     // Clear LA highlight if one was set
-    if (affordabilityData && selectedBoundary && affordabilityData[selectedBoundary.id]) {
-      clearLAHighlight(affordabilityData[selectedBoundary.id].la_code);
+    if (selectedLACode) {
+      clearLAHighlight(selectedLACode);
+      selectedLACode = null;
     }
 
     if (clearInput) {
@@ -428,34 +436,35 @@
               />
             </MapSource>
 
-            <!-- Local Authority boundaries highlight -->
-            <MapSource
-              id="la-source"
-              type="vector"
-              url="https://cdn.ons.gov.uk/maptiles/administrative/2021/lad/v2/boundaries/{z}/{x}/{y}.pbf"
-              layer="lad"
-              promoteId="areacd"
-            >
-              <MapLayer
-                id="la-outline"
-                type="line"
-                paint={{
-                  "line-color": [
-                    "case",
-                    ["==", ["feature-state", "highlighted"], true],
-                    "#1f77b4",
-                    "transparent",
-                  ],
-                  "line-width": [
-                    "case",
-                    ["==", ["feature-state", "highlighted"], true],
-                    2.5,
-                    0,
-                  ],
-                  "line-opacity": 0.8,
-                }}
-              />
-            </MapSource>
+            <!-- Local Authority boundaries highlight (from master-topo GeoJSON) -->
+            {#if laGeojson}
+              <MapSource
+                id="la-geojson"
+                type="geojson"
+                data={laGeojson}
+                promoteId="id"
+              >
+                <MapLayer
+                  id="la-outline"
+                  type="line"
+                  paint={{
+                    "line-color": [
+                      "case",
+                      ["==", ["feature-state", "highlighted"], true],
+                      "#1f77b4",
+                      "transparent",
+                    ],
+                    "line-width": [
+                      "case",
+                      ["==", ["feature-state", "highlighted"], true],
+                      2.5,
+                      0,
+                    ],
+                    "line-opacity": 0.8,
+                  }}
+                />
+              </MapSource>
+            {/if}
           {/if}
         </Map>
       {/if}

@@ -462,3 +462,37 @@ export async function searchPlaces(query, allAreaNames = []) {
 
   return results;
 }
+
+/**
+ * Get Local Authority boundaries as GeoJSON from topoJSON
+ * Filters the 'ltla' features from master-topo
+ * @returns {object} GeoJSON FeatureCollection with LA boundaries
+ */
+export function getLocalAuthorityGeoJSON() {
+  if (!topoData || !topoData.objects || !topoData.objects.ltla) {
+    return { type: "FeatureCollection", features: [] };
+  }
+
+  try {
+    const features = topojson.feature(topoData, topoData.objects.ltla).features;
+    
+    const geojson = {
+      type: "FeatureCollection",
+      features: features.map((feature) => ({
+        type: "Feature",
+        id: feature.properties?.areacd || feature.properties?.code,
+        properties: {
+          id: feature.properties?.areacd || feature.properties?.code,
+          name: feature.properties?.areanm || feature.properties?.name,
+          ...feature.properties,
+        },
+        geometry: feature.geometry,
+      })),
+    };
+
+    return geojson;
+  } catch (e) {
+    console.error("Failed to extract LA boundaries from topoJSON:", e);
+    return { type: "FeatureCollection", features: [] };
+  }
+}

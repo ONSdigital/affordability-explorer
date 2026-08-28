@@ -37,8 +37,8 @@
   let hovered = null;
   let selected = null;
   let selectedLACode = null;
-  let zoom;
-  let center = {};
+  let zoom = 6;
+  let center = { lng: -3.5, lat: 54 };
   let loading = true;
   let error = null;
 

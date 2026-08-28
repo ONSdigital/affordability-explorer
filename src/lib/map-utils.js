@@ -271,9 +271,10 @@ export async function loadAffordabilityData(propertyType = 'all', priceLevel = '
 
 /**
  * Calculate equal interval breaks for affordability ratios
+ * Returns array of bounds (numColors + 1 values) for use in legend
  * @param {object} msoas - Map of MSOA code -> {ratio: number}
- * @param {number} numColors - Number of color breaks (default: 7)
- * @returns {array} Array of break points
+ * @param {number} numColors - Number of colors (default: 7)
+ * @returns {array} Array of bounds including min and max (e.g., [1.64, 9.55, 17.46, ..., 57.02])
  */
 export function calculateColorBreaks(msoas, numColors = 7) {
   // Extract non-null ratios and sort
@@ -290,19 +291,21 @@ export function calculateColorBreaks(msoas, numColors = 7) {
     return [];
   }
 
-  // Use equal interval breaks (Jenks-like approach)
+  // Use equal interval breaks
   const minRatio = ratios[0];
   const maxRatio = ratios[ratios.length - 1];
   const range = maxRatio - minRatio;
 
-  const breaks = [];
+  // Create bounds array: [min, break1, break2, ..., breakN, max]
+  const bounds = [minRatio];
   for (let i = 1; i < numColors; i++) {
     const breakValue = minRatio + (range * i) / numColors;
-    breaks.push(Math.round(breakValue * 100) / 100); // Round to 2 decimals
+    bounds.push(Math.round(breakValue * 100) / 100); // Round to 2 decimals
   }
+  bounds.push(maxRatio); // Add max value
 
-  console.log("Color breaks:", breaks);
-  return breaks;
+  console.log("Color bounds:", bounds);
+  return bounds;
 }
 
 /**
@@ -316,12 +319,12 @@ export function createColorExpression(msoas, colorPalette = null) {
     colorPalette = ["#E92730", "#f0702f", "#f6ae35", "#f1ec37", "#95ca53", "#2ea949", "#0a8647"];
   }
 
-  const breaks = calculateColorBreaks(msoas, colorPalette.length);
+  const bounds = calculateColorBreaks(msoas, colorPalette.length);
   const colorUnavailable = "#ccc";
 
-  // If no breaks, return default color expression
-  if (breaks.length === 0) {
-    console.warn("No valid breaks calculated, using default unavailable color");
+  // If no bounds, return default color expression
+  if (bounds.length === 0) {
+    console.warn("No valid bounds calculated, using default unavailable color");
     return [
       "case",
       ["!=", ["feature-state", "ratio"], null],
@@ -337,26 +340,27 @@ export function createColorExpression(msoas, colorPalette = null) {
   expression.push(["==", ["feature-state", "ratio"], null]);
   expression.push(colorUnavailable);
 
-  // Add conditions for each color break
-  for (let i = 0; i < breaks.length; i++) {
-    const breakValue = breaks[i];
-    const nextBreakValue = i < breaks.length - 1 ? breaks[i + 1] : Infinity;
+  // Add conditions for each color range
+  // bounds has (numColors + 1) values, so we have numColors ranges
+  for (let i = 0; i < colorPalette.length; i++) {
+    const lowerBound = bounds[i];
+    const upperBound = bounds[i + 1];
     const color = colorPalette[i];
 
     if (i === 0) {
-      // First range: ratio < first break
-      expression.push(["<", ["feature-state", "ratio"], breakValue]);
+      // First range: ratio < upperBound
+      expression.push(["<", ["feature-state", "ratio"], upperBound]);
       expression.push(color);
-    } else if (i === breaks.length - 1) {
-      // Last range: ratio >= last break
-      expression.push([">=", ["feature-state", "ratio"], breakValue]);
+    } else if (i === colorPalette.length - 1) {
+      // Last range: ratio >= lowerBound
+      expression.push([">=", ["feature-state", "ratio"], lowerBound]);
       expression.push(color);
     } else {
-      // Middle ranges: between breaks
+      // Middle ranges: lowerBound <= ratio < upperBound
       expression.push([
         "all",
-        [">=", ["feature-state", "ratio"], breakValue],
-        ["<", ["feature-state", "ratio"], nextBreakValue],
+        [">=", ["feature-state", "ratio"], lowerBound],
+        ["<", ["feature-state", "ratio"], upperBound],
       ]);
       expression.push(color);
     }

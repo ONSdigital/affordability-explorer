@@ -1,5 +1,5 @@
 <script>
-  export let breaks = [];
+  export let bounds = [];
   export let colorPalette = ["#E92730", "#f0702f", "#f6ae35", "#f1ec37", "#95ca53", "#2ea949", "#0a8647"];
   export let unavailableColor = "#ccc";
 
@@ -14,28 +14,15 @@
   <div class="legend-title">Affordability Ratio (Price / Earnings)</div>
   
   <div class="legend-items">
-    {#each breaks as breakValue, i}
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: {colorPalette[i]}"></div>
-        <div class="legend-label">
-          {#if i === 0}
-            {formatValue(breakValue)} and below
-          {:else if i === breaks.length - 1}
-            {formatValue(breaks[i - 1])} to {formatValue(breakValue)}
-          {:else}
-            {formatValue(breaks[i - 1])} to {formatValue(breakValue)}
-          {/if}
+    {#if bounds.length === colorPalette.length + 1}
+      {#each colorPalette as color, i}
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: {color}"></div>
+          <div class="legend-label">
+            {formatValue(bounds[i])} to {formatValue(bounds[i + 1])}
+          </div>
         </div>
-      </div>
-    {/each}
-
-    {#if breaks.length > 0}
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: {colorPalette[colorPalette.length - 1]}"></div>
-        <div class="legend-label">
-          {formatValue(breaks[breaks.length - 1])} and above
-        </div>
-      </div>
+      {/each}
     {/if}
 
     <div class="legend-item">
@@ -45,7 +32,7 @@
   </div>
 
   <div class="legend-note">
-    Lower ratios = more affordable | Higher ratios = less affordable
+    Lower ratios = more affordable (red) | Higher ratios = less affordable (green)
   </div>
 </div>
 

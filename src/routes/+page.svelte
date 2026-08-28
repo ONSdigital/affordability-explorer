@@ -35,7 +35,7 @@
   let hovered = null;
   let selected = null;
   let selectedLACode = null;
-  let zoom = 6;
+  let zoom = 7;
   let center = { lng: -3.5, lat: 54 };
   let loading = true;
   let error = null;
@@ -45,7 +45,7 @@
   let priceLevel = "median";
   let affordabilityData = {};
   let colorExpression = null;
-  let colorBreaks = [];
+  let colorBounds = [];
   let mapLoading = false;
 
   // UK bounds
@@ -160,8 +160,8 @@
       affordabilityData = await loadAffordabilityData(pType, pLevel);
       console.log(`Loaded affordability data: ${Object.keys(affordabilityData).length} MSOAs`);
       
-      colorBreaks = calculateColorBreaks(affordabilityData);
-      console.log("Color breaks:", colorBreaks);
+      colorBounds = calculateColorBreaks(affordabilityData);
+      console.log("Color bounds:", colorBounds);
       
       colorExpression = createColorExpression(affordabilityData);
       console.log("Color expression created:", colorExpression.length > 0);
@@ -430,7 +430,7 @@
         <Map
           id="mapsearch-map"
           style={mapStyle}
-          location={{ bounds: bounds.uk }}
+          location={{ center: { lng: -3.5, lat: 54 }, zoom: 6 }}
           bind:map
           bind:zoom
           bind:center
@@ -550,9 +550,9 @@
         {/if}
       </div>
 
-      {#if affordabilityData && colorBreaks.length > 0}
+      {#if affordabilityData && colorBounds.length > 0}
         <div class="legend-container">
-          <ColorLegend breaks={colorBreaks} />
+          <ColorLegend bounds={colorBounds} />
         </div>
       {/if}
     </div>

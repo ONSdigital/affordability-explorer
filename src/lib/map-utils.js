@@ -270,36 +270,38 @@ export async function loadAffordabilityData(propertyType = 'all', priceLevel = '
 }
 
 /**
- * Calculate quantile breaks for affordability ratios
- * Uses quantiles to split values into equal-frequency bins
+ * Calculate equal interval breaks for affordability ratios
  * @param {object} msoas - Map of MSOA code -> {ratio: number}
  * @param {number} numColors - Number of color breaks (default: 7)
  * @returns {array} Array of break points
  */
 export function calculateColorBreaks(msoas, numColors = 7) {
-  // Extract non-null ratios
+  // Extract non-null ratios and sort
   const ratios = Object.values(msoas)
     .map((m) => m.ratio)
     .filter((r) => r !== null && isFinite(r))
     .sort((a, b) => a - b);
 
+  console.log(`calculateColorBreaks: Found ${ratios.length} valid ratios`);
+  console.log(`Min ratio: ${ratios[0]}, Max ratio: ${ratios[ratios.length - 1]}`);
+
   if (ratios.length === 0) {
-    return Array(numColors).fill(0);
+    console.warn("No valid ratios found for color breaks");
+    return [];
   }
 
-  if (ratios.length < numColors) {
-    // If fewer ratios than colors, just return unique values
-    return [...new Set(ratios)];
-  }
+  // Use equal interval breaks (Jenks-like approach)
+  const minRatio = ratios[0];
+  const maxRatio = ratios[ratios.length - 1];
+  const range = maxRatio - minRatio;
 
-  // Calculate quantiles
   const breaks = [];
   for (let i = 1; i < numColors; i++) {
-    const quantile = i / numColors;
-    const index = Math.floor(quantile * (ratios.length - 1));
-    breaks.push(ratios[index]);
+    const breakValue = minRatio + (range * i) / numColors;
+    breaks.push(Math.round(breakValue * 100) / 100); // Round to 2 decimals
   }
 
+  console.log("Color breaks:", breaks);
   return breaks;
 }
 
@@ -317,49 +319,53 @@ export function createColorExpression(msoas, colorPalette = null) {
   const breaks = calculateColorBreaks(msoas, colorPalette.length);
   const colorUnavailable = "#ccc";
 
-  // If no breaks, return default color
+  // If no breaks, return default color expression
   if (breaks.length === 0) {
-    return colorUnavailable;
+    console.warn("No valid breaks calculated, using default unavailable color");
+    return [
+      "case",
+      ["!=", ["feature-state", "ratio"], null],
+      colorUnavailable,
+      colorUnavailable
+    ];
   }
 
-  // Build expression: ["case", condition1, color1, condition2, color2, ..., defaultColor]
+  // Build expression: ["case", [condition], color, [condition], color, ..., defaultColor]
   const expression = ["case"];
 
-  // Handle missing/null data
-  expression.push(["!=", ["feature-state", "ratio"], null]);
+  // Handle missing/null data first
+  expression.push(["==", ["feature-state", "ratio"], null]);
   expression.push(colorUnavailable);
 
-  // Add conditions for each color
+  // Add conditions for each color break
   for (let i = 0; i < breaks.length; i++) {
     const breakValue = breaks[i];
+    const nextBreakValue = i < breaks.length - 1 ? breaks[i + 1] : Infinity;
     const color = colorPalette[i];
 
     if (i === 0) {
-      // First: ratio < first break
+      // First range: ratio < first break
       expression.push(["<", ["feature-state", "ratio"], breakValue]);
       expression.push(color);
     } else if (i === breaks.length - 1) {
-      // Last: ratio >= last break value
-      expression.push([">=", ["feature-state", "ratio"], breaks[i - 1]]);
+      // Last range: ratio >= last break
+      expression.push([">=", ["feature-state", "ratio"], breakValue]);
       expression.push(color);
     } else {
-      // Middle: between breaks
+      // Middle ranges: between breaks
       expression.push([
         "all",
-        [">=", ["feature-state", "ratio"], breaks[i - 1]],
-        ["<", ["feature-state", "ratio"], breakValue],
+        [">=", ["feature-state", "ratio"], breakValue],
+        ["<", ["feature-state", "ratio"], nextBreakValue],
       ]);
       expression.push(color);
     }
   }
 
-  // Highest values
-  expression.push([">=", ["feature-state", "ratio"], breaks[breaks.length - 1]]);
-  expression.push(colorPalette[colorPalette.length - 1]);
-
-  // Default
+  // Default fallback
   expression.push(colorUnavailable);
 
+  console.log("Color expression built with", breaks.length + 1, "color ranges");
   return expression;
 }
 

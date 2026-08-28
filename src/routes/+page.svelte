@@ -63,6 +63,7 @@
   let selectElement;
 
   onMount(async () => {
+    console.log("Page mounted, initializing map...");
     try {
       await loadTopoJSON();
 
@@ -76,17 +77,23 @@
       // Load the style
       const styleResponse = await fetch("/style.json");
       mapStyle = await styleResponse.json();
+      console.log("Map style and data loaded");
 
       loading = false;
     } catch (e) {
       error = "Failed to load map data";
       loading = false;
+      console.error("Mount error:", e);
     }
   });
 
   // Reactive: Load affordability data and update map colors when filters change
-  $: if (map && propertyType && priceLevel) {
-    loadAndColorMap(propertyType, priceLevel);
+  $: {
+    console.log('Reactive check: map =', !!map, 'propertyType =', propertyType, 'priceLevel =', priceLevel);
+    if (map && propertyType && priceLevel) {
+      console.log('Triggering loadAndColorMap with:', { propertyType, priceLevel });
+      loadAndColorMap(propertyType, priceLevel);
+    }
   }
 
   // When selected changes, update selectedBoundary and zoom
@@ -141,18 +148,20 @@
       colorExpression = createColorExpression(affordabilityData);
       console.log("Color expression created:", colorExpression.length > 0);
       
-      // Update map layers with new color expression
+      // First, update feature states on map so they're available when paint expression evaluates
+      if (map && affordabilityData) {
+        console.log("Setting feature states for", Object.keys(affordabilityData).length, "MSOAs");
+        updateMapFeatureStates(map, "msoa-source", "msoa-fill", affordabilityData);
+      }
+      
+      // Then update map layers with new color expression
       if (map && colorExpression) {
         try {
+          console.log("Applying color expression to msoa-fill layer");
           map.setPaintProperty("msoa-fill", "fill-color", colorExpression);
         } catch (e) {
           console.warn("Could not update layer paint property:", e);
         }
-      }
-
-      // Update feature states on map
-      if (map && affordabilityData) {
-        updateMapFeatureStates(map, "msoa-source", "msoa-fill", affordabilityData);
       }
 
       mapLoading = false;
@@ -384,87 +393,85 @@
           scrollZoomGuard={true}
         >
           <!-- Vector tile source for MSOA boundaries with affordability coloring -->
-          {#if colorExpression}
+          <MapSource
+            id="msoa-source"
+            type="vector"
+            url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{z}/{x}/{y}.pbf"
+            layer="msoa"
+            promoteId="areacd"
+          >
+            <MapLayer
+              id="msoa-fill"
+              type="fill"
+              hover={true}
+              bind:hovered
+              select={true}
+              bind:selected
+              paint={{
+                "fill-color": colorExpression || "#ccc",
+                "fill-opacity": [
+                  "case",
+                  ["==", ["feature-state", "selected"], true],
+                  0.9,
+                  ["==", ["feature-state", "hovered"], true],
+                  0.85,
+                  0.7,
+                ],
+              }}
+            />
+            <MapLayer
+              id="msoa-outline"
+              type="line"
+              paint={{
+                "line-color": [
+                  "case",
+                  ["==", ["feature-state", "selected"], true],
+                  "#333",
+                  ["==", ["feature-state", "hovered"], true],
+                  "#666",
+                  "#999",
+                ],
+                "line-width": [
+                  "case",
+                  ["==", ["feature-state", "selected"], true],
+                  2,
+                  ["==", ["feature-state", "hovered"], true],
+                  1,
+                  0.5,
+                ],
+                "line-opacity": 0.5,
+              }}
+            />
+          </MapSource>
+
+          <!-- Local Authority boundaries highlight (from master-topo GeoJSON) -->
+          {#if laGeojson}
             <MapSource
-              id="msoa-source"
-              type="vector"
-              url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{z}/{x}/{y}.pbf"
-              layer="msoa"
-              promoteId="areacd"
+              id="la-geojson"
+              type="geojson"
+              data={laGeojson}
+              promoteId="id"
             >
               <MapLayer
-                id="msoa-fill"
-                type="fill"
-                hover={true}
-                bind:hovered
-                select={true}
-                bind:selected
-                paint={{
-                  "fill-color": colorExpression,
-                  "fill-opacity": [
-                    "case",
-                    ["==", ["feature-state", "selected"], true],
-                    0.9,
-                    ["==", ["feature-state", "hovered"], true],
-                    0.85,
-                    0.7,
-                  ],
-                }}
-              />
-              <MapLayer
-                id="msoa-outline"
+                id="la-outline"
                 type="line"
                 paint={{
                   "line-color": [
                     "case",
-                    ["==", ["feature-state", "selected"], true],
-                    "#333",
-                    ["==", ["feature-state", "hovered"], true],
-                    "#666",
-                    "#999",
+                    ["==", ["feature-state", "highlighted"], true],
+                    "#1f77b4",
+                    "transparent",
                   ],
                   "line-width": [
                     "case",
-                    ["==", ["feature-state", "selected"], true],
-                    2,
-                    ["==", ["feature-state", "hovered"], true],
-                    1,
-                    0.5,
+                    ["==", ["feature-state", "highlighted"], true],
+                    2.5,
+                    0,
                   ],
-                  "line-opacity": 0.5,
+                  "line-opacity": 0.8,
                 }}
               />
             </MapSource>
-
-            <!-- Local Authority boundaries highlight (from master-topo GeoJSON) -->
-            {#if laGeojson}
-              <MapSource
-                id="la-geojson"
-                type="geojson"
-                data={laGeojson}
-                promoteId="id"
-              >
-                <MapLayer
-                  id="la-outline"
-                  type="line"
-                  paint={{
-                    "line-color": [
-                      "case",
-                      ["==", ["feature-state", "highlighted"], true],
-                      "#1f77b4",
-                      "transparent",
-                    ],
-                    "line-width": [
-                      "case",
-                      ["==", ["feature-state", "highlighted"], true],
-                      2.5,
-                      0,
-                    ],
-                    "line-opacity": 0.8,
-                  }}
-                />
-              </MapSource>
-            {/if}
           {/if}
         </Map>
       {/if}

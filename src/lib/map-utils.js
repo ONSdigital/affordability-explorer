@@ -240,7 +240,7 @@ export async function loadAffordabilityData(propertyType = 'all', priceLevel = '
   }
 
   try {
-    const response = await fetch(`/static/data/${propertyType}/msoas-latest.json`);
+    const response = await fetch(`/data/${propertyType}/msoas-latest.json`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
 

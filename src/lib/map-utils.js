@@ -221,3 +221,244 @@ export function findBoundaryAtPoint(lng, lat, boundaryType = 'ltla') {
   
   return null;
 }
+
+// ========== AFFORDABILITY DATA & COLORING ==========
+
+// Cache for affordability data by property type and price level
+const affordabilityCache = {};
+
+/**
+ * Load affordability data for a property type and price level
+ * @param {string} propertyType - Property type (all, detached, semi-detached, terraced, flats)
+ * @param {string} priceLevel - Price level (median, lq)
+ * @returns {object} Object mapping MSOA codes to color-ready data
+ */
+export async function loadAffordabilityData(propertyType = 'all', priceLevel = 'median') {
+  const cacheKey = `${propertyType}:${priceLevel}`;
+  if (affordabilityCache[cacheKey]) {
+    return affordabilityCache[cacheKey];
+  }
+
+  try {
+    const response = await fetch(`/static/data/${propertyType}/msoas-latest.json`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+
+    // Create a map: MSOA code -> affordability ratio
+    const msoas = {};
+    if (data.msoas && Array.isArray(data.msoas)) {
+      data.msoas.forEach((msoa) => {
+        const ratio = msoa.affordability?.[priceLevel]?.ratio;
+        msoas[msoa.code] = {
+          code: msoa.code,
+          name: msoa.name,
+          la_code: msoa.la_code,
+          la_name: msoa.la_name,
+          region_code: msoa.region_code,
+          region_name: msoa.region_name,
+          ratio: ratio !== undefined ? ratio : null,
+        };
+      });
+    }
+
+    affordabilityCache[cacheKey] = msoas;
+    return msoas;
+  } catch (error) {
+    console.error(`Failed to load affordability data for ${propertyType}/${priceLevel}:`, error);
+    return {};
+  }
+}
+
+/**
+ * Calculate quantile breaks for affordability ratios
+ * Uses quantiles to split values into equal-frequency bins
+ * @param {object} msoas - Map of MSOA code -> {ratio: number}
+ * @param {number} numColors - Number of color breaks (default: 7)
+ * @returns {array} Array of break points
+ */
+export function calculateColorBreaks(msoas, numColors = 7) {
+  // Extract non-null ratios
+  const ratios = Object.values(msoas)
+    .map((m) => m.ratio)
+    .filter((r) => r !== null && isFinite(r))
+    .sort((a, b) => a - b);
+
+  if (ratios.length === 0) {
+    return Array(numColors).fill(0);
+  }
+
+  if (ratios.length < numColors) {
+    // If fewer ratios than colors, just return unique values
+    return [...new Set(ratios)];
+  }
+
+  // Calculate quantiles
+  const breaks = [];
+  for (let i = 1; i < numColors; i++) {
+    const quantile = i / numColors;
+    const index = Math.floor(quantile * (ratios.length - 1));
+    breaks.push(ratios[index]);
+  }
+
+  return breaks;
+}
+
+/**
+ * Create a Maplibre GL paint expression for data-driven coloring
+ * @param {object} msoas - Map of MSOA code -> {ratio: number}
+ * @param {array} colorPalette - Color array (default: affordability palette)
+ * @returns {array} Maplibre GL paint expression
+ */
+export function createColorExpression(msoas, colorPalette = null) {
+  if (!colorPalette) {
+    colorPalette = ["#E92730", "#f0702f", "#f6ae35", "#f1ec37", "#95ca53", "#2ea949", "#0a8647"];
+  }
+
+  const breaks = calculateColorBreaks(msoas, colorPalette.length);
+  const colorUnavailable = "#ccc";
+
+  // If no breaks, return default color
+  if (breaks.length === 0) {
+    return colorUnavailable;
+  }
+
+  // Build expression: ["case", condition1, color1, condition2, color2, ..., defaultColor]
+  const expression = ["case"];
+
+  // Handle missing/null data
+  expression.push(["!=", ["feature-state", "ratio"], null]);
+  expression.push(colorUnavailable);
+
+  // Add conditions for each color
+  for (let i = 0; i < breaks.length; i++) {
+    const breakValue = breaks[i];
+    const color = colorPalette[i];
+
+    if (i === 0) {
+      // First: ratio < first break
+      expression.push(["<", ["feature-state", "ratio"], breakValue]);
+      expression.push(color);
+    } else if (i === breaks.length - 1) {
+      // Last: ratio >= last break value
+      expression.push([">=", ["feature-state", "ratio"], breaks[i - 1]]);
+      expression.push(color);
+    } else {
+      // Middle: between breaks
+      expression.push([
+        "all",
+        [">=", ["feature-state", "ratio"], breaks[i - 1]],
+        ["<", ["feature-state", "ratio"], breakValue],
+      ]);
+      expression.push(color);
+    }
+  }
+
+  // Highest values
+  expression.push([">=", ["feature-state", "ratio"], breaks[breaks.length - 1]]);
+  expression.push(colorPalette[colorPalette.length - 1]);
+
+  // Default
+  expression.push(colorUnavailable);
+
+  return expression;
+}
+
+/**
+ * Set feature states on a map for affordability visualization
+ * @param {object} map - Maplibre GL map instance
+ * @param {string} sourceId - Source ID (e.g., 'msoa-tiles')
+ * @param {string} layerId - Layer ID (e.g., 'msoa-fill')
+ * @param {object} msoas - Map of MSOA code -> {ratio: number}
+ */
+export function updateMapFeatureStates(map, sourceId, layerId, msoas) {
+  if (!map || !msoas) return;
+
+  // Update feature state for each MSOA
+  Object.entries(msoas).forEach(([msoacd, data]) => {
+    try {
+      map.setFeatureState(
+        { source: sourceId, sourceLayer: 'msoa', id: msoacd },
+        { ratio: data.ratio }
+      );
+    } catch (e) {
+      // Feature may not exist on current zoom level
+    }
+  });
+}
+
+/**
+ * Get MSOA by postcode using the postcodes.io API
+ * @param {string} postcode - Postcode to search
+ * @returns {object|null} MSOA data or null if not found
+ */
+export async function getMSOAByPostcode(postcode, msoas) {
+  try {
+    const normalized = normalizePostcode(postcode);
+    const response = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(normalized)}`);
+    if (!response.ok) return null;
+
+    const json = await response.json();
+    if (!json.result || !json.result.longitude || !json.result.latitude) return null;
+
+    const lon = json.result.longitude;
+    const lat = json.result.latitude;
+
+    // Find MSOA containing this point
+    // For now, return the nearest MSOA or use bulk lookup
+    // TODO: Implement spatial lookup if needed
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Search for places including areas, LTLAs, and postcodes
+ * @param {string} query - Search query
+ * @returns {array} Array of search results
+ */
+export async function searchPlaces(query, allAreaNames = []) {
+  if (!query || query.length < 2) return [];
+
+  const queryLower = query.toLowerCase();
+  const results = [];
+
+  // Search area names (from master-topo)
+  const areaMatches = allAreaNames.filter((name) =>
+    name.toLowerCase().includes(queryLower)
+  );
+
+  areaMatches.slice(0, 10).forEach((name) => {
+    results.push({
+      id: name,
+      label: name,
+      type: "area",
+      priority: 1,
+    });
+  });
+
+  // Try postcode lookup
+  try {
+    const postcodes = await fetchPostcodes(query);
+    postcodes.slice(0, 5).forEach((postcode) => {
+      results.push({
+        id: postcode,
+        label: postcode,
+        type: "postcode",
+        priority: 0,
+      });
+    });
+  } catch (e) {
+    // Silently fail on postcode lookup
+  }
+
+  // Sort by priority, then by query match position
+  results.sort((a, b) => {
+    if (a.priority !== b.priority) return a.priority - b.priority;
+    const aPos = a.label.toLowerCase().indexOf(queryLower);
+    const bPos = b.label.toLowerCase().indexOf(queryLower);
+    return aPos - bPos;
+  });
+
+  return results;
+}

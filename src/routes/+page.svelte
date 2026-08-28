@@ -18,6 +18,10 @@
     getAreaNames,
     fetchPostcodes,
     findBoundaryAtPoint,
+    loadAffordabilityData,
+    createColorExpression,
+    updateMapFeatureStates,
+    searchPlaces,
   } from "../lib/map-utils.js";
 
   let map;
@@ -30,6 +34,13 @@
   let center = {};
   let loading = true;
   let error = null;
+
+  // Filter controls
+  let propertyType = "all";
+  let priceLevel = "median";
+  let affordabilityData = null;
+  let colorExpression = null;
+  let mapLoading = false;
 
   // UK bounds
   const bounds = {
@@ -64,6 +75,11 @@
     }
   });
 
+  // Reactive: Load affordability data and update map colors when filters change
+  $: if (map && propertyType && priceLevel) {
+    loadAndColorMap(propertyType, priceLevel);
+  }
+
   // When selected changes, update selectedBoundary and zoom
   $: if (selected !== null && selected !== undefined) {
     const boundary = getBoundaryById(selected);
@@ -75,12 +91,68 @@
     clearSelection();
   }
 
+  function highlightLA(laCode) {
+    // Highlight the LA boundary when MSOA is selected
+    if (!map || !laCode) return;
+
+    try {
+      // Set feature state for LA outline layer
+      map.setFeatureState(
+        { source: "la-source", sourceLayer: "lad", id: laCode },
+        { highlighted: true }
+      );
+    } catch (e) {
+      console.warn("Could not highlight LA boundary:", e);
+    }
+  }
+
+  function clearLAHighlight(laCode) {
+    if (!map || !laCode) return;
+
+    try {
+      map.setFeatureState(
+        { source: "la-source", sourceLayer: "lad", id: laCode },
+        { highlighted: false }
+      );
+    } catch (e) {
+      // Silently fail
+    }
+  }
+
+  async function loadAndColorMap(pType, pLevel) {
+    mapLoading = true;
+    try {
+      affordabilityData = await loadAffordabilityData(pType, pLevel);
+      colorExpression = createColorExpression(affordabilityData);
+      
+      // Update map layers with new color expression
+      if (map && colorExpression) {
+        try {
+          map.setPaintProperty("msoa-fill", "fill-color", colorExpression);
+        } catch (e) {
+          console.warn("Could not update layer paint property:", e);
+        }
+      }
+
+      // Update feature states on map
+      if (map && affordabilityData) {
+        updateMapFeatureStates(map, "msoa-source", "msoa-fill", affordabilityData);
+      }
+
+      mapLoading = false;
+    } catch (e) {
+      console.error("Error loading affordability data:", e);
+      error = "Failed to load affordability data";
+      mapLoading = false;
+    }
+  }
+
   async function customLoadOptions(query, populateResults) {
     const results = [];
 
     if (!query) {
       // Show all area names
-      const options = allAreaNames.map((name) => ({
+      const options = allAreaNames.slice(0, 20).map((name) => ({
         id: name,
         label: name,
         type: "area",
@@ -89,34 +161,9 @@
       return;
     }
 
-    const queryLower = query.toLowerCase();
-
-    // Add matching area names
-    const areaMatches = allAreaNames.filter((name) =>
-      name.toLowerCase().includes(queryLower),
-    );
-
-    areaMatches.forEach((name) => {
-      results.push({
-        id: name,
-        label: name,
-        type: "area",
-      });
-    });
-
-    // Fetch postcode suggestions
-    try {
-      const postcodes = await fetchPostcodes(query);
-      postcodes.forEach((postcode) => {
-        results.push({
-          id: postcode,
-          label: postcode,
-          type: "postcode",
-        });
-      });
-    } catch (e) {}
-
-    populateResults(results);
+    // Use new search function
+    const searchResults = await searchPlaces(query, allAreaNames);
+    populateResults(searchResults);
   }
 
   function handleSelectChange(value) {
@@ -160,6 +207,12 @@
 
     // Close search menu
     closeSearchMenu();
+
+    // Highlight parent LA if this is an MSOA
+    if (affordabilityData && affordabilityData[boundary.id]) {
+      const msoaData = affordabilityData[boundary.id];
+      highlightLA(msoaData.la_code);
+    }
 
     if (map) {
       // Zoom to the selected boundary
@@ -224,6 +277,11 @@
     selectedValue = null;
     error = null;
 
+    // Clear LA highlight if one was set
+    if (affordabilityData && selectedBoundary && affordabilityData[selectedBoundary.id]) {
+      clearLAHighlight(affordabilityData[selectedBoundary.id].la_code);
+    }
+
     if (clearInput) {
       clearInput();
     }
@@ -246,17 +304,17 @@
 
 <Section>
   <Container width="full">
-    <ButtonGroup name="property-type" legend="Property type" value="all">
+    <ButtonGroup name="property-type" legend="Property type" bind:value={propertyType}>
       <ButtonGroupItem value="all" label="All properties" />
       <ButtonGroupItem value="detached" label="Detached" />
-      <ButtonGroupItem value="semi" label="Semi-detached" />
-      <ButtonGroupItem value="terrace" label="Terraced" />
-      <ButtonGroupItem value="flat" label="Flats and maisonettes" />
+      <ButtonGroupItem value="semi-detached" label="Semi-detached" />
+      <ButtonGroupItem value="terraced" label="Terraced" />
+      <ButtonGroupItem value="flats" label="Flats and maisonettes" />
     </ButtonGroup>
 
-    <ButtonGroup name="price-level" legend="Price level" value="median">
+    <ButtonGroup name="price-level" legend="Price level" bind:value={priceLevel}>
       <ButtonGroupItem value="median" label="Median" />
-      <ButtonGroupItem value="lowerquartile" label="Entry level" />
+      <ButtonGroupItem value="lq" label="Entry level" />
     </ButtonGroup>
   </Container>
 </Section>
@@ -291,7 +349,12 @@
 <Section>
   <Container width="full">
     <div class="map-wrapper">
-      {#if geojson && mapStyle}
+      {#if mapStyle}
+        {#if mapLoading}
+          <div class="map-loading-overlay">
+            <p>Loading affordability data...</p>
+          </div>
+        {/if}
         <Map
           id="mapsearch-map"
           style={mapStyle}
@@ -303,61 +366,88 @@
           attribution={true}
           scrollZoomGuard={true}
         >
-          <MapSource
-            id="boundaries"
-            type="geojson"
-            data={geojson}
-            promoteId="id"
-          >
-            <MapLayer
-              id="boundaries-fill"
-              type="fill"
-              hover={true}
-              bind:hovered
-              select={true}
-              bind:selected
-              paint={{
-                "fill-color": [
-                  "case",
-                  ["==", ["feature-state", "selected"], true],
-                  "#ff6b35",
-                  ["==", ["feature-state", "hovered"], true],
-                  "#e8d4b8",
-                  "#c9c9c9",
-                ],
-                "fill-opacity": [
-                  "case",
-                  ["==", ["feature-state", "selected"], true],
-                  0.8,
-                  ["==", ["feature-state", "hovered"], true],
-                  0.6,
-                  0.4,
-                ],
-              }}
-            />
-            <MapLayer
-              id="boundaries-outline"
-              type="line"
-              paint={{
-                "line-color": [
-                  "case",
-                  ["==", ["feature-state", "selected"], true],
-                  "#cc4420",
-                  ["==", ["feature-state", "hovered"], true],
-                  "#bbb",
-                  "#999",
-                ],
-                "line-width": [
-                  "case",
-                  ["==", ["feature-state", "selected"], true],
-                  2,
-                  ["==", ["feature-state", "hovered"], true],
-                  1,
-                  0.5,
-                ],
-              }}
-            />
-          </MapSource>
+          <!-- Vector tile source for MSOA boundaries with affordability coloring -->
+          {#if colorExpression}
+            <MapSource
+              id="msoa-source"
+              type="vector"
+              url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/"
+              layer="msoa"
+              promoteId="areacd"
+            >
+              <MapLayer
+                id="msoa-fill"
+                type="fill"
+                hover={true}
+                bind:hovered
+                select={true}
+                bind:selected
+                paint={{
+                  "fill-color": colorExpression,
+                  "fill-opacity": [
+                    "case",
+                    ["==", ["feature-state", "selected"], true],
+                    0.9,
+                    ["==", ["feature-state", "hovered"], true],
+                    0.85,
+                    0.7,
+                  ],
+                }}
+              />
+              <MapLayer
+                id="msoa-outline"
+                type="line"
+                paint={{
+                  "line-color": [
+                    "case",
+                    ["==", ["feature-state", "selected"], true],
+                    "#333",
+                    ["==", ["feature-state", "hovered"], true],
+                    "#666",
+                    "#999",
+                  ],
+                  "line-width": [
+                    "case",
+                    ["==", ["feature-state", "selected"], true],
+                    2,
+                    ["==", ["feature-state", "hovered"], true],
+                    1,
+                    0.5,
+                  ],
+                  "line-opacity": 0.5,
+                }}
+              />
+            </MapSource>
+
+            <!-- Local Authority boundaries highlight -->
+            <MapSource
+              id="la-source"
+              type="vector"
+              url="https://cdn.ons.gov.uk/maptiles/administrative/2021/lad/v2/boundaries/"
+              layer="lad"
+              promoteId="areacd"
+            >
+              <MapLayer
+                id="la-outline"
+                type="line"
+                paint={{
+                  "line-color": [
+                    "case",
+                    ["==", ["feature-state", "highlighted"], true],
+                    "#1f77b4",
+                    "transparent",
+                  ],
+                  "line-width": [
+                    "case",
+                    ["==", ["feature-state", "highlighted"], true],
+                    2.5,
+                    0,
+                  ],
+                  "line-opacity": 0.8,
+                }}
+              />
+            </MapSource>
+          {/if}
         </Map>
       {/if}
     </div>
@@ -382,24 +472,11 @@
       {#if hovered}
         | Hovered: {hovered}
       {/if}
+      {#if mapLoading}
+        | <span class="status-loading">Loading data...</span>
+      {/if}
     </p>
   </Container>
-</Section>
-
-<Section title="Affordability snapshot">
-  <Grid width="full">
-    <Card title="House price to earnings ratio"></Card>
-    <Card title="Comparisons"></Card>
-    <Card title="Property sales over time"></Card>
-  </Grid>
-</Section>
-
-<Section title="What would I need to buy?">
-  <Grid width="full">
-    <Card title="Property cost"></Card>
-    <Card title="Income required"></Card>
-    <Card title="Total savings needed"></Card>
-  </Grid>
 </Section>
 
 <style>
@@ -475,11 +552,37 @@
     font-family: "Courier New", monospace;
   }
 
+  .status-loading {
+    color: #0078d4;
+    font-weight: 500;
+  }
+
   .map-wrapper {
     height: 600px;
     border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  .map-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 4px;
+  }
+
+  .map-loading-overlay p {
+    font-size: 14px;
+    color: #333;
+    margin: 0;
   }
 
   .map-wrapper :global(.mapboxgl-canvas) {

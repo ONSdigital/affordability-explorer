@@ -217,7 +217,13 @@ async function main() {
       });
       
       if (!regionSet.has(laData.region_code)) {
-        regionSet.set(laData.region_code, laData.region_name);
+        const countryCode = laData.region_code.startsWith('E') ? 'E92000001' : 'W92000004';
+        const countryName = laData.region_code.startsWith('E') ? 'England' : 'Wales';
+        regionSet.set(laData.region_code, {
+          name: laData.region_name,
+          country_code: countryCode,
+          country_name: countryName
+        });
       }
     }
     
@@ -227,9 +233,14 @@ async function main() {
       JSON.stringify({ authorities }, null, 2)
     );
     
-    // Write regions.json
+    // Write regions.json with country hierarchy
     const regions = Array.from(regionSet.entries())
-      .map(([code, name]) => ({ code, name }))
+      .map(([code, data]) => ({
+        code,
+        name: data.name,
+        country_code: data.country_code,
+        country_name: data.country_name
+      }))
       .sort((a, b) => a.code.localeCompare(b.code));
     
     fs.writeFileSync(
@@ -239,7 +250,7 @@ async function main() {
     
     console.log(`\nShared Geography Files:`);
     console.log(`  ✓ geography/authorities.json (${authorities.length} LAs with region info)`);
-    console.log(`  ✓ geography/regions.json (${regions.length} regions)`);
+    console.log(`  ✓ geography/regions.json (${regions.length} regions with country hierarchy)`);
   }
   
   console.log('');

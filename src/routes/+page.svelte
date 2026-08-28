@@ -316,11 +316,6 @@
         clearLAHighlight(selectedLACode);
       }
       
-      // For MSOA selection, highlight the parent LA
-      if (laCode) {
-        highlightLA(laCode);
-      }
-      
       // Set the MSOA as selected
       if (msoaCode) {
         // Update reactive variable for MapLayer binding
@@ -348,65 +343,66 @@
             label: `${msoa.name} (${msoa.la_name})`,
             type: "msoa",
           };
+          
+          // Set selectedBoundary for clear button
+          selectedBoundary = {
+            id: msoaCode,
+            name: msoa.name,
+            bounds: [[-3.5, 54], [-3.5, 54]] // Placeholder, will zoom to LA instead
+          };
         }
         
-        // Query the MSOA feature to get its bounds and center
-        if (map) {
-          try {
-            const features = map.querySourceFeatures("msoa-source", {
-              sourceLayer: "msoa",
-              filter: ["==", ["id"], msoaCode]
-            });
+        // For MSOA selection, highlight and zoom to the parent LA
+        if (laCode && laGeojson && map) {
+          highlightLA(laCode);
+          
+          // Find LA feature in geojson and zoom to it
+          const laFeatures = laGeojson.features || [];
+          const laFeature = laFeatures.find(f => f.properties.areacd === laCode);
+          
+          if (laFeature && laFeature.bbox) {
+            // LA has proper bbox
+            const [minLng, minLat, maxLng, maxLat] = laFeature.bbox;
+            map.fitBounds(
+              [
+                [minLng, minLat],
+                [maxLng, maxLat],
+              ],
+              {
+                padding: 50,
+                duration: 1000,
+              },
+            );
+          } else if (laFeature && laFeature.geometry) {
+            // Calculate bounds from geometry
+            let minLng = Infinity, maxLng = -Infinity;
+            let minLat = Infinity, maxLat = -Infinity;
             
-            if (features.length > 0) {
-              const feature = features[0];
-              const bounds = feature.properties.bounds || feature.geometry.coordinates;
-              
-              // Calculate center of feature
-              let centerLng = -3.5;
-              let centerLat = 54;
-              
-              if (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon") {
-                let minLng = Infinity, maxLng = -Infinity;
-                let minLat = Infinity, maxLat = -Infinity;
-                
-                const coords = feature.geometry.type === "Polygon" 
-                  ? feature.geometry.coordinates[0] 
-                  : feature.geometry.coordinates[0][0];
-                
-                coords.forEach(([lng, lat]) => {
-                  minLng = Math.min(minLng, lng);
-                  maxLng = Math.max(maxLng, lng);
-                  minLat = Math.min(minLat, lat);
-                  maxLat = Math.max(maxLat, lat);
-                });
-                
-                centerLng = (minLng + maxLng) / 2;
-                centerLat = (minLat + maxLat) / 2;
+            const extractCoords = (coords) => {
+              if (typeof coords[0] === "number") {
+                minLng = Math.min(minLng, coords[0]);
+                maxLng = Math.max(maxLng, coords[0]);
+                minLat = Math.min(minLat, coords[1]);
+                maxLat = Math.max(maxLat, coords[1]);
+              } else {
+                coords.forEach(extractCoords);
               }
-              
-              // Zoom to show the MSOA and parent LA
-              map.flyTo({
-                center: [centerLng, centerLat],
-                zoom: 9,
-                duration: 1000
-              });
-            } else {
-              // Fallback if feature not found
-              map.flyTo({
-                center: [-3.5, 54],
-                zoom: 7,
-                duration: 1000
-              });
+            };
+            
+            extractCoords(laFeature.geometry.coordinates);
+            
+            if (isFinite(minLng) && isFinite(maxLng) && isFinite(minLat) && isFinite(maxLat)) {
+              map.fitBounds(
+                [
+                  [minLng, minLat],
+                  [maxLng, maxLat],
+                ],
+                {
+                  padding: 50,
+                  duration: 1000,
+                },
+              );
             }
-          } catch (e) {
-            console.warn("Could not query MSOA bounds:", e);
-            // Fallback zoom
-            map.flyTo({
-              center: [-3.5, 54],
-              zoom: 7,
-              duration: 1000
-            });
           }
         }
       }

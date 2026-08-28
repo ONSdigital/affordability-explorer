@@ -210,25 +210,7 @@ async function processPropertyType(propType, sheetLetter) {
     JSON.stringify({ authorities }, null, 2)
   );
   
-  // Write regions
-  console.log('Writing regions.json...');
-  const REGIONS = [
-    { cd: "E12000001", nm: "North East" },
-    { cd: "E12000002", nm: "North West" },
-    { cd: "E12000003", nm: "Yorkshire and The Humber" },
-    { cd: "E12000004", nm: "East Midlands" },
-    { cd: "E12000005", nm: "West Midlands" },
-    { cd: "E12000006", nm: "East of England" },
-    { cd: "E12000007", nm: "London" },
-    { cd: "E12000008", nm: "South East" },
-    { cd: "E12000009", nm: "South West" },
-    { cd: "W92000004", nm: "Wales" }
-  ];
-  
-  fs.writeFileSync(
-    path.join(typeDir, 'regions.json'),
-    JSON.stringify({ regions: REGIONS }, null, 2)
-  );
+  // Note: regions.json is now generated once in geography/ folder by generate-final-files.js
   
   console.log(`✓ Complete: /static/data/${propType}/`);
 }

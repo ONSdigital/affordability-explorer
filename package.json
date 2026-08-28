@@ -9,6 +9,7 @@
     "package": "vite package",
     "preview": "vite preview",
     "deploy": "gh-pages -d build -t",
+    "generate-data": "node scripts/process-by-property-type.js && node scripts/calculate-affordability-by-type.js && node scripts/generate-final-files.js",
     "lint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. .",
     "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
   },

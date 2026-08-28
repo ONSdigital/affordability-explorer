@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = path.join(__dirname, '../static/data');
+const GEOGRAPHY_DIR = path.join(OUTPUT_DIR, 'geography');
 
 const PROPERTY_TYPES = ['all', 'detached', 'semi-detached', 'terraced', 'flats'];
 
@@ -42,14 +43,25 @@ function generateForPropertyType(propType) {
     fs.mkdirSync(nationalDir, { recursive: true });
   }
   
-  // Generate msoas-latest.json
-  const msoas = [];
+  // Read all LA files and build authorities list + aggregate data
   const laFiles = fs.readdirSync(laDir).filter(f => f.endsWith('.json'));
+  const authorities = [];
+  const msoas = [];
   
   for (const filename of laFiles) {
     const filePath = path.join(laDir, filename);
     const laData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     
+    // Add to authorities list with region info
+    authorities.push({
+      code: laData.code,
+      name: laData.name,
+      region_code: laData.region_code,
+      region_name: laData.region_name,
+      msoa_count: laData.msoas.length
+    });
+    
+    // Collect MSOAs for msoas-latest.json
     for (const msoa of laData.msoas) {
       msoas.push({
         code: msoa.code,
@@ -63,6 +75,15 @@ function generateForPropertyType(propType) {
     }
   }
   
+  // Write authorities.json
+  fs.writeFileSync(
+    path.join(typeDir, 'authorities.json'),
+    JSON.stringify({ authorities }, null, 2)
+  );
+  
+  console.log(`  ✓ authorities.json (${authorities.length} LAs with region info)`);
+  
+  // Generate msoas-latest.json
   msoas.sort((a, b) => {
     if (a.region_code !== b.region_code) return a.region_code.localeCompare(b.region_code);
     if (a.la_code !== b.la_code) return a.la_code.localeCompare(b.la_code);
@@ -88,11 +109,13 @@ function generateForPropertyType(propType) {
   
   // Generate national files
   // England: E codes
-  const englandLAs = laFiles
-    .map(f => JSON.parse(fs.readFileSync(path.join(laDir, f), 'utf-8')))
-    .filter(la => la.code.startsWith('E'));
-  
-  const englandAff = aggregateAffordability(englandLAs);
+  const englandLAs = authorities.filter(la => la.code.startsWith('E'));
+  const englandAff = aggregateAffordability(
+    englandLAs.map(la => {
+      const filePath = path.join(laDir, la.code + '.json');
+      return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    })
+  );
   fs.writeFileSync(
     path.join(nationalDir, 'england.json'),
     JSON.stringify({
@@ -105,11 +128,13 @@ function generateForPropertyType(propType) {
   console.log(`  ✓ england.json (${englandLAs.length} LAs)`);
   
   // Wales: W codes
-  const walesLAs = laFiles
-    .map(f => JSON.parse(fs.readFileSync(path.join(laDir, f), 'utf-8')))
-    .filter(la => la.code.startsWith('W'));
-  
-  const walesAff = aggregateAffordability(walesLAs);
+  const walesLAs = authorities.filter(la => la.code.startsWith('W'));
+  const walesAff = aggregateAffordability(
+    walesLAs.map(la => {
+      const filePath = path.join(laDir, la.code + '.json');
+      return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    })
+  );
   fs.writeFileSync(
     path.join(nationalDir, 'wales.json'),
     JSON.stringify({
@@ -173,6 +198,57 @@ async function main() {
   console.log('Generating msoas-latest and national files\n');
   console.log('='.repeat(60));
   
+  // Ensure geography directory exists
+  if (!fs.existsSync(GEOGRAPHY_DIR)) {
+    fs.mkdirSync(GEOGRAPHY_DIR, { recursive: true });
+  }
+  
+  // Generate shared geography files (only once from 'all' property type)
+  const allLADir = path.join(OUTPUT_DIR, 'all', 'la');
+  if (fs.existsSync(allLADir)) {
+    const laFiles = fs.readdirSync(allLADir).filter(f => f.endsWith('.json'));
+    const authorities = [];
+    const regionSet = new Map();
+    
+    for (const filename of laFiles) {
+      const filePath = path.join(allLADir, filename);
+      const laData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      
+      authorities.push({
+        code: laData.code,
+        name: laData.name,
+        region_code: laData.region_code,
+        region_name: laData.region_name,
+        msoa_count: laData.msoas.length
+      });
+      
+      if (!regionSet.has(laData.region_code)) {
+        regionSet.set(laData.region_code, laData.region_name);
+      }
+    }
+    
+    // Write authorities.json
+    fs.writeFileSync(
+      path.join(GEOGRAPHY_DIR, 'authorities.json'),
+      JSON.stringify({ authorities }, null, 2)
+    );
+    
+    // Write regions.json
+    const regions = Array.from(regionSet.entries())
+      .map(([code, name]) => ({ code, name }))
+      .sort((a, b) => a.code.localeCompare(b.code));
+    
+    fs.writeFileSync(
+      path.join(GEOGRAPHY_DIR, 'regions.json'),
+      JSON.stringify({ regions }, null, 2)
+    );
+    
+    console.log(`\nShared Geography Files:`);
+    console.log(`  ✓ geography/authorities.json (${authorities.length} LAs with region info)`);
+    console.log(`  ✓ geography/regions.json (${regions.length} regions)`);
+  }
+  
+  console.log('');
   for (const propType of PROPERTY_TYPES) {
     generateForPropertyType(propType);
   }

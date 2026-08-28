@@ -1,6 +1,15 @@
 # affordability-explorer
 
-An interactive data visualization application built with SvelteKit and ONS visual components.
+An interactive data visualization application for exploring UK housing affordability by Middle Super Output Area (MSOA), built with SvelteKit and ONS visual components.
+
+## Features
+
+- **Interactive Map**: Visualize housing affordability across Middle Super Output Areas (MSOAs) in England and Wales using ONS vector tiles
+- **Color-Coded Affordability Ratios**: Map displays 7-color gradient representing price-to-earnings ratios
+- **Property Type Filtering**: Switch between "All", Detached, Semi-detached, Terraced, and Flats
+- **Price Level Filtering**: View Median or Lower Quartile affordability ratios
+- **Dynamic Legend**: Shows affordability ratio ranges with automatic color breaks calculated from data
+- **Responsive Design**: Works on desktop and mobile devices
 
 ## Getting Started
 
@@ -72,6 +81,30 @@ This processes:
 
 For detailed information about the data pipeline, see [PIPELINE.md](./PIPELINE.md)
 
+## Map Implementation
+
+The interactive map displays MSOA boundaries from ONS Vector Tiles and colors them based on housing affordability data:
+
+### Data Sources
+- **MSOA Boundaries**: https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{z}/{x}/{y}.pbf
+- **Affordability Data**: Generated from `/data/[property-type]/msoas-latest.json`
+- **Base Map**: OpenStreetMap raster tiles
+
+### Color Breaks
+Uses equal-interval method to divide affordability ratios into 7 color ranges:
+- Red (#E92730) = Most affordable (lowest ratios)
+- Green (#0a8647) = Least affordable (highest ratios)
+- Gray (#ccc) = Data unavailable
+
+Breaks are calculated dynamically based on the minimum and maximum affordability ratios in the selected property type and price level.
+
+### Map Features
+- Zoom: 6 (centered on England and Wales)
+- Vector tile layer: `msoa` with feature IDs from `areacd` (MSOA codes)
+- Feature state: Each MSOA has a `color` property set based on affordability ratio
+- Paint expression: Simple case statement using feature state color
+- Hover/select: Visual feedback when hovering or selecting MSOAs
+
 ### Code Quality
 
 Format code with Prettier:
@@ -99,9 +132,10 @@ export const base_preview = '/affordability-explorer'; // Preview/staging path
 
 - `/src/routes/` - Page components and routing
 - `/src/lib/` - Reusable components and utilities
+- `/src/lib/components/` - Svelte components (ColorLegend, etc.)
+- `/static/data/` - Generated affordability data files (not committed)
 - `/src/app.html` - HTML shell
 - `/src/app.css` - Global styles
-- `/static/` - Static assets
 
 ## Built With
 
@@ -109,7 +143,7 @@ export const base_preview = '/affordability-explorer'; // Preview/staging path
 - [Svelte 5](https://svelte.dev/) - UI framework
 - [ONS Svelte Components](https://github.com/ONSvisual/svelte-components/) - Visual components library
 - [ONS Svelte Charts](https://github.com/ONSvisual/svelte-charts/) - Charting library
-- [ONS Svelte Maps](https://github.com/ONSvisual/svelte-maps/) - Mapping library
+- [ONS Svelte Maps](https://github.com/ONSvisual/svelte-maps/) - Mapping library with Maplibre GL
 - [Vite](https://vitejs.dev/) - Build tool
 
 ## License

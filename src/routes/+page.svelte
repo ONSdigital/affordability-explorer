@@ -261,18 +261,27 @@
     const results = [];
 
     if (!query) {
-      // Show all area names
-      const options = allAreaNames.slice(0, 20).map((name) => ({
+      // Show LTLAs and MSOAs
+      const ltlaOptions = allAreaNames.slice(0, 10).map((name) => ({
         id: name,
         label: name,
-        type: "area",
+        type: "ltla",
       }));
-      populateResults(options);
+      
+      const msoaOptions = Object.values(affordabilityData).slice(0, 10).map((msoa) => ({
+        id: msoa.code,
+        label: `${msoa.name} (${msoa.la_name})`,
+        type: "msoa",
+        msoaCode: msoa.code,
+        laCode: msoa.la_code,
+      }));
+      
+      populateResults([...ltlaOptions, ...msoaOptions]);
       return;
     }
 
     // Use new search function
-    const searchResults = await searchPlaces(query, allAreaNames);
+    const searchResults = await searchPlaces(query, allAreaNames, affordabilityData);
     populateResults(searchResults);
   }
 
@@ -280,14 +289,37 @@
     if (!value) return;
 
     const selectedOption = value;
-    const { type, id } = selectedOption;
+    const { type, id, msoaCode, laCode } = selectedOption;
 
     if (type === "postcode") {
       selectAreaByPostcode(id);
-    } else if (type === "area") {
+    } else if (type === "ltla") {
       const boundary = getBoundaryByName(id);
       if (boundary) {
         selectBoundary(boundary);
+      }
+    } else if (type === "msoa") {
+      // For MSOA selection, highlight the parent LA and zoom to MSOA
+      if (laCode) {
+        highlightLA(laCode);
+      }
+      
+      // Zoom to MSOA by getting its center from affordability data
+      if (map && affordabilityData && affordabilityData[msoaCode]) {
+        const msoa = affordabilityData[msoaCode];
+        selectedValue = {
+          id: msoaCode,
+          label: `${msoa.name}`,
+          type: "msoa",
+        };
+        
+        // Try to zoom to the MSOA center - we'd need bounds from the vector tile
+        // For now, just zoom in a bit on England/Wales center
+        map.flyTo({
+          center: [-3.5, 54],
+          zoom: 8,
+          duration: 1000
+        });
       }
     }
 
@@ -473,6 +505,7 @@
           bind:map
           bind:zoom
           bind:center
+          minzoom={6}
           controls={true}
           attribution={true}
           scrollZoomGuard={true}

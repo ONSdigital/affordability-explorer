@@ -38,6 +38,9 @@ function buildAreaLookups(topo) {
   const uniqueNames = new Set();
 
   for (const [key, geometryCollection] of Object.entries(topo.objects)) {
+    // Only include ltla (lower tier local authorities) in search
+    if (key !== 'ltla') continue;
+    
     const features = topojson.feature(topo, geometryCollection).features;
     
     features.forEach((feature) => {
@@ -436,34 +439,50 @@ export async function getMSOAByPostcode(postcode, msoas) {
 }
 
 /**
- * Search for places including areas, LTLAs, and postcodes
+ * Search for places including LTLAs and MSOAs
  * @param {string} query - Search query
+ * @param {array} allAreaNames - LTLA names from master-topo
+ * @param {object} msoas - MSOA data (code -> {name, la_code, ...})
  * @returns {array} Array of search results
  */
-export async function searchPlaces(query, allAreaNames = []) {
+export async function searchPlaces(query, allAreaNames = [], msoas = {}) {
   if (!query || query.length < 2) return [];
 
   const queryLower = query.toLowerCase();
   const results = [];
 
-  // Search area names (from master-topo)
+  // Search LTLA names (from master-topo)
   const areaMatches = allAreaNames.filter((name) =>
     name.toLowerCase().includes(queryLower)
   );
 
-  areaMatches.slice(0, 10).forEach((name) => {
+  areaMatches.slice(0, 5).forEach((name) => {
     results.push({
       id: name,
       label: name,
-      type: "area",
-      priority: 1,
+      type: "ltla",
+      priority: 2,
     });
+  });
+
+  // Search MSOA names from affordability data
+  Object.values(msoas).forEach((msoa) => {
+    if (msoa.name.toLowerCase().includes(queryLower) && results.length < 15) {
+      results.push({
+        id: msoa.code,
+        label: `${msoa.name} (${msoa.la_name})`,
+        type: "msoa",
+        priority: 1,
+        msoaCode: msoa.code,
+        laCode: msoa.la_code,
+      });
+    }
   });
 
   // Try postcode lookup
   try {
     const postcodes = await fetchPostcodes(query);
-    postcodes.slice(0, 5).forEach((postcode) => {
+    postcodes.slice(0, 3).forEach((postcode) => {
       results.push({
         id: postcode,
         label: postcode,

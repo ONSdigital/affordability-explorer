@@ -53,6 +53,8 @@ To build the preview version (for staging):
 npm run build:preview
 ```
 
+GitHub Pages is deployed from the `main` branch via the `Deploy to GitHub Pages` workflow using the built `build/` artifact rather than a `gh-pages` branch.
+
 To preview the built app locally:
 
 ```bash

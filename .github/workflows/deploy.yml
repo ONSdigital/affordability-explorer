@@ -24,16 +24,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@a81bbbf8298c0fa03ea29cdc473d45eda4b39522 # v4.0.0
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@60edb5dd545a775178fbb3ce5d2f0289889aa7bf # v4.0.0
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
 
       - name: Configure GitHub Pages
-        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+        uses: actions/configure-pages@v5
 
       - name: Install dependencies
         run: npm install
@@ -42,7 +42,7 @@ jobs:
         run: npm run build:preview
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./build
 
@@ -57,4 +57,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@decd61bb4d42f7b0ee45d233eefb86395c939e07 # v4.0.5
+        uses: actions/deploy-pages@v4

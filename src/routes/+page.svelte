@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { base } from "$app/paths";
   import { Map, MapSource, MapLayer } from "@onsvisual/svelte-maps";
   import {
     AccessibleSelect,
@@ -78,7 +79,7 @@
       laGeojson = getLocalAuthorityGeoJSON();
 
       // Load the style
-      const styleResponse = await fetch("/style.json");
+      const styleResponse = await fetch(`${base}/style.json`);
       mapStyle = await styleResponse.json();
 
       loading = false;

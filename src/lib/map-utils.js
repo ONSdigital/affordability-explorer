@@ -1,5 +1,6 @@
 import * as topojson from 'topojson-client';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import { base } from '$app/paths';
 
 let boundaries = [];
 let areaNames = [];
@@ -8,12 +9,16 @@ let topoData = null;
 
 const UK_POSTCODE_RE = /^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$/i;
 
+function withBase(path) {
+  return `${base}${path}`;
+}
+
 /**
  * Load and cache TopoJSON data
  * @param {string} topoPath - Path to TopoJSON file (default: '/master-topo.json')
  * @returns {object|null} Loaded TopoJSON data or null if error
  */
-export async function loadTopoJSON(topoPath = '/master-topo.json') {
+export async function loadTopoJSON(topoPath = withBase('/master-topo.json')) {
   if (topoData) return topoData;
   
   try {
@@ -243,7 +248,7 @@ export async function loadAffordabilityData(propertyType = 'all', priceLevel = '
   }
 
   try {
-    const response = await fetch(`/data/${propertyType}/msoas-latest.json`);
+    const response = await fetch(withBase(`/data/${propertyType}/msoas-latest.json`));
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
 

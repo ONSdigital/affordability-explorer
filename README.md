@@ -55,6 +55,13 @@ npm run build:preview
 
 GitHub Pages is deployed from the `main` branch via the `Deploy to GitHub Pages` workflow using the built `build/` artifact rather than a `gh-pages` branch.
 
+Before pushing a Pages deployment, generate the data locally and rebuild the committed `build/` folder:
+
+```bash
+npm run generate-data
+npm run build:preview
+```
+
 To preview the built app locally:
 
 ```bash

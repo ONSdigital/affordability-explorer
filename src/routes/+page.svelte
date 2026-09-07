@@ -66,6 +66,7 @@
   let selectedValue = null;
   let clearInput;
   let selectElement;
+  let detachMapHandlers = null;
 
   onMount(async () => {
     try {
@@ -87,6 +88,12 @@
       error = "Failed to load map data";
       loading = false;
     }
+
+    return () => {
+      if (detachMapHandlers) {
+        detachMapHandlers();
+      }
+    };
   });
 
   // Reactive: Load affordability data and update map colors when filters change
@@ -102,6 +109,27 @@
     if (propertyType && priceLevel && !mapLoading && Object.keys(affordabilityData).length === 0) {
       loadAndColorMap(propertyType, priceLevel);
     }
+  }
+
+  $: if (map && !detachMapHandlers) {
+    const reapplyMapColors = () => {
+      applyAffordabilityColors();
+    };
+
+    const handleSourceData = (event) => {
+      if (event?.sourceId === "msoa-source") {
+        applyAffordabilityColors();
+      }
+    };
+
+    map.on("idle", reapplyMapColors);
+    map.on("sourcedata", handleSourceData);
+
+    detachMapHandlers = () => {
+      map.off("idle", reapplyMapColors);
+      map.off("sourcedata", handleSourceData);
+      detachMapHandlers = null;
+    };
   }
 
   // When selected changes, update selectedBoundary and zoom
@@ -203,29 +231,40 @@
         }
       }
       
-      // First, update feature states on map so they're available when paint expression evaluates
-      if (map && affordabilityData) {
-        updateMapFeatureStates(map, "msoa-source", affordabilityData, colorBounds);
-        
-        // Apply the color expression to the layer
-        try {
-          const expr = [
-            "case",
-            ["!=", ["feature-state", "color"], null],
-            ["feature-state", "color"],
-            "rgba(255, 255, 255, 0)"
-          ];
-          map.setPaintProperty("msoa-fill", "fill-color", expr);
-        } catch (e) {
-          console.error("Could not apply fill-color expression:", e.message);
-        }
-      }
+      applyAffordabilityColors();
 
       mapLoading = false;
     } catch (e) {
       console.error("Error loading map colors:", e.message);
       error = "Failed to load map data";
       mapLoading = false;
+    }
+  }
+
+  function applyAffordabilityColors() {
+    if (!map || !affordabilityData || Object.keys(affordabilityData).length === 0) {
+      return;
+    }
+
+    try {
+      if (!map.getSource("msoa-source") || !map.getLayer("msoa-fill")) {
+        return;
+      }
+
+      updateMapFeatureStates(map, "msoa-source", affordabilityData, colorBounds);
+
+      map.setPaintProperty(
+        "msoa-fill",
+        "fill-color",
+        colorExpression ?? [
+          "case",
+          ["!=", ["feature-state", "color"], null],
+          ["feature-state", "color"],
+          "#ccc",
+        ],
+      );
+    } catch (e) {
+      console.error("Could not apply affordability colors:", e.message);
     }
   }
 
@@ -683,6 +722,12 @@
               select={true}
               bind:selected
               paint={{
+                "fill-color": [
+                  "case",
+                  ["!=", ["feature-state", "color"], null],
+                  ["feature-state", "color"],
+                  "#ccc",
+                ],
                 "fill-opacity": [
                   "case",
                   ["==", ["feature-state", "selected"], true],

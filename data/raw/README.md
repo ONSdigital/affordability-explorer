@@ -32,6 +32,8 @@ This directory contains the raw source Excel files from the Office for National 
 - **lowerquartilepricepaidforadministrativegeographies.xlsx** - Lower quartile house prices by LA, annual from 2002-2025
 - **salesforadministrativegeographies.xlsx** - Sales by LA, annual from 2002-2025
 
+The current processing script reads **tables 2a-2e** from the median and lower quartile administrative geography files to populate top-level LA `timeSeries` (by property type) in `/static/data/<type>/la/<LACODE>.json`.
+
 ## Data Processing Pipeline
 
 The raw Excel files are processed by the following scripts (in `/scripts/`):

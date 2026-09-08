@@ -234,6 +234,26 @@ export function findBoundaryAtPoint(lng, lat, boundaryType = 'ltla') {
 
 // Cache for affordability data by property type and price level
 const affordabilityCache = {};
+const localAuthorityAffordabilityCache = {};
+const localAuthorityDataCache = {};
+const nationalAffordabilityCache = {};
+const regionalMedianAffordabilityCache = {};
+const geographyAuthoritiesCache = {
+  authorities: null,
+};
+const AFFORDABILITY_COLOR_PALETTE = [
+  "#EAECB1",
+  "#A9D891",
+  "#00A7BA",
+  "#004EA6",
+  "#002D7D",
+  "#000D54",
+];
+const AFFORDABILITY_COLOR_BREAKS = [1, 5, 10, 15, 20, 40, 60];
+
+function roundToTwoDecimals(value) {
+  return Math.round(value * 100) / 100;
+}
 
 /**
  * Load affordability data for a property type and price level
@@ -271,44 +291,255 @@ export async function loadAffordabilityData(propertyType = 'all', priceLevel = '
 
     affordabilityCache[cacheKey] = msoas;
     return msoas;
-    } catch (error) {
-      console.error(`Failed to load affordability data for ${propertyType}/${priceLevel}:`, error.message);
-      return {};
-    }
+  } catch (error) {
+    console.error(`Failed to load affordability data for ${propertyType}/${priceLevel}:`, error.message);
+    return {};
+  }
 }
 
 /**
- * Calculate equal interval breaks for affordability ratios
- * Returns array of bounds (numColors + 1 values) for use in legend
- * @param {object} msoas - Map of MSOA code -> {ratio: number}
- * @param {number} numColors - Number of colors (default: 7)
- * @returns {array} Array of bounds including min and max (e.g., [1.64, 9.55, 17.46, ..., 57.02])
+ * Load and cache full Local Authority data file
+ * @param {string} propertyType - Property type (all, detached, semi-detached, terraced, flats)
+ * @param {string} laCode - Local Authority code
+ * @returns {object|null} Full Local Authority data object
  */
-export function calculateColorBreaks(msoas, numColors = 7) {
-  // Extract non-null ratios and sort
-  const ratios = Object.values(msoas)
-    .map((m) => m.ratio)
-    .filter((r) => r !== null && isFinite(r))
-    .sort((a, b) => a - b);
+export async function loadLocalAuthorityData(propertyType = 'all', laCode = '') {
+  if (!laCode) return null;
 
-  if (ratios.length === 0) {
+  const cacheKey = `${propertyType}:${laCode}`;
+  if (localAuthorityDataCache[cacheKey]) {
+    return localAuthorityDataCache[cacheKey];
+  }
+
+  try {
+    const response = await fetch(withBase(`/data/${propertyType}/la/${laCode}.json`));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    localAuthorityDataCache[cacheKey] = data;
+    return data;
+  } catch (error) {
+    console.error(
+      `Failed to load Local Authority data for ${propertyType}/${laCode}:`,
+      error.message
+    );
+    return null;
+  }
+}
+
+/**
+ * Load and cache Local Authority affordability data (stripped to MSOA affordability only)
+ * @param {string} propertyType - Property type (all, detached, semi-detached, terraced, flats)
+ * @param {string} laCode - Local Authority code
+ * @returns {object} Object mapping MSOA codes to {code, name, affordability}
+ */
+export async function loadLocalAuthorityAffordabilityData(propertyType = 'all', laCode = '') {
+  if (!laCode) return {};
+
+  const cacheKey = `${propertyType}:${laCode}`;
+  if (localAuthorityAffordabilityCache[cacheKey]) {
+    return localAuthorityAffordabilityCache[cacheKey];
+  }
+
+  const data = await loadLocalAuthorityData(propertyType, laCode);
+  if (!data) {
+    return {};
+  }
+
+  const msoas = {};
+  if (Array.isArray(data?.msoas)) {
+    data.msoas.forEach((msoa) => {
+      if (!msoa?.code) return;
+      msoas[msoa.code] = {
+        code: msoa.code,
+        name: msoa.name,
+        affordability: {
+          median: msoa.affordability?.median ?? null,
+          lq: msoa.affordability?.lq ?? null,
+        },
+      };
+    });
+  }
+
+  localAuthorityAffordabilityCache[cacheKey] = msoas;
+  return msoas;
+}
+
+/**
+ * Get a single MSOA affordability record from its Local Authority file
+ * @param {string} propertyType - Property type
+ * @param {string} laCode - Local Authority code
+ * @param {string} msoaCode - MSOA code
+ * @returns {object|null} MSOA affordability record or null
+ */
+export async function getMsoaAffordabilityFromLocalAuthority(
+  propertyType = 'all',
+  laCode = '',
+  msoaCode = ''
+) {
+  if (!laCode || !msoaCode) return null;
+
+  const msoas = await loadLocalAuthorityAffordabilityData(propertyType, laCode);
+  return msoas[msoaCode] || null;
+}
+
+async function loadGeographyAuthorities() {
+  if (geographyAuthoritiesCache.authorities) {
+    return geographyAuthoritiesCache.authorities;
+  }
+
+  try {
+    const response = await fetch(withBase('/data/geography/authorities.json'));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    geographyAuthoritiesCache.authorities = Array.isArray(data?.authorities)
+      ? data.authorities
+      : [];
+    return geographyAuthoritiesCache.authorities;
+  } catch (error) {
+    console.error('Failed to load geography authorities:', error.message);
+    return [];
+  }
+}
+
+function aggregateMedianAffordability(laDataArray = []) {
+  let totalMedianPrice = 0;
+  let totalMedianEarnings = 0;
+  let count = 0;
+
+  for (const laData of laDataArray) {
+    const median = laData?.affordability?.median;
+    if (!median?.price || !median?.earnings) continue;
+    totalMedianPrice += median.price;
+    totalMedianEarnings += median.earnings;
+    count += 1;
+  }
+
+  if (count === 0) {
+    return null;
+  }
+
+  const price = Math.round(totalMedianPrice / count);
+  const earnings = Math.round(totalMedianEarnings / count);
+  return {
+    price,
+    earnings,
+    ratio: roundToTwoDecimals(price / earnings),
+  };
+}
+
+/**
+ * Load country affordability summary from national files
+ * @param {string} propertyType - Property type
+ * @param {string} country - 'england' or 'wales'
+ * @returns {object|null} Affordability object with median/lq, or null
+ */
+export async function loadCountryAffordability(propertyType = 'all', country = 'england') {
+  const normalizedCountry = String(country).toLowerCase() === 'wales' ? 'wales' : 'england';
+  const cacheKey = `${propertyType}:${normalizedCountry}`;
+
+  if (nationalAffordabilityCache[cacheKey]) {
+    return nationalAffordabilityCache[cacheKey];
+  }
+
+  try {
+    const response = await fetch(withBase(`/data/${propertyType}/national/${normalizedCountry}.json`));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const affordability = data?.affordability ?? null;
+    nationalAffordabilityCache[cacheKey] = affordability;
+    return affordability;
+  } catch (error) {
+    console.error(
+      `Failed to load country affordability for ${propertyType}/${normalizedCountry}:`,
+      error.message
+    );
+    return null;
+  }
+}
+
+/**
+ * Compute region-level median affordability from LA files
+ * @param {string} propertyType - Property type
+ * @param {string} regionCode - Region code
+ * @returns {object|null} Region summary with median affordability
+ */
+export async function loadRegionMedianAffordability(propertyType = 'all', regionCode = '') {
+  if (!regionCode) return null;
+
+  const cacheKey = `${propertyType}:${regionCode}`;
+  if (regionalMedianAffordabilityCache[cacheKey]) {
+    return regionalMedianAffordabilityCache[cacheKey];
+  }
+
+  const authorities = await loadGeographyAuthorities();
+  const regionAuthorities = authorities.filter((authority) => authority.region_code === regionCode);
+
+  if (regionAuthorities.length === 0) {
+    return null;
+  }
+
+  const laDataArray = await Promise.all(
+    regionAuthorities.map((authority) => loadLocalAuthorityData(propertyType, authority.code))
+  );
+  const median = aggregateMedianAffordability(laDataArray);
+  if (!median) {
+    return null;
+  }
+
+  const summary = {
+    code: regionCode,
+    name: regionAuthorities[0]?.region_name ?? null,
+    median,
+  };
+  regionalMedianAffordabilityCache[cacheKey] = summary;
+  return summary;
+}
+
+function calculateEqualIntervalBreaks(ratios = [], numClasses = 7) {
+  if (!Array.isArray(ratios) || ratios.length === 0) {
     return [];
   }
 
-  // Use equal interval breaks
   const minRatio = ratios[0];
   const maxRatio = ratios[ratios.length - 1];
-  const range = maxRatio - minRatio;
 
-  // Create bounds array: [min, break1, break2, ..., breakN, max]
-  const bounds = [minRatio];
-  for (let i = 1; i < numColors; i++) {
-    const breakValue = minRatio + (range * i) / numColors;
-    bounds.push(Math.round(breakValue * 100) / 100); // Round to 2 decimals
+  if (numClasses <= 1 || minRatio === maxRatio) {
+    return [minRatio, maxRatio];
   }
-  bounds.push(maxRatio); // Add max value
+
+  const range = maxRatio - minRatio;
+  const bounds = [minRatio];
+
+  for (let i = 1; i < numClasses; i++) {
+    bounds.push(minRatio + (range * i) / numClasses);
+  }
+  bounds.push(maxRatio);
 
   return bounds;
+}
+
+function getPaletteForBreaks(colorPalette = [], breakCount = 0) {
+  if (!Array.isArray(colorPalette) || colorPalette.length === 0 || breakCount <= 0) {
+    return [];
+  }
+
+  if (breakCount <= colorPalette.length) {
+    return colorPalette.slice(0, breakCount);
+  }
+
+  // If more classes are requested than base colors, sample across the palette.
+  return Array.from({ length: breakCount }, (_, i) => {
+    const paletteIndex = Math.round((i * (colorPalette.length - 1)) / (breakCount - 1));
+    return colorPalette[paletteIndex];
+  });
+}
+
+/**
+ * Return fixed manual breaks for affordability classes.
+ * @returns {array} Array of break bounds for legend/map classes
+ */
+export function calculateColorBreaks() {
+  return [...AFFORDABILITY_COLOR_BREAKS];
 }
 
 /**
@@ -318,7 +549,7 @@ export function calculateColorBreaks(msoas, numColors = 7) {
  */
 export function createColorExpression(colorPalette = null) {
   if (!colorPalette) {
-    colorPalette = ["#E92730", "#f0702f", "#f6ae35", "#f1ec37", "#95ca53", "#2ea949", "#0a8647"];
+    colorPalette = AFFORDABILITY_COLOR_PALETTE;
   }
 
   // Simple expression: if feature-state color is set, use it; otherwise transparent
@@ -349,8 +580,11 @@ export function updateMapFeatureStates(map, sourceId, msoas, colorBounds, colorP
   }
 
   if (!colorPalette) {
-    colorPalette = ["#E92730", "#f0702f", "#f6ae35", "#f1ec37", "#95ca53", "#2ea949", "#0a8647"];
+    colorPalette = AFFORDABILITY_COLOR_PALETTE;
   }
+
+  const intervalCount = Math.max(0, (Array.isArray(colorBounds) ? colorBounds.length : 0) - 1);
+  const activePalette = getPaletteForBreaks(colorPalette, intervalCount);
 
   // Update feature state for each MSOA with its color
   Object.entries(msoas).forEach(([msoacd, data]) => {
@@ -358,20 +592,20 @@ export function updateMapFeatureStates(map, sourceId, msoas, colorBounds, colorP
       // Calculate the color for this MSOA based on its ratio
       let color = "#ccc"; // default unavailable
       
-      if (data.ratio !== null && colorBounds.length > 0) {
+      if (Number.isFinite(data.ratio) && intervalCount > 0) {
         // Find which color range this ratio falls into
-        for (let i = 0; i < colorPalette.length; i++) {
+        for (let i = 0; i < intervalCount; i++) {
           const lowerBound = colorBounds[i];
           const upperBound = colorBounds[i + 1];
           
-          if (i === 0 && data.ratio < upperBound) {
-            color = colorPalette[i];
+          if (i === 0 && data.ratio <= upperBound) {
+            color = activePalette[i];
             break;
-          } else if (i === colorPalette.length - 1 && data.ratio >= lowerBound) {
-            color = colorPalette[i];
+          } else if (i === intervalCount - 1 && data.ratio >= lowerBound) {
+            color = activePalette[i];
             break;
           } else if (data.ratio >= lowerBound && data.ratio < upperBound) {
-            color = colorPalette[i];
+            color = activePalette[i];
             break;
           }
         }

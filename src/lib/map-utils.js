@@ -840,10 +840,10 @@ export async function loadNationalAffordability(
 }
 
 /**
- * Load regional affordability by aggregating LAs in a region
+ * Load regional affordability from generated region files
  * @param {string} propertyType - Property type (all, detached, semi-detached, terraced, flats)
  * @param {string} regionCode - Region code
- * @param {string} regionName - Region name (for caching)
+ * @param {string} regionName - Region name (unused, kept for call-site compatibility)
  * @returns {object|null} Regional median affordability or null
  */
 export async function loadRegionalAffordability(
@@ -859,57 +859,15 @@ export async function loadRegionalAffordability(
   }
 
   try {
-    const authorities = await loadGeographyAuthorities();
-    const regionLAs = authorities.filter(
-      (auth) => auth.region_code === regionCode,
+    const response = await fetch(
+      withBase(`/data/${propertyType}/region/${regionCode}.json`),
     );
-
-    if (regionLAs.length === 0) {
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const regional = data?.affordability?.median || null;
+    if (!regional) {
       return null;
     }
-
-    const regionalMedians = (
-      await Promise.all(
-        regionLAs.map(async (la) => {
-          try {
-            const laData = await loadLocalAuthorityData(propertyType, la.code);
-            const median = laData?.affordability?.median;
-            if (!median?.price || !median?.earnings) {
-              return null;
-            }
-
-            return {
-              price: median.price,
-              earnings: median.earnings,
-            };
-          } catch (e) {
-            return null;
-          }
-        }),
-      )
-    ).filter(Boolean);
-
-    const count = regionalMedians.length;
-
-    if (count === 0) {
-      return null;
-    }
-
-    const totals = regionalMedians.reduce(
-      (accumulator, median) => ({
-        price: accumulator.price + median.price,
-        earnings: accumulator.earnings + median.earnings,
-      }),
-      { price: 0, earnings: 0 },
-    );
-
-    const regional = {
-      price: Math.round(totals.price / count),
-      earnings: Math.round(totals.earnings / count),
-      ratio: roundToTwoDecimals(
-        totals.price / count / (totals.earnings / count),
-      ),
-    };
 
     regionalMedianAffordabilityCache[cacheKey] = regional;
     return regional;

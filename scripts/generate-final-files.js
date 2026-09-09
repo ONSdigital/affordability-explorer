@@ -7,12 +7,21 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import XLSX from 'xlsx';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = path.join(__dirname, '../static/data');
 const GEOGRAPHY_DIR = path.join(OUTPUT_DIR, 'geography');
+const DATA_DIR = path.join(__dirname, '../data/raw');
 
 const PROPERTY_TYPES = ['all', 'detached', 'semi-detached', 'terraced', 'flats'];
+const PROPERTY_TYPE_SHEET_LETTERS = {
+  all: 'a',
+  detached: 'b',
+  'semi-detached': 'c',
+  terraced: 'd',
+  flats: 'e',
+};
 
 const REGIONS = [
   { cd: "E12000001", nm: "North East" },
@@ -26,6 +35,169 @@ const REGIONS = [
   { cd: "E12000009", nm: "South West" },
   { cd: "W92000004", nm: "Wales" }
 ];
+
+const COUNTRIES = [
+  { code: 'E92000001', slug: 'england', name: 'England' },
+  { code: 'W92000004', slug: 'wales', name: 'Wales' },
+];
+
+const medianAdministrativeWorkbook = XLSX.readFile(
+  path.join(DATA_DIR, 'medianpricepaidforadministrativegeographies.xlsx'),
+);
+const lowerQuartileAdministrativeWorkbook = XLSX.readFile(
+  path.join(DATA_DIR, 'lowerquartilepricepaidforadministrativegeographies.xlsx'),
+);
+const affordabilityWorkbook = XLSX.readFile(
+  path.join(DATA_DIR, 'aff2ratioofhousepricetoresidencebasedearnings.xlsx'),
+);
+
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+function getLatestNumericValue(sheet, row, startCol) {
+  const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
+
+  for (let col = range.e.c; col >= startCol; col--) {
+    const value = sheet[XLSX.utils.encode_cell({ r: row, c: col })]?.v;
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return Math.round(value);
+    }
+  }
+
+  return null;
+}
+
+function readLatestAreaValues(workbook, sheetName) {
+  const sheet = workbook.Sheets[sheetName];
+  if (!sheet) {
+    return {};
+  }
+
+  const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
+  const values = {};
+
+  for (let row = 2; row <= range.e.r; row++) {
+    const code = sheet[XLSX.utils.encode_cell({ r: row, c: 0 })]?.v;
+    const name = sheet[XLSX.utils.encode_cell({ r: row, c: 1 })]?.v ?? null;
+
+    if (!code || typeof code !== 'string') {
+      continue;
+    }
+
+    const latestValue = getLatestNumericValue(sheet, row, 2);
+    if (!Number.isFinite(latestValue)) {
+      continue;
+    }
+
+    values[code] = {
+      code,
+      name,
+      value: latestValue,
+    };
+  }
+
+  return values;
+}
+
+function createAffordabilityEntry(price, earnings) {
+  if (!Number.isFinite(price) || !Number.isFinite(earnings) || earnings === 0) {
+    return null;
+  }
+
+  return {
+    price,
+    earnings,
+    ratio: Math.round((price / earnings) * 100) / 100,
+  };
+}
+
+function buildAreaAffordabilitySummary(code, name, medianPrices, lowerQuartilePrices, medianEarnings, lowerQuartileEarnings) {
+  const median = createAffordabilityEntry(
+    medianPrices[code]?.value ?? null,
+    medianEarnings[code]?.value ?? null,
+  );
+  const lq = createAffordabilityEntry(
+    lowerQuartilePrices[code]?.value ?? null,
+    lowerQuartileEarnings[code]?.value ?? null,
+  );
+
+  return {
+    code,
+    name: name ?? medianPrices[code]?.name ?? lowerQuartilePrices[code]?.name ?? null,
+    affordability: {
+      ...(median ? { median } : {}),
+      ...(lq ? { lq } : {}),
+    },
+  };
+}
+
+function writeRegionFiles(typeDir, propType) {
+  const regionDir = path.join(typeDir, 'region');
+  ensureDir(regionDir);
+
+  const sheetLetter = PROPERTY_TYPE_SHEET_LETTERS[propType];
+  const medianPrices = readLatestAreaValues(medianAdministrativeWorkbook, `1${sheetLetter}`);
+  const lowerQuartilePrices = readLatestAreaValues(lowerQuartileAdministrativeWorkbook, `1${sheetLetter}`);
+  const medianEarnings = readLatestAreaValues(affordabilityWorkbook, '1b');
+  const lowerQuartileEarnings = readLatestAreaValues(affordabilityWorkbook, '2b');
+
+  for (const region of REGIONS) {
+    const summary = buildAreaAffordabilitySummary(
+      region.cd,
+      region.nm,
+      medianPrices,
+      lowerQuartilePrices,
+      medianEarnings,
+      lowerQuartileEarnings,
+    );
+
+    fs.writeFileSync(
+      path.join(regionDir, `${region.cd}.json`),
+      JSON.stringify(summary, null, 2),
+    );
+  }
+
+  console.log(`  ✓ region/*.json (${REGIONS.length} region files)`);
+
+  return {
+    medianPrices,
+    lowerQuartilePrices,
+    medianEarnings,
+    lowerQuartileEarnings,
+  };
+}
+
+function writeNationalFiles(nationalDir, areaData) {
+  ensureDir(nationalDir);
+
+  for (const country of COUNTRIES) {
+    const summary = buildAreaAffordabilitySummary(
+      country.code,
+      country.name,
+      areaData.medianPrices,
+      areaData.lowerQuartilePrices,
+      areaData.medianEarnings,
+      areaData.lowerQuartileEarnings,
+    );
+
+    fs.writeFileSync(
+      path.join(nationalDir, `${country.slug}.json`),
+      JSON.stringify(
+        {
+          region: country.name,
+          affordability: summary.affordability,
+        },
+        null,
+        2,
+      ),
+    );
+  }
+
+  console.log(`  ✓ national/*.json (${COUNTRIES.length} country files)`);
+}
 
 function generateForPropertyType(propType) {
   console.log(`\nProcessing: ${propType}`);
@@ -100,92 +272,9 @@ function generateForPropertyType(propType) {
   );
   
   console.log(`  ✓ msoas-latest.json (${msoas.length} MSOAs)`);
-  
-  // Generate national files
-  // England: E codes
-  const englandLAs = authorities.filter(la => la.code.startsWith('E'));
-  const englandAff = aggregateAffordability(
-    englandLAs.map(la => {
-      const filePath = path.join(laDir, la.code + '.json');
-      return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    })
-  );
-  fs.writeFileSync(
-    path.join(nationalDir, 'england.json'),
-    JSON.stringify({
-      region: 'England',
-      la_count: englandLAs.length,
-      affordability: englandAff
-    }, null, 2)
-  );
-  
-  console.log(`  ✓ england.json (${englandLAs.length} LAs)`);
-  
-  // Wales: W codes
-  const walesLAs = authorities.filter(la => la.code.startsWith('W'));
-  const walesAff = aggregateAffordability(
-    walesLAs.map(la => {
-      const filePath = path.join(laDir, la.code + '.json');
-      return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    })
-  );
-  fs.writeFileSync(
-    path.join(nationalDir, 'wales.json'),
-    JSON.stringify({
-      region: 'Wales',
-      la_count: walesLAs.length,
-      affordability: walesAff
-    }, null, 2)
-  );
-  
-  console.log(`  ✓ wales.json (${walesLAs.length} LAs)`);
-}
 
-function aggregateAffordability(laDataArray) {
-  const agg = {
-    median: { price: 0, earnings: 0, ratio: 0, count: 0 },
-    lq: { price: 0, earnings: 0, ratio: 0, count: 0 }
-  };
-  
-  for (const laData of laDataArray) {
-    const aff = laData.affordability;
-    
-    if (aff.median && aff.median.price) {
-      agg.median.price += aff.median.price;
-      agg.median.earnings += aff.median.earnings;
-      agg.median.count++;
-    }
-    
-    if (aff.lq && aff.lq.price) {
-      agg.lq.price += aff.lq.price;
-      agg.lq.earnings += aff.lq.earnings;
-      agg.lq.count++;
-    }
-  }
-  
-  // Calculate averages
-  const result = {
-    median: {},
-    lq: {}
-  };
-  
-  if (agg.median.count > 0) {
-    result.median = {
-      price: Math.round(agg.median.price / agg.median.count),
-      earnings: Math.round(agg.median.earnings / agg.median.count),
-      ratio: Math.round((agg.median.price / agg.median.earnings) * 100) / 100
-    };
-  }
-  
-  if (agg.lq.count > 0) {
-    result.lq = {
-      price: Math.round(agg.lq.price / agg.lq.count),
-      earnings: Math.round(agg.lq.earnings / agg.lq.count),
-      ratio: Math.round((agg.lq.price / agg.lq.earnings) * 100) / 100
-    };
-  }
-  
-  return result;
+  const areaData = writeRegionFiles(typeDir, propType);
+  writeNationalFiles(nationalDir, areaData);
 }
 
 async function main() {

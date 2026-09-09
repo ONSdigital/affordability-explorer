@@ -1907,9 +1907,10 @@
                 yKey="y"
                 zKey="type"
                 zDomain={['msoa', 'region', 'nation']}
-                yAxisLabel="Affordability Ratio"
+                xAxisLabel="Affordability Ratio"
+                yAxis={false}
                 height={400}
-                padding={{ top: 0, right: 8, bottom: 28, left: 50 }}
+                padding={{ top: 0, right: 8, bottom: 28, left: 20 }}
                 colors={['#1570bf', '#fd7e14', '#e74c3c']}
               />
             </div>

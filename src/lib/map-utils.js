@@ -839,6 +839,7 @@ export async function loadRegionalAffordability(propertyType = 'all', regionCode
 
 /**
  * Transform MSOA affordability data into beeswarm chart format
+ * For vertical beeswarm: X-axis = affordability ratio, Y-axis = categorical (MSOA index)
  * @param {array} msoas - Array of MSOA objects with affordability data
  * @param {object} regionAffordability - Region average affordability
  * @param {object} nationalAffordability - National average affordability
@@ -850,8 +851,8 @@ export function transformMsoaDataForBeeswarm(msoas = [], regionAffordability = n
   msoas.forEach((msoa, index) => {
     if (msoa?.affordability?.median?.ratio) {
       data.push({
-        x: index,
-        y: msoa.affordability.median.ratio,
+        x: msoa.affordability.median.ratio,
+        y: index,
         label: msoa.name || msoa.code,
         code: msoa.code,
         type: 'msoa',
@@ -859,10 +860,12 @@ export function transformMsoaDataForBeeswarm(msoas = [], regionAffordability = n
     }
   });
 
+  const nextY = data.length;
+
   if (regionAffordability?.ratio) {
     data.push({
-      x: data.length,
-      y: regionAffordability.ratio,
+      x: regionAffordability.ratio,
+      y: nextY,
       label: 'Region Average',
       type: 'region',
     });
@@ -870,8 +873,8 @@ export function transformMsoaDataForBeeswarm(msoas = [], regionAffordability = n
 
   if (nationalAffordability?.ratio) {
     data.push({
-      x: data.length,
-      y: nationalAffordability.ratio,
+      x: nationalAffordability.ratio,
+      y: nextY + 1,
       label: 'Nation Average',
       type: 'nation',
     });

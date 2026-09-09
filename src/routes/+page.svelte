@@ -1906,6 +1906,7 @@
                 xKey="x"
                 yKey="y"
                 zKey="type"
+                zDomain={['msoa', 'region', 'nation']}
                 yAxisLabel="Affordability Ratio"
                 height={400}
                 padding={{ top: 0, right: 8, bottom: 28, left: 50 }}

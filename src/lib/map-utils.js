@@ -382,7 +382,7 @@ export async function getMsoaAffordabilityFromLocalAuthority(
   return msoas[msoaCode] || null;
 }
 
-async function loadGeographyAuthorities() {
+export async function loadGeographyAuthorities() {
   if (geographyAuthoritiesCache.authorities) {
     return geographyAuthoritiesCache.authorities;
   }
@@ -750,4 +750,132 @@ export function getLocalAuthorityGeoJSON() {
     console.error("Failed to extract LA boundaries from topoJSON:", e);
     return { type: "FeatureCollection", features: [] };
   }
+}
+
+// ========== BEESWARM DATA ==========
+
+/**
+ * Load national affordability for a property type
+ * @param {string} propertyType - Property type (all, detached, semi-detached, terraced, flats)
+ * @param {string} country - 'england' or 'wales'
+ * @returns {object|null} National affordability data or null
+ */
+export async function loadNationalAffordability(propertyType = 'all', country = 'england') {
+  const cacheKey = `${propertyType}:national:${country}`;
+  if (nationalAffordabilityCache[cacheKey]) {
+    return nationalAffordabilityCache[cacheKey];
+  }
+
+  try {
+    const response = await fetch(withBase(`/data/${propertyType}/national/${country}.json`));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    nationalAffordabilityCache[cacheKey] = data.affordability?.median || null;
+    return nationalAffordabilityCache[cacheKey];
+  } catch (error) {
+    console.error(`Failed to load national affordability for ${propertyType}/${country}:`, error.message);
+    return null;
+  }
+}
+
+/**
+ * Load regional affordability by aggregating LAs in a region
+ * @param {string} propertyType - Property type (all, detached, semi-detached, terraced, flats)
+ * @param {string} regionCode - Region code
+ * @param {string} regionName - Region name (for caching)
+ * @returns {object|null} Regional median affordability or null
+ */
+export async function loadRegionalAffordability(propertyType = 'all', regionCode = '', regionName = '') {
+  if (!regionCode && !regionName) return null;
+
+  const cacheKey = `${propertyType}:region:${regionCode || regionName}`;
+  if (regionalMedianAffordabilityCache[cacheKey]) {
+    return regionalMedianAffordabilityCache[cacheKey];
+  }
+
+  try {
+    const authorities = await loadGeographyAuthorities();
+    const regionLAs = authorities.filter(auth => auth.region_code === regionCode);
+
+    if (regionLAs.length === 0) {
+      return null;
+    }
+
+    let totalPrice = 0;
+    let totalEarnings = 0;
+    let count = 0;
+
+    for (const la of regionLAs) {
+      try {
+        const laData = await loadLocalAuthorityData(propertyType, la.code);
+        const median = laData?.affordability?.median;
+        if (median?.price && median?.earnings) {
+          totalPrice += median.price;
+          totalEarnings += median.earnings;
+          count += 1;
+        }
+      } catch (e) {
+        // Skip LAs that fail to load
+      }
+    }
+
+    if (count === 0) {
+      return null;
+    }
+
+    const regional = {
+      price: Math.round(totalPrice / count),
+      earnings: Math.round(totalEarnings / count),
+      ratio: roundToTwoDecimals((totalPrice / count) / (totalEarnings / count)),
+    };
+
+    regionalMedianAffordabilityCache[cacheKey] = regional;
+    return regional;
+  } catch (error) {
+    console.error(`Failed to load regional affordability for ${regionCode}:`, error.message);
+    return null;
+  }
+}
+
+/**
+ * Transform MSOA affordability data into beeswarm chart format
+ * @param {array} msoas - Array of MSOA objects with affordability data
+ * @param {object} regionAffordability - Region average affordability
+ * @param {object} nationalAffordability - National average affordability
+ * @returns {array} Array formatted for ScatterChart
+ */
+export function transformMsoaDataForBeeswarm(msoas = [], regionAffordability = null, nationalAffordability = null) {
+  const data = [];
+
+  msoas.forEach((msoa, index) => {
+    if (msoa?.affordability?.median?.ratio) {
+      data.push({
+        x: index,
+        y: msoa.affordability.median.ratio,
+        label: msoa.name || msoa.code,
+        code: msoa.code,
+        type: 'msoa',
+      });
+    }
+  });
+
+  if (regionAffordability?.ratio) {
+    data.push({
+      x: data.length,
+      y: regionAffordability.ratio,
+      label: 'Region Average',
+      type: 'region',
+    });
+  }
+
+  if (nationalAffordability?.ratio) {
+    data.push({
+      x: data.length,
+      y: nationalAffordability.ratio,
+      label: 'Nation Average',
+      type: 'nation',
+    });
+  }
+
+  return data;
 }

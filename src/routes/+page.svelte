@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { base } from "$app/paths";
-  import { ColumnChart, LineChart } from "@onsvisual/svelte-charts";
+  import { ColumnChart, LineChart, ScatterChart } from "@onsvisual/svelte-charts";
   import { Map, MapSource, MapLayer } from "@onsvisual/svelte-maps";
   import {
     AccessibleSelect,
@@ -30,6 +30,9 @@
     calculateColorBreaks,
     updateMapFeatureStates,
     searchPlaces,
+    loadNationalAffordability,
+    loadRegionalAffordability,
+    transformMsoaDataForBeeswarm,
   } from "../lib/map-utils.js";
   import ColorLegend from "../lib/components/ColorLegend.svelte";
 
@@ -90,6 +93,10 @@
   let legendSelectedRange = null;
   let legendHoverIndicatorValue = null;
   let legendSelectedIndicatorValue = null;
+  let beeswarmData = null;
+  let beeswarmLoading = false;
+  let beeswarmError = null;
+  let beeswarmSelectionKey = "";
   const snapshotFlagThreshold = 5;
   const propertyTypeLabels = {
     all: "All properties",
@@ -297,6 +304,21 @@
 
   $: if (map && laGeojson) {
     syncLocalAuthorityOutline(selectedLACode);
+  }
+
+  $: {
+    const nextBeeswarmSelectionKey = selectedAreaForData
+      ? `${propertyType}:${selectedAreaForData.type}:${selectedAreaForData.code}`
+      : "";
+
+    if (nextBeeswarmSelectionKey !== beeswarmSelectionKey) {
+      beeswarmSelectionKey = nextBeeswarmSelectionKey;
+      if (selectedAreaForData) {
+        loadBeeswarmData(propertyType, selectedAreaForData);
+      } else {
+        resetBeeswarmData();
+      }
+    }
   }
 
   function getLocalAuthorityFeature(laCode) {
@@ -1060,6 +1082,69 @@
     buySectionError = null;
   }
 
+  function resetBeeswarmData() {
+    beeswarmSelectionKey = "";
+    beeswarmData = null;
+    beeswarmLoading = false;
+    beeswarmError = null;
+  }
+
+  async function loadBeeswarmData(propertyTypeValue, selectedArea) {
+    if (!selectedArea) {
+      resetBeeswarmData();
+      return;
+    }
+
+    beeswarmLoading = true;
+    beeswarmError = null;
+
+    try {
+      let laCode = null;
+      let regionCode = null;
+      let regionName = null;
+      let country = "england";
+
+      if (selectedArea.type === "la") {
+        laCode = selectedArea.code;
+      } else if (selectedArea.type === "msoa") {
+        laCode = selectedMsoaForSnapshot?.la_code;
+        if (!laCode) {
+          const laData = await loadLocalAuthorityData(propertyTypeValue, selectedMsoaForSnapshot?.la_code);
+          laCode = laData?.code;
+        }
+      }
+
+      if (!laCode) {
+        beeswarmData = [];
+        return;
+      }
+
+      const laData = await loadLocalAuthorityData(propertyTypeValue, laCode);
+      if (!laData) {
+        beeswarmError = "Failed to load Local Authority data";
+        beeswarmData = [];
+        return;
+      }
+
+      regionCode = laData.region_code;
+      regionName = laData.region_name;
+      country = laData.code?.startsWith("W") ? "wales" : "england";
+
+      const msoas = laData.msoas || [];
+
+      const regionAffordability = await loadRegionalAffordability(propertyTypeValue, regionCode, regionName);
+      const nationalAffordability = await loadNationalAffordability(propertyTypeValue, country);
+
+      beeswarmData = transformMsoaDataForBeeswarm(msoas, regionAffordability, nationalAffordability);
+    } catch (e) {
+      console.error("Error loading beeswarm data:", e);
+      beeswarmError = "Failed to load beeswarm data";
+      beeswarmData = [];
+    } finally {
+      beeswarmLoading = false;
+    }
+  }
+
   function parseQuarterToDate(quarterValue) {
     const match = String(quarterValue ?? "").match(/^(\d{4})-Q([1-4])$/);
     if (!match) return null;
@@ -1609,7 +1694,9 @@
 
 <Section>
   <Container width="full">
-    <div class="map-wrapper">
+    <Grid width="full">
+      <div class="map-column">
+        <div class="map-wrapper">
       {#if mapStyle}
         {#if mapLoading}
           <div class="map-loading-overlay">
@@ -1762,52 +1849,81 @@
 
         </Map>
       {/if}
-    </div>
 
-    {#if selectedBoundary}
-      <div class="selection-info">
-        <p>
-          <strong>Selected:</strong>
-          {selectedBoundary.name}
-          ({selectedBoundary.type})
-          {#if selectedMsoaForSnapshot?.la_name}
-            | <strong>Parent LA:</strong> {selectedMsoaForSnapshot.la_name}
+        {#if selectedBoundary}
+          <div class="selection-info">
+            <p>
+              <strong>Selected:</strong>
+              {selectedBoundary.name}
+              ({selectedBoundary.type})
+              {#if selectedMsoaForSnapshot?.la_name}
+                | <strong>Parent LA:</strong> {selectedMsoaForSnapshot.la_name}
+              {/if}
+            </p>
+            <button on:click={clearSelection} class="clear-btn"
+              >Clear Selection</button
+            >
+          </div>
+        {/if}
+
+        <div class="map-footer">
+          <div class="map-info">
+            <strong>Map Info:</strong>
+            Zoom: {zoom ? zoom.toFixed(1) : "—"} | Lng: {center.lng
+              ? center.lng.toFixed(2)
+              : "—"} | Lat: {center.lat ? center.lat.toFixed(2) : "—"}
+            {#if hovered}
+              | Hovered: {hovered}
+            {/if}
+            {#if mapLoading}
+              | <span class="status-loading">Loading data...</span>
+            {/if}
+          </div>
+
+          {#if affordabilityData && colorBounds.length > 0}
+            <div class="legend-container">
+              <ColorLegend
+                bounds={colorBounds}
+                selectedRangeIndex={legendSelectedRange ? legendSelectedRange.index : null}
+                hoverValue={legendHoverIndicatorValue}
+                selectedValue={legendSelectedIndicatorValue}
+                on:rangehover={handleLegendRangeHover}
+                on:rangeleave={handleLegendRangeLeave}
+                on:rangeselect={handleLegendRangeSelect}
+              />
+            </div>
           {/if}
-        </p>
-        <button on:click={clearSelection} class="clear-btn"
-          >Clear Selection</button
-        >
-      </div>
-    {/if}
-
-    <div class="map-footer">
-      <div class="map-info">
-        <strong>Map Info:</strong>
-        Zoom: {zoom ? zoom.toFixed(1) : "—"} | Lng: {center.lng
-          ? center.lng.toFixed(2)
-          : "—"} | Lat: {center.lat ? center.lat.toFixed(2) : "—"}
-        {#if hovered}
-          | Hovered: {hovered}
-        {/if}
-        {#if mapLoading}
-          | <span class="status-loading">Loading data...</span>
-        {/if}
-      </div>
-
-      {#if affordabilityData && colorBounds.length > 0}
-        <div class="legend-container">
-          <ColorLegend
-            bounds={colorBounds}
-            selectedRangeIndex={legendSelectedRange ? legendSelectedRange.index : null}
-            hoverValue={legendHoverIndicatorValue}
-            selectedValue={legendSelectedIndicatorValue}
-            on:rangehover={handleLegendRangeHover}
-            on:rangeleave={handleLegendRangeLeave}
-            on:rangeselect={handleLegendRangeSelect}
-          />
         </div>
+      </div>
+
+      {#if selectedBoundary}
+        <Card title="MSOA Distribution" class="beeswarm-card">
+          {#if beeswarmLoading}
+            <p class="snapshot-status">Loading beeswarm data...</p>
+          {:else if beeswarmError}
+            <p class="snapshot-status snapshot-status--error">{beeswarmError}</p>
+          {:else if beeswarmData && beeswarmData.length > 0}
+            <div class="beeswarm-chart">
+              <ScatterChart
+                data={beeswarmData}
+                xKey="x"
+                yKey="y"
+                yAxisLabel="Affordability Ratio"
+                height={400}
+                padding={{ top: 0, right: 8, bottom: 28, left: 50 }}
+                colors={beeswarmData.map(d => 
+                  d.type === 'msoa' ? '#1570bf' : 
+                  d.type === 'region' ? '#fd7e14' : 
+                  '#e74c3c'
+                )}
+              />
+            </div>
+          {:else}
+            <p class="snapshot-status">No beeswarm data available.</p>
+          {/if}
+        </Card>
       {/if}
-    </div>
+    </Grid>
   </Container>
 </Section>
 
@@ -2038,6 +2154,22 @@
 </Section>
 
 <style>
+  .map-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .beeswarm-card {
+    flex-shrink: 0;
+  }
+
+  .beeswarm-chart {
+    width: 100%;
+    height: 400px;
+  }
+
   .error-message {
     padding: 12px 16px;
     background-color: #fef2f2;

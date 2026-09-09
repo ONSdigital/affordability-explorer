@@ -1108,13 +1108,10 @@
         laCode = selectedArea.code;
       } else if (selectedArea.type === "msoa") {
         laCode = selectedMsoaForSnapshot?.la_code;
-        if (!laCode) {
-          const laData = await loadLocalAuthorityData(propertyTypeValue, selectedMsoaForSnapshot?.la_code);
-          laCode = laData?.code;
-        }
       }
 
       if (!laCode) {
+        beeswarmError = "Could not determine Local Authority";
         beeswarmData = [];
         return;
       }

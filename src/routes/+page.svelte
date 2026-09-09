@@ -1908,14 +1908,11 @@
                 data={beeswarmData}
                 xKey="x"
                 yKey="y"
+                zKey="type"
                 yAxisLabel="Affordability Ratio"
                 height={400}
                 padding={{ top: 0, right: 8, bottom: 28, left: 50 }}
-                colors={beeswarmData.map(d => 
-                  d.type === 'msoa' ? '#1570bf' : 
-                  d.type === 'region' ? '#fd7e14' : 
-                  '#e74c3c'
-                )}
+                colors={['#1570bf', '#fd7e14', '#e74c3c']}
               />
             </div>
           {:else}

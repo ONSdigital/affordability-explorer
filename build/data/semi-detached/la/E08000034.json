@@ -3,6 +3,7 @@
   "name": "Kirklees",
   "region_code": "E12000003",
   "region_name": "Yorkshire and The Humber",
+  "latest_period": "2025-Q3",
   "msoas": [
     {
       "code": "E02002271",
@@ -11,12 +12,14 @@
         "median": {
           "price": 250000,
           "earnings": 35867,
-          "ratio": 6.97
+          "ratio": 6.97,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 210225,
           "earnings": 27387,
-          "ratio": 7.68
+          "ratio": 7.68,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -1233,12 +1236,14 @@
         "median": {
           "price": 217500,
           "earnings": 35867,
-          "ratio": 6.06
+          "ratio": 6.06,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 165000,
           "earnings": 27387,
-          "ratio": 6.02
+          "ratio": 6.02,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -2455,12 +2460,14 @@
         "median": {
           "price": 215000,
           "earnings": 35867,
-          "ratio": 5.99
+          "ratio": 5.99,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 170000,
           "earnings": 27387,
-          "ratio": 6.21
+          "ratio": 6.21,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -3677,12 +3684,14 @@
         "median": {
           "price": 234000,
           "earnings": 35867,
-          "ratio": 6.52
+          "ratio": 6.52,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 185500,
           "earnings": 27387,
-          "ratio": 6.77
+          "ratio": 6.77,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -4899,12 +4908,14 @@
         "median": {
           "price": 207000,
           "earnings": 35867,
-          "ratio": 5.77
+          "ratio": 5.77,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 175750,
           "earnings": 27387,
-          "ratio": 6.42
+          "ratio": 6.42,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -6121,12 +6132,14 @@
         "median": {
           "price": 204000,
           "earnings": 35867,
-          "ratio": 5.69
+          "ratio": 5.69,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 167322,
           "earnings": 27387,
-          "ratio": 6.11
+          "ratio": 6.11,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -7343,12 +7356,14 @@
         "median": {
           "price": 267998,
           "earnings": 35867,
-          "ratio": 7.47
+          "ratio": 7.47,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 204750,
           "earnings": 27387,
-          "ratio": 7.48
+          "ratio": 7.48,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -8565,12 +8580,14 @@
         "median": {
           "price": 185262,
           "earnings": 35867,
-          "ratio": 5.17
+          "ratio": 5.17,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 161625,
           "earnings": 27387,
-          "ratio": 5.9
+          "ratio": 5.9,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -9787,12 +9804,14 @@
         "median": {
           "price": 179000,
           "earnings": 35867,
-          "ratio": 4.99
+          "ratio": 4.99,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 150000,
           "earnings": 27387,
-          "ratio": 5.48
+          "ratio": 5.48,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -11006,16 +11025,8 @@
       "code": "E02002280",
       "name": "Batley Central",
       "affordability": {
-        "median": {
-          "price": 95000,
-          "earnings": 35867,
-          "ratio": 2.65
-        },
-        "lq": {
-          "price": 87950,
-          "earnings": 27387,
-          "ratio": 3.21
-        }
+        "median": {},
+        "lq": {}
       },
       "timeSeries": {
         "median": [
@@ -11360,6 +11371,16 @@
             "sales": 7
           },
           {
+            "quarter": "2012-Q4",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2013-Q1",
+            "price": null,
+            "sales": 3
+          },
+          {
             "quarter": "2013-Q2",
             "price": 110000,
             "sales": 5
@@ -11418,6 +11439,26 @@
             "quarter": "2016-Q1",
             "price": 130000,
             "sales": 5
+          },
+          {
+            "quarter": "2016-Q2",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2016-Q3",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2016-Q4",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2017-Q1",
+            "price": null,
+            "sales": 3
           },
           {
             "quarter": "2017-Q2",
@@ -11495,6 +11536,11 @@
             "sales": 6
           },
           {
+            "quarter": "2021-Q1",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2021-Q2",
             "price": 110000,
             "sales": 5
@@ -11525,9 +11571,39 @@
             "sales": 6
           },
           {
+            "quarter": "2022-Q4",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2023-Q1",
             "price": 149000,
             "sales": 5
+          },
+          {
+            "quarter": "2023-Q2",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2023-Q3",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2023-Q4",
+            "price": null,
+            "sales": 1
+          },
+          {
+            "quarter": "2024-Q1",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2024-Q2",
+            "price": null,
+            "sales": 3
           },
           {
             "quarter": "2024-Q3",
@@ -11548,6 +11624,11 @@
             "quarter": "2025-Q2",
             "price": 95000,
             "sales": 5
+          },
+          {
+            "quarter": "2025-Q3",
+            "price": null,
+            "sales": 4
           }
         ],
         "lq": [
@@ -11892,6 +11973,16 @@
             "sales": 7
           },
           {
+            "quarter": "2012-Q4",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2013-Q1",
+            "price": null,
+            "sales": 3
+          },
+          {
             "quarter": "2013-Q2",
             "price": 81000,
             "sales": 5
@@ -11950,6 +12041,26 @@
             "quarter": "2016-Q1",
             "price": 120000,
             "sales": 5
+          },
+          {
+            "quarter": "2016-Q2",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2016-Q3",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2016-Q4",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2017-Q1",
+            "price": null,
+            "sales": 3
           },
           {
             "quarter": "2017-Q2",
@@ -12027,6 +12138,11 @@
             "sales": 6
           },
           {
+            "quarter": "2021-Q1",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2021-Q2",
             "price": 65000,
             "sales": 5
@@ -12057,9 +12173,39 @@
             "sales": 6
           },
           {
+            "quarter": "2022-Q4",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2023-Q1",
             "price": 145000,
             "sales": 5
+          },
+          {
+            "quarter": "2023-Q2",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2023-Q3",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2023-Q4",
+            "price": null,
+            "sales": 1
+          },
+          {
+            "quarter": "2024-Q1",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2024-Q2",
+            "price": null,
+            "sales": 3
           },
           {
             "quarter": "2024-Q3",
@@ -12080,6 +12226,11 @@
             "quarter": "2025-Q2",
             "price": 87950,
             "sales": 5
+          },
+          {
+            "quarter": "2025-Q3",
+            "price": null,
+            "sales": 4
           }
         ]
       }
@@ -12091,12 +12242,14 @@
         "median": {
           "price": 185000,
           "earnings": 35867,
-          "ratio": 5.16
+          "ratio": 5.16,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 164000,
           "earnings": 27387,
-          "ratio": 5.99
+          "ratio": 5.99,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -13313,12 +13466,14 @@
         "median": {
           "price": 165000,
           "earnings": 35867,
-          "ratio": 4.6
+          "ratio": 4.6,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 148750,
           "earnings": 27387,
-          "ratio": 5.43
+          "ratio": 5.43,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -14535,12 +14690,14 @@
         "median": {
           "price": 164000,
           "earnings": 35867,
-          "ratio": 4.57
+          "ratio": 4.57,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 140000,
           "earnings": 27387,
-          "ratio": 5.11
+          "ratio": 5.11,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -14876,6 +15033,11 @@
             "sales": 5
           },
           {
+            "quarter": "2012-Q2",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2012-Q3",
             "price": 118000,
             "sales": 5
@@ -14904,6 +15066,11 @@
             "quarter": "2013-Q4",
             "price": 120000,
             "sales": 5
+          },
+          {
+            "quarter": "2014-Q1",
+            "price": null,
+            "sales": 4
           },
           {
             "quarter": "2014-Q2",
@@ -15468,6 +15635,11 @@
             "sales": 5
           },
           {
+            "quarter": "2012-Q2",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2012-Q3",
             "price": 117000,
             "sales": 5
@@ -15496,6 +15668,11 @@
             "quarter": "2013-Q4",
             "price": 91000,
             "sales": 5
+          },
+          {
+            "quarter": "2014-Q1",
+            "price": null,
+            "sales": 4
           },
           {
             "quarter": "2014-Q2",
@@ -15737,12 +15914,14 @@
         "median": {
           "price": 220000,
           "earnings": 35867,
-          "ratio": 6.13
+          "ratio": 6.13,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 187999,
           "earnings": 27387,
-          "ratio": 6.86
+          "ratio": 6.86,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -16959,12 +17138,14 @@
         "median": {
           "price": 242000,
           "earnings": 35867,
-          "ratio": 6.75
+          "ratio": 6.75,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 195000,
           "earnings": 27387,
-          "ratio": 7.12
+          "ratio": 7.12,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -18181,12 +18362,14 @@
         "median": {
           "price": 160438,
           "earnings": 35867,
-          "ratio": 4.47
+          "ratio": 4.47,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 141250,
           "earnings": 27387,
-          "ratio": 5.16
+          "ratio": 5.16,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -19403,12 +19586,14 @@
         "median": {
           "price": 185000,
           "earnings": 35867,
-          "ratio": 5.16
+          "ratio": 5.16,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 128438,
           "earnings": 27387,
-          "ratio": 4.69
+          "ratio": 4.69,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -19969,9 +20154,29 @@
             "sales": 9
           },
           {
+            "quarter": "2023-Q3",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2023-Q4",
             "price": 235000,
             "sales": 5
+          },
+          {
+            "quarter": "2024-Q1",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2024-Q2",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2024-Q3",
+            "price": null,
+            "sales": 4
           },
           {
             "quarter": "2024-Q4",
@@ -20551,9 +20756,29 @@
             "sales": 9
           },
           {
+            "quarter": "2023-Q3",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2023-Q4",
             "price": 225000,
             "sales": 5
+          },
+          {
+            "quarter": "2024-Q1",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2024-Q2",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2024-Q3",
+            "price": null,
+            "sales": 4
           },
           {
             "quarter": "2024-Q4",
@@ -20585,12 +20810,14 @@
         "median": {
           "price": 195000,
           "earnings": 35867,
-          "ratio": 5.44
+          "ratio": 5.44,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 150000,
           "earnings": 27387,
-          "ratio": 5.48
+          "ratio": 5.48,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -21807,12 +22034,14 @@
         "median": {
           "price": 180000,
           "earnings": 35867,
-          "ratio": 5.02
+          "ratio": 5.02,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 166500,
           "earnings": 27387,
-          "ratio": 6.08
+          "ratio": 6.08,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -23029,12 +23258,14 @@
         "median": {
           "price": 249000,
           "earnings": 35867,
-          "ratio": 6.94
+          "ratio": 6.94,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 215000,
           "earnings": 27387,
-          "ratio": 7.85
+          "ratio": 7.85,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -24251,12 +24482,14 @@
         "median": {
           "price": 235000,
           "earnings": 35867,
-          "ratio": 6.55
+          "ratio": 6.55,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 197500,
           "earnings": 27387,
-          "ratio": 7.21
+          "ratio": 7.21,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -25473,12 +25706,14 @@
         "median": {
           "price": 170000,
           "earnings": 35867,
-          "ratio": 4.74
+          "ratio": 4.74,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 136500,
           "earnings": 27387,
-          "ratio": 4.98
+          "ratio": 4.98,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -26695,12 +26930,14 @@
         "median": {
           "price": 153500,
           "earnings": 35867,
-          "ratio": 4.28
+          "ratio": 4.28,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 107000,
           "earnings": 27387,
-          "ratio": 3.91
+          "ratio": 3.91,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -27917,12 +28154,14 @@
         "median": {
           "price": 159000,
           "earnings": 35867,
-          "ratio": 4.43
+          "ratio": 4.43,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 140000,
           "earnings": 27387,
-          "ratio": 5.11
+          "ratio": 5.11,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -29139,12 +29378,14 @@
         "median": {
           "price": 156750,
           "earnings": 35867,
-          "ratio": 4.37
+          "ratio": 4.37,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 135000,
           "earnings": 27387,
-          "ratio": 4.93
+          "ratio": 4.93,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -30361,12 +30602,14 @@
         "median": {
           "price": 235000,
           "earnings": 35867,
-          "ratio": 6.55
+          "ratio": 6.55,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 199765,
           "earnings": 27387,
-          "ratio": 7.29
+          "ratio": 7.29,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -31583,12 +31826,14 @@
         "median": {
           "price": 175000,
           "earnings": 35867,
-          "ratio": 4.88
+          "ratio": 4.88,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 155625,
           "earnings": 27387,
-          "ratio": 5.68
+          "ratio": 5.68,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -32805,12 +33050,14 @@
         "median": {
           "price": 180000,
           "earnings": 35867,
-          "ratio": 5.02
+          "ratio": 5.02,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 145000,
           "earnings": 27387,
-          "ratio": 5.29
+          "ratio": 5.29,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -34027,12 +34274,14 @@
         "median": {
           "price": 226848,
           "earnings": 35867,
-          "ratio": 6.32
+          "ratio": 6.32,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 167499,
           "earnings": 27387,
-          "ratio": 6.12
+          "ratio": 6.12,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -35249,12 +35498,14 @@
         "median": {
           "price": 255000,
           "earnings": 35867,
-          "ratio": 7.11
+          "ratio": 7.11,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 235000,
           "earnings": 27387,
-          "ratio": 8.58
+          "ratio": 8.58,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -36468,16 +36719,8 @@
       "code": "E02002301",
       "name": "Birkby",
       "affordability": {
-        "median": {
-          "price": 180000,
-          "earnings": 35867,
-          "ratio": 5.02
-        },
-        "lq": {
-          "price": 150000,
-          "earnings": 27387,
-          "ratio": 5.48
-        }
+        "median": {},
+        "lq": {}
       },
       "timeSeries": {
         "median": [
@@ -36862,6 +37105,16 @@
             "sales": 5
           },
           {
+            "quarter": "2014-Q4",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2015-Q1",
+            "price": null,
+            "sales": 2
+          },
+          {
             "quarter": "2015-Q2",
             "price": 130000,
             "sales": 5
@@ -36967,9 +37220,19 @@
             "sales": 7
           },
           {
+            "quarter": "2020-Q3",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2020-Q4",
             "price": 143500,
             "sales": 5
+          },
+          {
+            "quarter": "2021-Q1",
+            "price": null,
+            "sales": 4
           },
           {
             "quarter": "2021-Q2",
@@ -37055,6 +37318,11 @@
             "quarter": "2025-Q2",
             "price": 180000,
             "sales": 5
+          },
+          {
+            "quarter": "2025-Q3",
+            "price": null,
+            "sales": 2
           }
         ],
         "lq": [
@@ -37439,6 +37707,16 @@
             "sales": 5
           },
           {
+            "quarter": "2014-Q4",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2015-Q1",
+            "price": null,
+            "sales": 2
+          },
+          {
             "quarter": "2015-Q2",
             "price": 100000,
             "sales": 5
@@ -37544,9 +37822,19 @@
             "sales": 7
           },
           {
+            "quarter": "2020-Q3",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2020-Q4",
             "price": 134000,
             "sales": 5
+          },
+          {
+            "quarter": "2021-Q1",
+            "price": null,
+            "sales": 4
           },
           {
             "quarter": "2021-Q2",
@@ -37632,6 +37920,11 @@
             "quarter": "2025-Q2",
             "price": 150000,
             "sales": 5
+          },
+          {
+            "quarter": "2025-Q3",
+            "price": null,
+            "sales": 2
           }
         ]
       }
@@ -37643,12 +37936,14 @@
         "median": {
           "price": 220000,
           "earnings": 35867,
-          "ratio": 6.13
+          "ratio": 6.13,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 182250,
           "earnings": 27387,
-          "ratio": 6.65
+          "ratio": 6.65,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -38865,12 +39160,14 @@
         "median": {
           "price": 220000,
           "earnings": 35867,
-          "ratio": 6.13
+          "ratio": 6.13,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 185000,
           "earnings": 27387,
-          "ratio": 6.76
+          "ratio": 6.76,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -40087,12 +40384,14 @@
         "median": {
           "price": 215000,
           "earnings": 35867,
-          "ratio": 5.99
+          "ratio": 5.99,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 164000,
           "earnings": 27387,
-          "ratio": 5.99
+          "ratio": 5.99,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -41309,12 +41608,14 @@
         "median": {
           "price": 171000,
           "earnings": 35867,
-          "ratio": 4.77
+          "ratio": 4.77,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 156000,
           "earnings": 27387,
-          "ratio": 5.7
+          "ratio": 5.7,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -42531,12 +42832,14 @@
         "median": {
           "price": 215000,
           "earnings": 35867,
-          "ratio": 5.99
+          "ratio": 5.99,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 187000,
           "earnings": 27387,
-          "ratio": 6.83
+          "ratio": 6.83,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -43753,12 +44056,14 @@
         "median": {
           "price": 188500,
           "earnings": 35867,
-          "ratio": 5.26
+          "ratio": 5.26,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 174375,
           "earnings": 27387,
-          "ratio": 6.37
+          "ratio": 6.37,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -44975,12 +45280,14 @@
         "median": {
           "price": 225000,
           "earnings": 35867,
-          "ratio": 6.27
+          "ratio": 6.27,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 190000,
           "earnings": 27387,
-          "ratio": 6.94
+          "ratio": 6.94,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -46197,12 +46504,14 @@
         "median": {
           "price": 207750,
           "earnings": 35867,
-          "ratio": 5.79
+          "ratio": 5.79,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 183125,
           "earnings": 27387,
-          "ratio": 6.69
+          "ratio": 6.69,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -47419,12 +47728,14 @@
         "median": {
           "price": 180000,
           "earnings": 35867,
-          "ratio": 5.02
+          "ratio": 5.02,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 151250,
           "earnings": 27387,
-          "ratio": 5.52
+          "ratio": 5.52,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -48641,12 +48952,14 @@
         "median": {
           "price": 185250,
           "earnings": 35867,
-          "ratio": 5.16
+          "ratio": 5.16,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 168912,
           "earnings": 27387,
-          "ratio": 6.17
+          "ratio": 6.17,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -49863,12 +50176,14 @@
         "median": {
           "price": 225000,
           "earnings": 35867,
-          "ratio": 6.27
+          "ratio": 6.27,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 160500,
           "earnings": 27387,
-          "ratio": 5.86
+          "ratio": 5.86,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -51085,12 +51400,14 @@
         "median": {
           "price": 132000,
           "earnings": 35867,
-          "ratio": 3.68
+          "ratio": 3.68,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 120000,
           "earnings": 27387,
-          "ratio": 4.38
+          "ratio": 4.38,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -51431,6 +51748,26 @@
             "sales": 10
           },
           {
+            "quarter": "2012-Q3",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2012-Q4",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2013-Q1",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2013-Q2",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2013-Q3",
             "price": 76000,
             "sales": 5
@@ -51439,6 +51776,16 @@
             "quarter": "2013-Q4",
             "price": 81750,
             "sales": 6
+          },
+          {
+            "quarter": "2014-Q1",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2014-Q2",
+            "price": null,
+            "sales": 4
           },
           {
             "quarter": "2014-Q3",
@@ -51526,6 +51873,21 @@
             "sales": 8
           },
           {
+            "quarter": "2018-Q4",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2019-Q1",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2019-Q2",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2019-Q3",
             "price": 136500,
             "sales": 7
@@ -51554,6 +51916,11 @@
             "quarter": "2020-Q4",
             "price": 111640,
             "sales": 5
+          },
+          {
+            "quarter": "2021-Q1",
+            "price": null,
+            "sales": 3
           },
           {
             "quarter": "2021-Q2",
@@ -51604,6 +51971,36 @@
             "quarter": "2023-Q3",
             "price": 131000,
             "sales": 6
+          },
+          {
+            "quarter": "2023-Q4",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2024-Q1",
+            "price": null,
+            "sales": 1
+          },
+          {
+            "quarter": "2024-Q2",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2024-Q3",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2024-Q4",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2025-Q1",
+            "price": null,
+            "sales": 3
           },
           {
             "quarter": "2025-Q2",
@@ -51953,6 +52350,26 @@
             "sales": 10
           },
           {
+            "quarter": "2012-Q3",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2012-Q4",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2013-Q1",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2013-Q2",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2013-Q3",
             "price": 76000,
             "sales": 5
@@ -51961,6 +52378,16 @@
             "quarter": "2013-Q4",
             "price": 76000,
             "sales": 6
+          },
+          {
+            "quarter": "2014-Q1",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2014-Q2",
+            "price": null,
+            "sales": 4
           },
           {
             "quarter": "2014-Q3",
@@ -52048,6 +52475,21 @@
             "sales": 8
           },
           {
+            "quarter": "2018-Q4",
+            "price": null,
+            "sales": 4
+          },
+          {
+            "quarter": "2019-Q1",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2019-Q2",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2019-Q3",
             "price": 79000,
             "sales": 7
@@ -52076,6 +52518,11 @@
             "quarter": "2020-Q4",
             "price": 85000,
             "sales": 5
+          },
+          {
+            "quarter": "2021-Q1",
+            "price": null,
+            "sales": 3
           },
           {
             "quarter": "2021-Q2",
@@ -52128,6 +52575,36 @@
             "sales": 6
           },
           {
+            "quarter": "2023-Q4",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2024-Q1",
+            "price": null,
+            "sales": 1
+          },
+          {
+            "quarter": "2024-Q2",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2024-Q3",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2024-Q4",
+            "price": null,
+            "sales": 3
+          },
+          {
+            "quarter": "2025-Q1",
+            "price": null,
+            "sales": 3
+          },
+          {
             "quarter": "2025-Q2",
             "price": 120000,
             "sales": 5
@@ -52147,12 +52624,14 @@
         "median": {
           "price": 232500,
           "earnings": 35867,
-          "ratio": 6.48
+          "ratio": 6.48,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 165250,
           "earnings": 27387,
-          "ratio": 6.03
+          "ratio": 6.03,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -53369,12 +53848,14 @@
         "median": {
           "price": 170000,
           "earnings": 35867,
-          "ratio": 4.74
+          "ratio": 4.74,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 145000,
           "earnings": 27387,
-          "ratio": 5.29
+          "ratio": 5.29,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -53743,6 +54224,11 @@
             "quarter": "2013-Q4",
             "price": 136000,
             "sales": 6
+          },
+          {
+            "quarter": "2014-Q1",
+            "price": null,
+            "sales": 4
           },
           {
             "quarter": "2014-Q2",
@@ -54342,6 +54828,11 @@
             "sales": 6
           },
           {
+            "quarter": "2014-Q1",
+            "price": null,
+            "sales": 4
+          },
+          {
             "quarter": "2014-Q2",
             "price": 122000,
             "sales": 9
@@ -54581,12 +55072,14 @@
         "median": {
           "price": 227500,
           "earnings": 35867,
-          "ratio": 6.34
+          "ratio": 6.34,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 199000,
           "earnings": 27387,
-          "ratio": 7.27
+          "ratio": 7.27,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -55803,12 +56296,14 @@
         "median": {
           "price": 197000,
           "earnings": 35867,
-          "ratio": 5.49
+          "ratio": 5.49,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 155000,
           "earnings": 27387,
-          "ratio": 5.66
+          "ratio": 5.66,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -57025,12 +57520,14 @@
         "median": {
           "price": 162500,
           "earnings": 35867,
-          "ratio": 4.53
+          "ratio": 4.53,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 132250,
           "earnings": 27387,
-          "ratio": 4.83
+          "ratio": 4.83,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -58247,12 +58744,14 @@
         "median": {
           "price": 250000,
           "earnings": 35867,
-          "ratio": 6.97
+          "ratio": 6.97,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 219008,
           "earnings": 27387,
-          "ratio": 8
+          "ratio": 8,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -59469,12 +59968,14 @@
         "median": {
           "price": 232500,
           "earnings": 35867,
-          "ratio": 6.48
+          "ratio": 6.48,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 200000,
           "earnings": 27387,
-          "ratio": 7.3
+          "ratio": 7.3,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -60691,12 +61192,14 @@
         "median": {
           "price": 260000,
           "earnings": 35867,
-          "ratio": 7.25
+          "ratio": 7.25,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 223000,
           "earnings": 27387,
-          "ratio": 8.14
+          "ratio": 8.14,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -61913,12 +62416,14 @@
         "median": {
           "price": 280000,
           "earnings": 35867,
-          "ratio": 7.81
+          "ratio": 7.81,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 190000,
           "earnings": 27387,
-          "ratio": 6.94
+          "ratio": 6.94,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -63135,12 +63640,14 @@
         "median": {
           "price": 257000,
           "earnings": 35867,
-          "ratio": 7.17
+          "ratio": 7.17,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 203750,
           "earnings": 27387,
-          "ratio": 7.44
+          "ratio": 7.44,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -64357,12 +64864,14 @@
         "median": {
           "price": 229975,
           "earnings": 35867,
-          "ratio": 6.41
+          "ratio": 6.41,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 210000,
           "earnings": 27387,
-          "ratio": 7.67
+          "ratio": 7.67,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -65579,12 +66088,14 @@
         "median": {
           "price": 261250,
           "earnings": 35867,
-          "ratio": 7.28
+          "ratio": 7.28,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 217750,
           "earnings": 27387,
-          "ratio": 7.95
+          "ratio": 7.95,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -66801,12 +67312,14 @@
         "median": {
           "price": 254750,
           "earnings": 35867,
-          "ratio": 7.1
+          "ratio": 7.1,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 224750,
           "earnings": 27387,
-          "ratio": 8.21
+          "ratio": 8.21,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -68023,12 +68536,14 @@
         "median": {
           "price": 237750,
           "earnings": 35867,
-          "ratio": 6.63
+          "ratio": 6.63,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 198500,
           "earnings": 27387,
-          "ratio": 7.25
+          "ratio": 7.25,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -69245,12 +69760,14 @@
         "median": {
           "price": 296500,
           "earnings": 35867,
-          "ratio": 8.27
+          "ratio": 8.27,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 252500,
           "earnings": 27387,
-          "ratio": 9.22
+          "ratio": 9.22,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -70467,12 +70984,14 @@
         "median": {
           "price": 285000,
           "earnings": 35867,
-          "ratio": 7.95
+          "ratio": 7.95,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 240000,
           "earnings": 27387,
-          "ratio": 8.76
+          "ratio": 8.76,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -72891,14 +73410,16 @@
   },
   "affordability": {
     "median": {
-      "price": 209238,
+      "price": 211755,
       "earnings": 35867,
-      "ratio": 5.83
+      "ratio": 5.9,
+      "period": "2025-Q3"
     },
     "lq": {
-      "price": 174273,
+      "price": 176213,
       "earnings": 27387,
-      "ratio": 6.36
+      "ratio": 6.43,
+      "period": "2025-Q3"
     }
   }
 }

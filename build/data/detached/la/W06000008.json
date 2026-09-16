@@ -3,6 +3,7 @@
   "name": "Ceredigion",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "latest_period": "2025-Q3",
   "msoas": [
     {
       "code": "W02000116",
@@ -11,12 +12,14 @@
         "median": {
           "price": 280000,
           "earnings": 33299,
-          "ratio": 8.41
+          "ratio": 8.41,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 243000,
           "earnings": 27201,
-          "ratio": 8.93
+          "ratio": 8.93,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -1230,16 +1233,8 @@
       "code": "W02000117",
       "name": "Aberystwyth North",
       "affordability": {
-        "median": {
-          "price": 302500,
-          "earnings": 33299,
-          "ratio": 9.08
-        },
-        "lq": {
-          "price": 215000,
-          "earnings": 27201,
-          "ratio": 7.9
-        }
+        "median": {},
+        "lq": {}
       },
       "timeSeries": {
         "median": [
@@ -1574,6 +1569,11 @@
             "sales": 5
           },
           {
+            "quarter": "2012-Q2",
+            "price": null,
+            "sales": 3
+          },
+          {
             "quarter": "2012-Q3",
             "price": 300000,
             "sales": 8
@@ -1799,6 +1799,11 @@
             "sales": 7
           },
           {
+            "quarter": "2023-Q4",
+            "price": null,
+            "sales": 3
+          },
+          {
             "quarter": "2024-Q1",
             "price": 347500,
             "sales": 6
@@ -1822,6 +1827,16 @@
             "quarter": "2025-Q1",
             "price": 302500,
             "sales": 6
+          },
+          {
+            "quarter": "2025-Q2",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2025-Q3",
+            "price": null,
+            "sales": 3
           }
         ],
         "lq": [
@@ -2156,6 +2171,11 @@
             "sales": 5
           },
           {
+            "quarter": "2012-Q2",
+            "price": null,
+            "sales": 3
+          },
+          {
             "quarter": "2012-Q3",
             "price": 237500,
             "sales": 8
@@ -2381,6 +2401,11 @@
             "sales": 7
           },
           {
+            "quarter": "2023-Q4",
+            "price": null,
+            "sales": 3
+          },
+          {
             "quarter": "2024-Q1",
             "price": 327500,
             "sales": 6
@@ -2404,6 +2429,16 @@
             "quarter": "2025-Q1",
             "price": 215000,
             "sales": 6
+          },
+          {
+            "quarter": "2025-Q2",
+            "price": null,
+            "sales": 2
+          },
+          {
+            "quarter": "2025-Q3",
+            "price": null,
+            "sales": 3
           }
         ]
       }
@@ -2415,12 +2450,14 @@
         "median": {
           "price": 355000,
           "earnings": 33299,
-          "ratio": 10.66
+          "ratio": 10.66,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 314750,
           "earnings": 27201,
-          "ratio": 11.57
+          "ratio": 11.57,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -3637,12 +3674,14 @@
         "median": {
           "price": 291000,
           "earnings": 33299,
-          "ratio": 8.74
+          "ratio": 8.74,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 216250,
           "earnings": 27201,
-          "ratio": 7.95
+          "ratio": 7.95,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -4859,12 +4898,14 @@
         "median": {
           "price": 315000,
           "earnings": 33299,
-          "ratio": 9.46
+          "ratio": 9.46,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 242000,
           "earnings": 27201,
-          "ratio": 8.9
+          "ratio": 8.9,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -6081,12 +6122,14 @@
         "median": {
           "price": 284500,
           "earnings": 33299,
-          "ratio": 8.54
+          "ratio": 8.54,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 222354,
           "earnings": 27201,
-          "ratio": 8.17
+          "ratio": 8.17,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -7303,12 +7346,14 @@
         "median": {
           "price": 331000,
           "earnings": 33299,
-          "ratio": 9.94
+          "ratio": 9.94,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 247500,
           "earnings": 27201,
-          "ratio": 9.1
+          "ratio": 9.1,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -8525,12 +8570,14 @@
         "median": {
           "price": 270000,
           "earnings": 33299,
-          "ratio": 8.11
+          "ratio": 8.11,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 220000,
           "earnings": 27201,
-          "ratio": 8.09
+          "ratio": 8.09,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -9747,12 +9794,14 @@
         "median": {
           "price": 280000,
           "earnings": 33299,
-          "ratio": 8.41
+          "ratio": 8.41,
+          "period": "2025-Q3"
         },
         "lq": {
           "price": 225000,
           "earnings": 27201,
-          "ratio": 8.27
+          "ratio": 8.27,
+          "period": "2025-Q3"
         }
       },
       "timeSeries": {
@@ -12171,14 +12220,16 @@
   },
   "affordability": {
     "median": {
-      "price": 301000,
+      "price": 300813,
       "earnings": 33299,
-      "ratio": 9.04
+      "ratio": 9.03,
+      "period": "2025-Q3"
     },
     "lq": {
-      "price": 238428,
+      "price": 241357,
       "earnings": 27201,
-      "ratio": 8.77
+      "ratio": 8.87,
+      "period": "2025-Q3"
     }
   }
 }

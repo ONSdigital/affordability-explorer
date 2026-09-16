@@ -30,6 +30,14 @@
       "type": "vector",
       "tiles": ["https://cdn.ons.gov.uk/maptiles/osm/v2/{z}/{x}/{y}.pbf"],
       "maxzoom":14
+    },
+    "mask-raster": {
+      "type": "raster",
+      "tiles": ["https://cdn.ons.gov.uk/maptiles/buildingmask/{z}/{x}/{y}.png"],
+      "tileSize": 256,
+      "maxzoom": 14,
+      "bounds": [-9, 47, 4, 61],
+      "attribution": "&copy; Ordnance Survey"
     }
   },
   "sprite": "https://cdn.ons.gov.uk/maptiles/osm/spritesv1/sprite",
@@ -40,6 +48,23 @@
       "type": "background",
       "paint": {
         "background-color": "rgb(242,243,240)"
+      }
+    },
+    {
+      "id": "mask-raster",
+      "type": "raster",
+      "source": "mask-raster",
+      "paint": {
+        "raster-brightness-max": 0.95,
+        "raster-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          10,
+          0,
+          11,
+          0.25
+        ]
       }
     },
     {

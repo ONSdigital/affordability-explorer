@@ -103,13 +103,13 @@ function readSheet(filePath, sheetName) {
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
-    return {};
+    return { areas: {}, latestPeriod: null };
   }
   
   const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
   const headerRowIdx = findHeaderRow(sheet, range, 2, 'MSOA code');
 
-  if (headerRowIdx === -1) return {};
+  if (headerRowIdx === -1) return { areas: {}, latestPeriod: null };
 
   const quarters = readQuarterColumns(sheet, range, headerRowIdx);
   
@@ -143,7 +143,10 @@ function readSheet(filePath, sheetName) {
     }
   }
   
-  return result;
+  return {
+    areas: result,
+    latestPeriod: quarters.at(-1)?.quarter ?? null
+  };
 }
 
 /**
@@ -154,14 +157,14 @@ function readAdministrativeSheet(filePath, sheetName) {
   const sheet = workbook.Sheets[sheetName];
 
   if (!sheet) {
-    return {};
+    return { areas: {}, latestPeriod: null };
   }
 
   const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
   const headerRowIdx = findHeaderRow(sheet, range, 2, 'Local authority code');
 
   if (headerRowIdx === -1) {
-    return {};
+    return { areas: {}, latestPeriod: null };
   }
 
   const quarters = readQuarterColumns(sheet, range, headerRowIdx);
@@ -195,7 +198,24 @@ function readAdministrativeSheet(filePath, sheetName) {
     }
   }
 
-  return result;
+  return {
+    areas: result,
+    latestPeriod: quarters.at(-1)?.quarter ?? null
+  };
+}
+
+function mergePriceAndSalesSeries(priceSeries, salesSeries) {
+  const pricesByQuarter = new Map(priceSeries.map(point => [point.quarter, point.value]));
+  const salesByQuarter = new Map(salesSeries.map(point => [point.quarter, point.value]));
+  const quarters = new Set([...pricesByQuarter.keys(), ...salesByQuarter.keys()]);
+
+  return Array.from(quarters)
+    .sort()
+    .map(quarter => ({
+      quarter,
+      price: pricesByQuarter.get(quarter) ?? null,
+      sales: salesByQuarter.get(quarter) ?? null
+    }));
 }
 
 async function processPropertyType(propType, sheetLetter) {
@@ -212,17 +232,20 @@ async function processPropertyType(propType, sheetLetter) {
   // Read all three files
   console.log('Reading median prices...');
   let startTime = Date.now();
-  const medianData = readSheet(path.join(DATA_DIR, 'medianpricepaidmsoa.xlsx'), sheetName);
+  const medianResult = readSheet(path.join(DATA_DIR, 'medianpricepaidmsoa.xlsx'), sheetName);
+  const medianData = medianResult.areas;
   console.log(`  ${Object.keys(medianData).length} MSOAs (${Math.round((Date.now() - startTime) / 1000)}s)`);
   
   console.log('Reading LQ prices...');
   startTime = Date.now();
-  const lqData = readSheet(path.join(DATA_DIR, 'lowerquartilepricepaidmsoa.xlsx'), sheetName);
+  const lqResult = readSheet(path.join(DATA_DIR, 'lowerquartilepricepaidmsoa.xlsx'), sheetName);
+  const lqData = lqResult.areas;
   console.log(`  (${Math.round((Date.now() - startTime) / 1000)}s)`);
   
   console.log('Reading sales...');
   startTime = Date.now();
-  const salesData = readSheet(path.join(DATA_DIR, 'salesmsoa.xlsx'), sheetName);
+  const salesResult = readSheet(path.join(DATA_DIR, 'salesmsoa.xlsx'), sheetName);
+  const salesData = salesResult.areas;
   console.log(`  (${Math.round((Date.now() - startTime) / 1000)}s)`);
 
   // Read LA-level administrative geography time series
@@ -230,24 +253,38 @@ async function processPropertyType(propType, sheetLetter) {
 
   console.log(`Reading LA median prices (table ${adminSheetName})...`);
   startTime = Date.now();
-  const laMedianData = readAdministrativeSheet(
+  const laMedianResult = readAdministrativeSheet(
     path.join(DATA_DIR, 'medianpricepaidforadministrativegeographies.xlsx'),
     adminSheetName
   );
+  const laMedianData = laMedianResult.areas;
   console.log(`  ${Object.keys(laMedianData).length} LAs (${Math.round((Date.now() - startTime) / 1000)}s)`);
 
   console.log(`Reading LA LQ prices (table ${adminSheetName})...`);
   startTime = Date.now();
-  const laLqData = readAdministrativeSheet(
+  const laLqResult = readAdministrativeSheet(
     path.join(DATA_DIR, 'lowerquartilepricepaidforadministrativegeographies.xlsx'),
     adminSheetName
   );
+  const laLqData = laLqResult.areas;
   console.log(`  ${Object.keys(laLqData).length} LAs (${Math.round((Date.now() - startTime) / 1000)}s)`);
   
   // Organize by LA
   console.log('Organizing by LA...');
   startTime = Date.now();
   const laMap = {};
+  const latestPeriods = [
+    medianResult.latestPeriod,
+    lqResult.latestPeriod,
+    salesResult.latestPeriod,
+    laMedianResult.latestPeriod,
+    laLqResult.latestPeriod
+  ].filter(Boolean);
+  const latestPeriod = latestPeriods[0] ?? null;
+
+  if (latestPeriods.some(period => period !== latestPeriod)) {
+    throw new Error(`Source files have inconsistent latest periods for ${propType}: ${latestPeriods.join(', ')}`);
+  }
   
   for (const msoaCode in medianData) {
     const msoa = medianData[msoaCode];
@@ -264,6 +301,7 @@ async function processPropertyType(propType, sheetLetter) {
         name: laName,
         region_code: regionCode,
         region_name: regionName,
+        latest_period: latestPeriod,
         msoas: [],
         timeSeries: {
           median: laMedianSeries.map(point => ({
@@ -284,16 +322,8 @@ async function processPropertyType(propType, sheetLetter) {
     const lqTS = lqData[msoaCode]?.data || [];
     const salesTS = salesData[msoaCode]?.data || [];
     
-    // Merge time series with sales
-    const medianWithSales = medianTS.map(p => {
-      const s = salesTS.find(s => s.quarter === p.quarter);
-      return { quarter: p.quarter, price: p.value, sales: s?.value || null };
-    });
-    
-    const lqWithSales = lqTS.map(p => {
-      const s = salesTS.find(s => s.quarter === p.quarter);
-      return { quarter: p.quarter, price: p.value, sales: s?.value || null };
-    });
+    const medianWithSales = mergePriceAndSalesSeries(medianTS, salesTS);
+    const lqWithSales = mergePriceAndSalesSeries(lqTS, salesTS);
     
     laMap[laCode].msoas.push({
       code: msoaCode,

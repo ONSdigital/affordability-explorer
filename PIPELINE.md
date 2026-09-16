@@ -76,7 +76,7 @@ Computes affordability ratios for each property type:
 ### 3. Map & National Files
 **Script**: `scripts/generate-final-files.js`
 
-- **msoas-latest.json** - Extract latest data for all MSOAs (for map layer)
+- **msoas-latest.json** - Extract data for the dataset's latest period for all MSOAs
 - **england.json** - Aggregate affordability for all England LAs
 - **wales.json** - Aggregate affordability for all Wales LAs
 - **Shared geography files** - Creates single authorities.json and regions.json in geography/ folder
@@ -129,7 +129,7 @@ Located in `static/data/geography/` (shared across all property types):
 
 ## Time Series Data
 
-- **Duration**: 119 quarters (1995-Q4 to 2025-Q2)
+- **Duration**: Determined by the period columns in the source workbooks
 - **Resolution**: Quarterly (Jan-Mar=Q1, Apr-Jun=Q2, Jul-Sep=Q3, Oct-Dec=Q4)
 - **Metrics**: House price + sales count per quarter per MSOA
 - **Availability**: Same for all property types except flats (starts 2005-Q2 due to data availability)
@@ -226,7 +226,7 @@ node scripts/generate-final-files.js
 
 ### Time Series
 - Earliest: 1995-Q4
-- Latest: 2025-Q2
+- Latest: Read from the rightmost period in the source workbooks
 - Flats start later (2005-Q2)
 - Monthly data converted to quarterly
 
@@ -234,6 +234,7 @@ node scripts/generate-final-files.js
 - Small LAs may have limited MSOA data
 - Some property types may have fewer sales records historically
 - Earnings data is annual (applied to all quarters for that year)
+- A missing value in the latest source period remains missing. The pipeline does not substitute an older observation in `msoas-latest.json`, affordability summaries, maps, or selected-area charts.
 
 ## Architecture Decisions
 

@@ -15,10 +15,10 @@ function withBase(path) {
 
 /**
  * Load and cache TopoJSON data
- * @param {string} topoPath - Path to TopoJSON file (default: '/master-topo.json')
+ * @param {string} topoPath - Path to the local authority TopoJSON file
  * @returns {object|null} Loaded TopoJSON data or null if error
  */
-export async function loadTopoJSON(topoPath = withBase("/master-topo.json")) {
+export async function loadTopoJSON(topoPath = withBase("/ltla2025.json")) {
   if (topoData) return topoData;
 
   try {
@@ -703,7 +703,7 @@ export async function getMSOAByPostcode(postcode, msoas) {
 /**
  * Search for places including LTLAs and MSOAs
  * @param {string} query - Search query
- * @param {array} allAreaNames - LTLA names from master-topo
+ * @param {array} allAreaNames - LTLA names from the local authority TopoJSON
  * @param {object} msoas - MSOA data (code -> {name, la_code, ...})
  * @returns {array} Array of search results
  */
@@ -713,7 +713,7 @@ export async function searchPlaces(query, allAreaNames = [], msoas = {}) {
   const queryLower = query.toLowerCase();
   const results = [];
 
-  // Search LTLA names (from master-topo)
+  // Search LTLA names from the local authority TopoJSON
   const areaMatches = allAreaNames.filter((name) =>
     name.toLowerCase().includes(queryLower),
   );
@@ -773,7 +773,7 @@ export async function searchPlaces(query, allAreaNames = [], msoas = {}) {
 
 /**
  * Get Local Authority boundaries as GeoJSON from topoJSON
- * Filters the 'ltla' features from master-topo
+ * Extract the 'ltla' features from the local authority TopoJSON
  * @returns {object} GeoJSON FeatureCollection with LA boundaries
  */
 export function getLocalAuthorityGeoJSON() {

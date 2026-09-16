@@ -1,10 +1,15 @@
 <script>
   import { onMount } from "svelte";
   import { base } from "$app/paths";
-  import { ColumnChart, LineChart, ScatterChart } from "@onsvisual/svelte-charts";
+  import {
+    ColumnChart,
+    LineChart,
+    ScatterChart,
+  } from "@onsvisual/svelte-charts";
   import { Map, MapSource, MapLayer } from "@onsvisual/svelte-maps";
   import {
     AccessibleSelect,
+    Button,
     Container,
     Section,
     ButtonGroup,
@@ -12,6 +17,7 @@
     Grid,
     Card,
     Checkbox,
+    Details,
   } from "@onsvisual/svelte-components";
   import {
     loadTopoJSON,
@@ -35,6 +41,7 @@
     transformMsoaDataForBeeswarm,
   } from "../lib/map-utils.js";
   import ColorLegend from "../lib/components/ColorLegend.svelte";
+  import BeeswarmMarkers from "../lib/components/BeeswarmMarkers.svelte";
 
   let map;
   let geojson;
@@ -99,21 +106,15 @@
   let beeswarmSelectionKey = "";
   let beeswarmRequestId = 0;
   let beeswarmLegendDomain = [];
-  let beeswarmColors = [];
   let beeswarmXMin = null;
   let beeswarmXMax = null;
   const BEESWARM_TYPE_ORDER = [
     "Selected area",
     "Other MSOAs in LA",
+    "LA average",
     "Region average",
     "National average",
   ];
-  const BEESWARM_COLOR_MAP = {
-    "Selected area": "#003c57",
-    "Other MSOAs in LA": "#1570bf",
-    "Region average": "#fd7e14",
-    "National average": "#e74c3c",
-  };
   const snapshotFlagThreshold = 5;
   const propertyTypeLabels = {
     all: "All properties",
@@ -197,7 +198,12 @@
   // Separate reactive for when map loads
   $: if (map && mapStyle && Object.keys(mapStyle).length > 0) {
     // Trigger color map load if not already triggered
-    if (propertyType && priceLevel && !mapLoading && Object.keys(affordabilityData).length === 0) {
+    if (
+      propertyType &&
+      priceLevel &&
+      !mapLoading &&
+      Object.keys(affordabilityData).length === 0
+    ) {
       loadAndColorMap(propertyType, priceLevel);
     }
   }
@@ -232,7 +238,11 @@
   }
 
   // Clear current selection when an MSOA map selection is explicitly removed.
-  $: if (selectedAreaType === "msoa" && selected === null && selectedFeatureId) {
+  $: if (
+    selectedAreaType === "msoa" &&
+    selected === null &&
+    selectedFeatureId
+  ) {
     clearSelection();
   }
 
@@ -344,7 +354,11 @@
     return (
       laGeojson.features.find((feature) => {
         const props = feature?.properties ?? {};
-        return props.areacd === laCode || props.code === laCode || props.id === laCode;
+        return (
+          props.areacd === laCode ||
+          props.code === laCode ||
+          props.id === laCode
+        );
       }) ?? null
     );
   }
@@ -446,32 +460,42 @@
         });
       }
 
-      const msoaOutlineBaseExists = Boolean(map.getLayer(MSOA_OUTLINE_BASE_LAYER_ID));
-      const msoaLegendMatchExists = Boolean(map.getLayer(MSOA_LEGEND_MATCH_LAYER_ID));
+      const msoaOutlineBaseExists = Boolean(
+        map.getLayer(MSOA_OUTLINE_BASE_LAYER_ID),
+      );
+      const msoaLegendMatchExists = Boolean(
+        map.getLayer(MSOA_LEGEND_MATCH_LAYER_ID),
+      );
       const targetBeforeLayer = msoaLegendMatchExists
         ? MSOA_LEGEND_MATCH_LAYER_ID
         : CITY_LABEL_LAYER_ID;
 
       if (!map.getLayer(LA_OUTLINE_LAYER_ID)) {
-        map.addLayer({
-          id: LA_OUTLINE_LAYER_ID,
-          type: "line",
-          source: LA_OUTLINE_SOURCE_ID,
-          filter: getLocalAuthorityOutlineFilter(laCode),
-          layout: {
-            "line-join": "round",
-            "line-cap": "round",
+        map.addLayer(
+          {
+            id: LA_OUTLINE_LAYER_ID,
+            type: "line",
+            source: LA_OUTLINE_SOURCE_ID,
+            filter: getLocalAuthorityOutlineFilter(laCode),
+            layout: {
+              "line-join": "round",
+              "line-cap": "round",
+            },
+            paint: {
+              "line-color": ONS_GREY_15,
+              "line-width": 3,
+              "line-opacity": 1,
+            },
           },
-          paint: {
-            "line-color": ONS_GREY_15,
-            "line-width": 3,
-            "line-opacity": 1,
-          },
-        }, targetBeforeLayer);
+          targetBeforeLayer,
+        );
         return;
       }
 
-      map.setFilter(LA_OUTLINE_LAYER_ID, getLocalAuthorityOutlineFilter(laCode));
+      map.setFilter(
+        LA_OUTLINE_LAYER_ID,
+        getLocalAuthorityOutlineFilter(laCode),
+      );
 
       if (msoaLegendMatchExists) {
         map.moveLayer(LA_OUTLINE_LAYER_ID, MSOA_LEGEND_MATCH_LAYER_ID);
@@ -507,7 +531,11 @@
   }
 
   function clearLegendRangeHighlight() {
-    if (!map || !affordabilityData || Object.keys(affordabilityData).length === 0) {
+    if (
+      !map ||
+      !affordabilityData ||
+      Object.keys(affordabilityData).length === 0
+    ) {
       return;
     }
 
@@ -532,7 +560,12 @@
   }
 
   function applyLegendRangeHighlight(range) {
-    if (!map || !range || !affordabilityData || Object.keys(affordabilityData).length === 0) {
+    if (
+      !map ||
+      !range ||
+      !affordabilityData ||
+      Object.keys(affordabilityData).length === 0
+    ) {
       return;
     }
 
@@ -578,7 +611,11 @@
     const max = Number(range.max);
     const index = Number(range.index);
 
-    if (!Number.isFinite(min) || !Number.isFinite(max) || !Number.isFinite(index)) {
+    if (
+      !Number.isFinite(min) ||
+      !Number.isFinite(max) ||
+      !Number.isFinite(index)
+    ) {
       return null;
     }
 
@@ -644,56 +681,56 @@
       affordabilityData = await loadAffordabilityData(pType, pLevel);
       legendHoveredRange = null;
       legendSelectedRange = null;
-      
+
       if (Object.keys(affordabilityData).length === 0) {
         error = "Failed to load affordability data";
         mapLoading = false;
         return;
       }
-      
+
       colorBounds = calculateColorBreaks(affordabilityData);
       colorExpression = createColorExpression();
-      
+
       // Wait for both source and layer to exist in the map
       if (map) {
         let attempts = 0;
         let sourceExists = false;
         let layerExists = false;
-        
+
         while ((!sourceExists || !layerExists) && attempts < 50) {
           try {
             sourceExists = !!map.getSource("msoa-source");
           } catch (e) {
             sourceExists = false;
           }
-          
+
           try {
             layerExists = !!map.getLayer("msoa-fill");
           } catch (e) {
             layerExists = false;
           }
-          
+
           if (!sourceExists || !layerExists) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
             attempts++;
           } else {
             break;
           }
         }
-        
+
         if (!sourceExists) {
           error = "Map source failed to load";
           mapLoading = false;
           return;
         }
-        
+
         if (!layerExists) {
           error = "Map layer failed to load";
           mapLoading = false;
           return;
         }
       }
-      
+
       applyAffordabilityColors();
       clearLegendRangeHighlight();
 
@@ -706,7 +743,11 @@
   }
 
   function applyAffordabilityColors() {
-    if (!map || !affordabilityData || Object.keys(affordabilityData).length === 0) {
+    if (
+      !map ||
+      !affordabilityData ||
+      Object.keys(affordabilityData).length === 0
+    ) {
       return;
     }
 
@@ -715,7 +756,12 @@
         return;
       }
 
-      updateMapFeatureStates(map, "msoa-source", affordabilityData, colorBounds);
+      updateMapFeatureStates(
+        map,
+        "msoa-source",
+        affordabilityData,
+        colorBounds,
+      );
 
       map.setPaintProperty(
         "msoa-fill",
@@ -780,7 +826,10 @@
       }
 
       if (selection?.type === "la") {
-        const laData = await loadLocalAuthorityData(propertyTypeValue, selection.code);
+        const laData = await loadLocalAuthorityData(
+          propertyTypeValue,
+          selection.code,
+        );
 
         if (requestId !== snapshotRequestId) {
           return;
@@ -788,7 +837,8 @@
 
         if (!laData?.affordability) {
           snapshotRatios = null;
-          snapshotError = "Affordability data unavailable for this local authority";
+          snapshotError =
+            "Affordability data unavailable for this local authority";
           return;
         }
 
@@ -826,7 +876,10 @@
     if (!regionCode || !affordabilityData) return null;
 
     const regionalRatios = Object.values(affordabilityData)
-      .filter((msoa) => msoa.region_code === regionCode && Number.isFinite(msoa.ratio))
+      .filter(
+        (msoa) =>
+          msoa.region_code === regionCode && Number.isFinite(msoa.ratio),
+      )
       .map((msoa) => msoa.ratio);
 
     if (regionalRatios.length === 0) {
@@ -852,17 +905,20 @@
       }
 
       const regionCode = isMsoaSelection
-        ? selection.region_code ?? laData?.region_code
-        : laData?.region_code ?? selection?.region_code;
+        ? (selection.region_code ?? laData?.region_code)
+        : (laData?.region_code ?? selection?.region_code);
       const regionName = isMsoaSelection
-        ? selection.region_name ?? laData?.region_name
-        : laData?.region_name ?? selection?.region_name;
+        ? (selection.region_name ?? laData?.region_name)
+        : (laData?.region_name ?? selection?.region_name);
       const country = getCountryFromRegionCode(regionCode);
       const showRegionComparison = country !== "wales";
       const regionMedianRatio = showRegionComparison
         ? calculateRegionMedianRatioFromCurrentData(regionCode)
         : null;
-      const countryAffordability = await loadCountryAffordability(propertyTypeValue, country);
+      const countryAffordability = await loadCountryAffordability(
+        propertyTypeValue,
+        country,
+      );
 
       if (requestId !== comparisonRequestId) {
         return;
@@ -878,7 +934,11 @@
         laMedianRatio: laData?.affordability?.median?.ratio ?? null,
         regionMedianRatio,
         countryMedianRatio: countryAffordability?.median?.ratio ?? null,
-        laName: laData?.name ?? selection?.la_name ?? selection?.name ?? "Local authority",
+        laName:
+          laData?.name ??
+          selection?.la_name ??
+          selection?.name ??
+          "Local authority",
         regionName: regionName ?? "Region",
         countryName: country === "wales" ? "Wales" : "England",
         showRegionComparison,
@@ -890,13 +950,18 @@
             nextComparisonRatios.laMedianRatio,
             nextComparisonRatios.countryMedianRatio,
           ]
-        : [nextComparisonRatios.laMedianRatio, nextComparisonRatios.countryMedianRatio];
+        : [
+            nextComparisonRatios.laMedianRatio,
+            nextComparisonRatios.countryMedianRatio,
+          ];
 
       if (showRegionComparison) {
         comparisonValues.push(nextComparisonRatios.regionMedianRatio);
       }
 
-      const hasComparisonData = comparisonValues.some((value) => Number.isFinite(value));
+      const hasComparisonData = comparisonValues.some((value) =>
+        Number.isFinite(value),
+      );
 
       if (!hasComparisonData) {
         comparisonRatios = null;
@@ -945,7 +1010,11 @@
     return year * 4 + (quarter - 1);
   }
 
-  function aggregateRollingAnnualSales(series = [], maxYears = SALES_YEARS_TO_SHOW) {
+  function aggregateRollingAnnualSales(
+    series = [],
+    maxYears = SALES_YEARS_TO_SHOW,
+    requiredEndPeriod = null,
+  ) {
     const quarterToSales = new globalThis.Map();
 
     for (const point of series) {
@@ -955,15 +1024,26 @@
       if (!quarterParts) continue;
 
       const quarterIndex = quarterPartsToIndex(quarterParts);
-      quarterToSales.set(quarterIndex, (quarterToSales.get(quarterIndex) ?? 0) + point.sales);
+      quarterToSales.set(
+        quarterIndex,
+        (quarterToSales.get(quarterIndex) ?? 0) + point.sales,
+      );
     }
 
-    const availableQuarterIndices = Array.from(quarterToSales.keys()).sort((a, b) => a - b);
+    const availableQuarterIndices = Array.from(quarterToSales.keys()).sort(
+      (a, b) => a - b,
+    );
     if (availableQuarterIndices.length === 0) {
       return { sales: [], periodLabel: null };
     }
 
-    const latestQuarterIndex = availableQuarterIndices[availableQuarterIndices.length - 1];
+    const requiredEndParts = parseQuarterParts(requiredEndPeriod);
+    const latestQuarterIndex = requiredEndParts
+      ? quarterPartsToIndex(requiredEndParts)
+      : availableQuarterIndices[availableQuarterIndices.length - 1];
+    if (!quarterToSales.has(latestQuarterIndex)) {
+      return { sales: [], periodLabel: null };
+    }
     const anchorQuarter = (latestQuarterIndex % 4) + 1;
     const periodLabel = `Q${anchorQuarter}`;
     const annualizedSales = [];
@@ -1046,18 +1126,34 @@
       let rollingPeriodLabel = null;
 
       if (isMsoaSelection) {
-        const msoaData = laData?.msoas?.find((msoa) => msoa.code === selection.code);
-        const rollingSales = aggregateRollingAnnualSales(msoaData?.timeSeries?.median ?? []);
+        const msoaData = laData?.msoas?.find(
+          (msoa) => msoa.code === selection.code,
+        );
+        const rollingSales = aggregateRollingAnnualSales(
+          msoaData?.timeSeries?.median ?? [],
+          SALES_YEARS_TO_SHOW,
+          laData?.latest_period,
+        );
         annualSales = rollingSales.sales;
         rollingPeriodLabel = rollingSales.periodLabel;
         areaName = msoaData?.name ?? areaName;
       } else {
-        let rollingSales = aggregateRollingAnnualSales(laData?.timeSeries?.median ?? []);
+        let rollingSales = aggregateRollingAnnualSales(
+          laData?.timeSeries?.median ?? [],
+          SALES_YEARS_TO_SHOW,
+          laData?.latest_period,
+        );
         annualSales = rollingSales.sales;
         rollingPeriodLabel = rollingSales.periodLabel;
         if (annualSales.length === 0) {
-          const fallbackQuarterlySales = aggregateLocalAuthorityQuarterlySales(laData?.msoas ?? []);
-          rollingSales = aggregateRollingAnnualSales(fallbackQuarterlySales);
+          const fallbackQuarterlySales = aggregateLocalAuthorityQuarterlySales(
+            laData?.msoas ?? [],
+          );
+          rollingSales = aggregateRollingAnnualSales(
+            fallbackQuarterlySales,
+            SALES_YEARS_TO_SHOW,
+            laData?.latest_period,
+          );
           annualSales = rollingSales.sales;
           rollingPeriodLabel = rollingSales.periodLabel;
         }
@@ -1068,9 +1164,10 @@
         salesOverTimeData = [];
         salesOverTimeName = areaName;
         salesOverTimePeriodLabel = null;
-        salesOverTimeError = `Property sales data unavailable for this ${getSelectedAreaTypeLabel(
-          selection?.type,
-        )}`;
+        salesOverTimeError = getLatestPeriodUnavailableMessage(
+          "Property sales data",
+          laData?.latest_period,
+        );
         return;
       }
 
@@ -1106,19 +1203,20 @@
     beeswarmLoading = false;
     beeswarmError = null;
     beeswarmLegendDomain = [];
-    beeswarmColors = [];
     beeswarmXMin = null;
     beeswarmXMax = null;
   }
 
   function decorateBeeswarmData(data = [], selectedArea = null, laData = null) {
-    const selectedCode = selectedArea?.type === "msoa" ? selectedArea.code : null;
+    const selectedCode =
+      selectedArea?.type === "msoa" ? selectedArea.code : null;
     const decoratedData = data.map((point) => {
       if (point.type === "region") {
         return {
           ...point,
           type: "Region average",
-          radius: 5,
+          marker: "region",
+          radius: 7,
         };
       }
 
@@ -1126,7 +1224,8 @@
         return {
           ...point,
           type: "National average",
-          radius: 5,
+          marker: "nation",
+          radius: 7,
         };
       }
 
@@ -1134,24 +1233,28 @@
         return {
           ...point,
           type: "Selected area",
-          radius: 5,
+          marker: "selected",
+          radius: 10,
         };
       }
 
       return {
         ...point,
         type: "Other MSOAs in LA",
+        marker: "other",
         radius: 3,
       };
     });
 
-    if (selectedArea?.type === "la" && laData?.affordability?.median?.ratio) {
+    if (Number.isFinite(laData?.affordability?.median?.ratio)) {
       decoratedData.push({
         x: laData.affordability.median.ratio,
         label: `${laData.name} average`,
         code: laData.code,
-        type: "Selected area",
-        radius: 5,
+        type: "LA average",
+        marker: "la",
+        selected: selectedArea?.type === "la",
+        radius: selectedArea?.type === "la" ? 10 : 7,
       });
     }
 
@@ -1159,9 +1262,12 @@
   }
 
   function setBeeswarmLegend(data = []) {
-    const presentTypes = new Set(data.map((point) => point?.type).filter(Boolean));
-    beeswarmLegendDomain = BEESWARM_TYPE_ORDER.filter((type) => presentTypes.has(type));
-    beeswarmColors = beeswarmLegendDomain.map((type) => BEESWARM_COLOR_MAP[type]);
+    const presentTypes = new Set(
+      data.map((point) => point?.type).filter(Boolean),
+    );
+    beeswarmLegendDomain = BEESWARM_TYPE_ORDER.filter((type) =>
+      presentTypes.has(type),
+    );
   }
 
   function setBeeswarmXBounds(data = []) {
@@ -1213,7 +1319,6 @@
         beeswarmError = "Could not determine Local Authority";
         beeswarmData = [];
         beeswarmLegendDomain = [];
-        beeswarmColors = [];
         beeswarmXMin = null;
         beeswarmXMax = null;
         return;
@@ -1228,7 +1333,23 @@
         beeswarmError = "Failed to load Local Authority data";
         beeswarmData = [];
         beeswarmLegendDomain = [];
-        beeswarmColors = [];
+        beeswarmXMin = null;
+        beeswarmXMax = null;
+        return;
+      }
+
+      const selectedAffordability =
+        selectedArea.type === "msoa"
+          ? laData.msoas?.find((msoa) => msoa.code === selectedArea.code)
+              ?.affordability?.median
+          : laData.affordability?.median;
+      if (!Number.isFinite(selectedAffordability?.ratio)) {
+        beeswarmError = getLatestPeriodUnavailableMessage(
+          "Affordability data",
+          laData.latest_period,
+        );
+        beeswarmData = [];
+        beeswarmLegendDomain = [];
         beeswarmXMin = null;
         beeswarmXMax = null;
         return;
@@ -1250,7 +1371,11 @@
       }
 
       beeswarmData = decorateBeeswarmData(
-        transformMsoaDataForBeeswarm(msoas, regionAffordability, nationalAffordability),
+        transformMsoaDataForBeeswarm(
+          msoas,
+          regionAffordability,
+          nationalAffordability,
+        ),
         selectedArea,
         laData,
       );
@@ -1264,7 +1389,6 @@
       beeswarmError = "Failed to load beeswarm data";
       beeswarmData = [];
       beeswarmLegendDomain = [];
-      beeswarmColors = [];
       beeswarmXMin = null;
       beeswarmXMax = null;
     } finally {
@@ -1301,7 +1425,10 @@
 
     for (const { upTo, rate } of bands) {
       const upperBound = Number.isFinite(upTo) ? upTo : price;
-      const taxableAmount = Math.max(0, Math.min(price, upperBound) - lowerBound);
+      const taxableAmount = Math.max(
+        0,
+        Math.min(price, upperBound) - lowerBound,
+      );
       tax += taxableAmount * rate;
 
       if (price <= upperBound) {
@@ -1315,7 +1442,8 @@
   }
 
   function calculateEnglandStampDuty(price, isFirstTimeBuyerValue) {
-    const firstTimeBuyerReliefApplied = isFirstTimeBuyerValue && price <= 625000;
+    const firstTimeBuyerReliefApplied =
+      isFirstTimeBuyerValue && price <= 625000;
     const bands = firstTimeBuyerReliefApplied
       ? ENGLAND_FIRST_TIME_BUYER_BANDS
       : ENGLAND_STAMP_DUTY_BANDS;
@@ -1326,7 +1454,11 @@
     };
   }
 
-  function calculateTotalSavingsNeeded(propertyPrice, country, isFirstTimeBuyerValue) {
+  function calculateTotalSavingsNeeded(
+    propertyPrice,
+    country,
+    isFirstTimeBuyerValue,
+  ) {
     if (!Number.isFinite(propertyPrice) || propertyPrice <= 0) {
       return null;
     }
@@ -1334,7 +1466,10 @@
     const deposit = propertyPrice * DEPOSIT_RATE;
 
     if (country === "wales") {
-      const transactionTax = calculateTaxFromBands(propertyPrice, WALES_LTT_BANDS);
+      const transactionTax = calculateTaxFromBands(
+        propertyPrice,
+        WALES_LTT_BANDS,
+      );
 
       return {
         deposit,
@@ -1345,7 +1480,10 @@
       };
     }
 
-    const stampDuty = calculateEnglandStampDuty(propertyPrice, isFirstTimeBuyerValue);
+    const stampDuty = calculateEnglandStampDuty(
+      propertyPrice,
+      isFirstTimeBuyerValue,
+    );
 
     return {
       deposit,
@@ -1360,7 +1498,11 @@
     return level === "lq" ? "Lower quartile" : "Median";
   }
 
-  async function loadBuySectionData(propertyTypeValue, priceLevelValue, selection) {
+  async function loadBuySectionData(
+    propertyTypeValue,
+    priceLevelValue,
+    selection,
+  ) {
     const requestId = ++buySectionRequestId;
     buySectionLoading = true;
     buySectionError = null;
@@ -1378,8 +1520,8 @@
         ? laData?.msoas?.find((msoa) => msoa.code === selection.code)
         : null;
       const priceSeriesRaw = isMsoaSelection
-        ? msoaData?.timeSeries?.[priceLevelValue] ?? []
-        : laData?.timeSeries?.[priceLevelValue] ?? [];
+        ? (msoaData?.timeSeries?.[priceLevelValue] ?? [])
+        : (laData?.timeSeries?.[priceLevelValue] ?? []);
 
       const priceSeries = priceSeriesRaw
         .map((point) => {
@@ -1395,28 +1537,28 @@
       const affordabilityPrice = isMsoaSelection
         ? msoaData?.affordability?.[priceLevelValue]?.price
         : laData?.affordability?.[priceLevelValue]?.price;
-      const latestSeriesPrice = priceSeries.length
-        ? priceSeries[priceSeries.length - 1].price
-        : null;
       const selectedPrice = Number.isFinite(affordabilityPrice)
         ? affordabilityPrice
-        : latestSeriesPrice;
+        : null;
 
       if (!Number.isFinite(selectedPrice)) {
         buySectionData = null;
-        buySectionError = `Property price data unavailable for this ${getSelectedAreaTypeLabel(
-          selection?.type,
-        )}`;
+        buySectionError = getLatestPeriodUnavailableMessage(
+          "Property price data",
+          laData?.latest_period,
+        );
         return;
       }
 
       buySectionData = {
         areaName: isMsoaSelection
-          ? msoaData?.name ?? selection.name ?? selection.code
-          : laData?.name ?? selection?.name ?? selection?.code,
+          ? (msoaData?.name ?? selection.name ?? selection.code)
+          : (laData?.name ?? selection?.name ?? selection?.code),
         areaTypeLabel: isMsoaSelection ? "MSOA" : "LA",
         priceLevelLabel: getPriceLevelLabel(priceLevelValue),
-        country: getCountryFromRegionCode(laData?.region_code ?? selection?.region_code),
+        country: getCountryFromRegionCode(
+          laData?.region_code ?? selection?.region_code,
+        ),
         propertyPrice: selectedPrice,
         incomeRequired: selectedPrice / INCOME_MULTIPLIER,
         priceSeries,
@@ -1435,7 +1577,13 @@
   }
 
   function formatRatio(value) {
-    return Number.isFinite(value) ? value.toFixed(2) : "—";
+    return Number.isFinite(value) ? value.toFixed(2) : "No data available";
+  }
+
+  function getLatestPeriodUnavailableMessage(dataLabel, latestPeriod) {
+    return `${dataLabel} unavailable for the latest period${
+      latestPeriod ? ` (${latestPeriod})` : ""
+    }.`;
   }
 
   function showSnapshotFlag(value) {
@@ -1452,21 +1600,27 @@
         label: name,
         type: "ltla",
       }));
-      
-      const msoaOptions = Object.values(affordabilityData).slice(0, 10).map((msoa) => ({
-        id: msoa.code,
-        label: `${msoa.name} (${msoa.la_name})`,
-        type: "msoa",
-        msoaCode: msoa.code,
-        laCode: msoa.la_code,
-      }));
-      
+
+      const msoaOptions = Object.values(affordabilityData)
+        .slice(0, 10)
+        .map((msoa) => ({
+          id: msoa.code,
+          label: `${msoa.name} (${msoa.la_name})`,
+          type: "msoa",
+          msoaCode: msoa.code,
+          laCode: msoa.la_code,
+        }));
+
       populateResults([...ltlaOptions, ...msoaOptions]);
       return;
     }
 
     // Use new search function
-    const searchResults = await searchPlaces(query, allAreaNames, affordabilityData);
+    const searchResults = await searchPlaces(
+      query,
+      allAreaNames,
+      affordabilityData,
+    );
     populateResults(searchResults);
   }
 
@@ -1554,7 +1708,10 @@
       id: msoaCode,
       name: msoaData.name,
       type: "msoa",
-      bounds: [[-3.5, 54], [-3.5, 54]],
+      bounds: [
+        [-3.5, 54],
+        [-3.5, 54],
+      ],
     };
 
     if (msoaData.la_code) {
@@ -1590,8 +1747,14 @@
       return;
     }
 
-    if (type === "msoa" && resolvedMsoaCode && affordabilityData?.[resolvedMsoaCode]) {
-      selectMsoa(resolvedMsoaCode, affordabilityData[resolvedMsoaCode], { zoomToParentLA: true });
+    if (
+      type === "msoa" &&
+      resolvedMsoaCode &&
+      affordabilityData?.[resolvedMsoaCode]
+    ) {
+      selectMsoa(resolvedMsoaCode, affordabilityData[resolvedMsoaCode], {
+        zoomToParentLA: true,
+      });
       return;
     }
 
@@ -1694,21 +1857,24 @@
           const features = map.querySourceFeatures("msoa-source", {
             sourceLayer: "msoa",
           });
-          
+
           // Find the feature containing this point
           for (const feature of features) {
             if (feature.geometry && feature.geometry.type === "Polygon") {
               // Check if point is in polygon (simple bounding box check first)
               const bounds = feature.geometry.coordinates[0];
-              let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-              
-              bounds.forEach(coord => {
+              let minX = Infinity,
+                maxX = -Infinity,
+                minY = Infinity,
+                maxY = -Infinity;
+
+              bounds.forEach((coord) => {
                 minX = Math.min(minX, coord[0]);
                 maxX = Math.max(maxX, coord[0]);
                 minY = Math.min(minY, coord[1]);
                 maxY = Math.max(maxY, coord[1]);
               });
-              
+
               if (lon >= minX && lon <= maxX && lat >= minY && lat <= maxY) {
                 msoaCode = feature.id || feature.properties?.areacd;
                 if (msoaCode) break;
@@ -1777,9 +1943,14 @@
   }
 </script>
 
-<Section>
+<div class="page-container">
+<Section width="full">
   <Container width="full">
-    <ButtonGroup name="property-type" legend="Property type" bind:value={propertyType}>
+    <ButtonGroup
+      name="property-type"
+      legend="Property type"
+      bind:value={propertyType}
+    >
       <ButtonGroupItem value="all" label="All properties" />
       <ButtonGroupItem value="detached" label="Detached" />
       <ButtonGroupItem value="semi-detached" label="Semi-detached" />
@@ -1787,14 +1958,18 @@
       <ButtonGroupItem value="flats" label="Flats and maisonettes" />
     </ButtonGroup>
 
-    <ButtonGroup name="price-level" legend="Price level" bind:value={priceLevel}>
+    <ButtonGroup
+      name="price-level"
+      legend="Price level"
+      bind:value={priceLevel}
+    >
       <ButtonGroupItem value="median" label="Median" />
       <ButtonGroupItem value="lq" label="Entry level" />
     </ButtonGroup>
   </Container>
 </Section>
 
-<Section title="Explore an area">
+<Section title="Explore an area" width="full">
   <Container width="full">
     {#if error}
       <div class="error-message">
@@ -1805,226 +1980,220 @@
         <p>Loading map data...</p>
       </div>
     {:else}
-      <div bind:this={selectElement}>
-        <AccessibleSelect
-          id="search-input"
-          label="Search for an area or postcode"
-          placeholder="e.g. London, SW1A 1AA, North East..."
-          mode="search"
-          bind:value={selectedValue}
-          bind:clearInput
-          loadOptions={customLoadOptions}
-          on:change={(e) => handleSelectChange(e.detail)}
-        />
+      <div class="search-controls">
+        <div class="search-controls__select" bind:this={selectElement}>
+          <AccessibleSelect
+            id="search-input"
+            label="Search for an area or postcode"
+            placeholder="e.g. London, SW1A 1AA, North East..."
+            mode="search"
+            bind:value={selectedValue}
+            bind:clearInput
+            loadOptions={customLoadOptions}
+            on:change={(e) => handleSelectChange(e.detail)}
+          />
+        </div>
+        <Button
+          variant="secondary"
+          disabled={!selectedBoundary}
+          on:click={clearSelection}
+        >
+          Clear selection
+        </Button>
       </div>
     {/if}
   </Container>
 </Section>
 
-<Section>
+<Section width="full">
   <Container width="full">
     <div class="map-beeswarm-container">
       <div class="map-grid">
         <Grid width="full">
           <div class="map-column">
-          <div class="map-wrapper">
-            {#if mapStyle}
-              {#if mapLoading}
-                <div class="map-loading-overlay">
-                  <p>Loading affordability data...</p>
-                </div>
-              {/if}
-              <Map
-                id="mapsearch-map"
-                style={mapStyle}
-                location={defaultMapView}
-                bind:map
-                bind:zoom
-                bind:center
-                minzoom={6}
-                maxzoom={13}
-                controls={true}
-                attribution={true}
-                scrollZoomGuard={true}
-              >
-                <!-- Vector tile source for MSOA boundaries with affordability coloring -->
-                <MapSource
-                  id="msoa-source"
-                  type="vector"
-                  url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{'{z}/{x}/{y}'}.pbf"
-                  layer="msoa"
-                  promoteId="areacd"
+            <div class="map-wrapper">
+              {#if mapStyle}
+                {#if mapLoading}
+                  <div class="map-loading-overlay">
+                    <p>Loading affordability data...</p>
+                  </div>
+                {/if}
+                <Map
+                  id="mapsearch-map"
+                  style={mapStyle}
+                  location={defaultMapView}
+                  bind:map
+                  bind:zoom
+                  bind:center
+                  minzoom={6}
+                  maxzoom={12.9}
+                  controls={true}
+                  attribution={true}
+                  scrollZoomGuard={true}
                 >
-                  <MapLayer
-                    id="msoa-fill"
-                    type="fill"
-                    order={CITY_LABEL_LAYER_ID}
-                    hover={true}
-                    bind:hovered
-                    select={true}
-                    bind:selected
-                    on:select={({ detail }) => {
-                      const msoaCode = String(detail?.id ?? "");
-                      if (msoaCode && affordabilityData && affordabilityData[msoaCode]) {
-                        selectMsoa(msoaCode, affordabilityData[msoaCode], {
-                          zoomToParentLA: true,
-                        });
-                      }
-                    }}
-                    paint={{
-                      "fill-color": [
-                        "case",
-                        ["!=", ["feature-state", "color"], null],
-                        ["feature-state", "color"],
-                        "#ccc",
-                      ],
-                      "fill-opacity": 1,
-                    }}
-                  />
-                  <MapLayer
-                    id="msoa-outline-base"
-                    type="line"
-                    order={CITY_LABEL_LAYER_ID}
-                    paint={{
-                      "line-color": ONS_GREY_75,
-                      "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.2, 11, 1],
-                      "line-opacity": [
-                        "case",
-                        ["==", ["feature-state", "legendActive"], true],
-                        [
+                  <!-- Vector tile source for MSOA boundaries with affordability coloring -->
+                  <MapSource
+                    id="msoa-source"
+                    type="vector"
+                    url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{'{z}/{x}/{y}'}.pbf"
+                    layer="msoa"
+                    promoteId="areacd"
+                  >
+                    <MapLayer
+                      id="msoa-fill"
+                      type="fill"
+                      order="mask-raster"
+                      hover={true}
+                      bind:hovered
+                      select={true}
+                      bind:selected
+                      on:select={({ detail }) => {
+                        const msoaCode = String(detail?.id ?? "");
+                        if (
+                          msoaCode &&
+                          affordabilityData &&
+                          affordabilityData[msoaCode]
+                        ) {
+                          selectMsoa(msoaCode, affordabilityData[msoaCode], {
+                            zoomToParentLA: true,
+                          });
+                        }
+                      }}
+                      paint={{
+                        "fill-color": [
+                          "case",
+                          ["!=", ["feature-state", "color"], null],
+                          ["feature-state", "color"],
+                          "#ccc",
+                        ],
+                        "fill-opacity": 1,
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-outline-base"
+                      type="line"
+                      order={CITY_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": ONS_GREY_75,
+                        "line-width": [
+                          "interpolate",
+                          ["linear"],
+                          ["zoom"],
+                          6,
+                          0.2,
+                          11,
+                          1,
+                        ],
+                        "line-opacity": [
+                          "case",
+                          ["==", ["feature-state", "legendActive"], true],
+                          [
+                            "case",
+                            ["==", ["feature-state", "legendMatch"], true],
+                            1,
+                            0.2,
+                          ],
+                          1,
+                        ],
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-legend-match"
+                      type="line"
+                      order={CITY_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": ONS_GREY_100,
+                        "line-width": 1.5,
+                        "line-opacity": [
                           "case",
                           ["==", ["feature-state", "legendMatch"], true],
                           1,
-                          0.2,
+                          0,
                         ],
-                        1,
-                      ],
-                    }}
-                  />
-                  <MapLayer
-                    id="msoa-legend-match"
-                    type="line"
-                    order={CITY_LABEL_LAYER_ID}
-                    paint={{
-                      "line-color": ONS_GREY_100,
-                      "line-width": 1.5,
-                      "line-opacity": [
-                        "case",
-                        ["==", ["feature-state", "legendMatch"], true],
-                        1,
-                        0,
-                      ],
-                    }}
-                  />
-                  <MapLayer
-                    id="msoa-hover-white"
-                    type="line"
-                    order={CITY_LABEL_LAYER_ID}
-                    paint={{
-                      "line-color": "#ffffff",
-                      "line-width": 3,
-                      "line-opacity": [
-                        "case",
-                        ["==", ["feature-state", "hovered"], true],
-                        0.8,
-                        0,
-                      ],
-                    }}
-                  />
-                  <MapLayer
-                    id="msoa-hover-outline"
-                    type="line"
-                    order={CITY_LABEL_LAYER_ID}
-                    paint={{
-                      "line-color": ONS_GREY_100,
-                      "line-width": 2,
-                      "line-opacity": [
-                        "case",
-                        ["==", ["feature-state", "hovered"], true],
-                        1,
-                        0,
-                      ],
-                    }}
-                  />
-                  <MapLayer
-                    id="msoa-selected-white"
-                    type="line"
-                    order={CITY_LABEL_LAYER_ID}
-                    paint={{
-                      "line-color": "#ffffff",
-                      "line-width": 5,
-                      "line-opacity": [
-                        "case",
-                        ["==", ["feature-state", "selected"], true],
-                        0.8,
-                        0,
-                      ],
-                    }}
-                  />
-                  <MapLayer
-                    id="msoa-selected-outline"
-                    type="line"
-                    order={CITY_LABEL_LAYER_ID}
-                    paint={{
-                      "line-color": ONS_GREY_100,
-                      "line-width": 3,
-                      "line-opacity": [
-                        "case",
-                        ["==", ["feature-state", "selected"], true],
-                        1,
-                        0,
-                      ],
-                    }}
-                  />
-                </MapSource>
-              </Map>
-            {/if}
-          </div>
-
-        {#if selectedBoundary}
-          <div class="selection-info">
-            <p>
-              <strong>Selected:</strong>
-              {selectedBoundary.name}
-              ({selectedBoundary.type})
-              {#if selectedMsoaForSnapshot?.la_name}
-                | <strong>Parent LA:</strong> {selectedMsoaForSnapshot.la_name}
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-hover-white"
+                      type="line"
+                      order={CITY_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": "#ffffff",
+                        "line-width": 3,
+                        "line-opacity": [
+                          "case",
+                          ["==", ["feature-state", "hovered"], true],
+                          0.8,
+                          0,
+                        ],
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-hover-outline"
+                      type="line"
+                      order={CITY_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": ONS_GREY_100,
+                        "line-width": 2,
+                        "line-opacity": [
+                          "case",
+                          ["==", ["feature-state", "hovered"], true],
+                          1,
+                          0,
+                        ],
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-selected-white"
+                      type="line"
+                      order={CITY_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": "#ffffff",
+                        "line-width": 5,
+                        "line-opacity": [
+                          "case",
+                          ["==", ["feature-state", "selected"], true],
+                          0.8,
+                          0,
+                        ],
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-selected-outline"
+                      type="line"
+                      order={CITY_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": ONS_GREY_100,
+                        "line-width": 3,
+                        "line-opacity": [
+                          "case",
+                          ["==", ["feature-state", "selected"], true],
+                          1,
+                          0,
+                        ],
+                      }}
+                    />
+                  </MapSource>
+                </Map>
               {/if}
-            </p>
-            <button on:click={clearSelection} class="clear-btn"
-              >Clear Selection</button
-            >
-          </div>
-        {/if}
-
-        <div class="map-footer">
-          <div class="map-info">
-            <strong>Map Info:</strong>
-            Zoom: {zoom ? zoom.toFixed(1) : "—"} | Lng: {center.lng
-              ? center.lng.toFixed(2)
-              : "—"} | Lat: {center.lat ? center.lat.toFixed(2) : "—"}
-            {#if hovered}
-              | Hovered: {hovered}
-            {/if}
-            {#if mapLoading}
-              | <span class="status-loading">Loading data...</span>
-            {/if}
-          </div>
-
-          {#if affordabilityData && colorBounds.length > 0}
-            <div class="legend-container">
-              <ColorLegend
-                bounds={colorBounds}
-                selectedRangeIndex={legendSelectedRange ? legendSelectedRange.index : null}
-                hoverValue={legendHoverIndicatorValue}
-                selectedValue={legendSelectedIndicatorValue}
-                on:rangehover={handleLegendRangeHover}
-                on:rangeleave={handleLegendRangeLeave}
-                on:rangeselect={handleLegendRangeSelect}
-              />
             </div>
-          {/if}
-        </div>
+
+            <div class="map-footer">
+              {#if affordabilityData && colorBounds.length > 0}
+                <div class="legend-container">
+                  <ColorLegend
+                    bounds={colorBounds}
+                    selectedRangeIndex={legendSelectedRange
+                      ? legendSelectedRange.index
+                      : null}
+                    hoverValue={legendHoverIndicatorValue}
+                    selectedValue={legendSelectedIndicatorValue}
+                    on:rangehover={handleLegendRangeHover}
+                    on:rangeleave={handleLegendRangeLeave}
+                    on:rangeselect={handleLegendRangeSelect}
+                  />
+                </div>
+              {/if}
+            </div>
           </div>
         </Grid>
       </div>
@@ -2035,7 +2204,9 @@
             {#if beeswarmLoading}
               <p class="snapshot-status">Loading beeswarm data...</p>
             {:else if beeswarmError}
-              <p class="snapshot-status snapshot-status--error">{beeswarmError}</p>
+              <p class="snapshot-status snapshot-status--error">
+                {beeswarmError}
+              </p>
             {:else if beeswarmData && beeswarmData.length > 0}
               <div class="beeswarm-chart">
                 <ScatterChart
@@ -2049,13 +2220,31 @@
                   xAxisLabel="Affordability Ratio"
                   yAxis={false}
                   yFitBeeswarm={true}
-                  legend={true}
+                  legend={false}
                   rKey="radius"
                   buffer={2}
-                  height={180}
-                  padding={{ top: 8, right: 8, bottom: 50, left: 20 }}
-                  colors={beeswarmColors}
-                />
+                  height={220}
+                  padding={{ top: 58, right: 8, bottom: 50, left: 20 }}
+                  colors={beeswarmLegendDomain.map(() => "transparent")}
+                >
+                  <BeeswarmMarkers slot="svg" />
+                </ScatterChart>
+                <div class="beeswarm-key" aria-label="Beeswarm marker key">
+                  {#each beeswarmLegendDomain as type}
+                    <span class="beeswarm-key__item">
+                      <span
+                        class:beeswarm-key__marker--selected={type === "Selected area"}
+                        class:beeswarm-key__marker--other={type === "Other MSOAs in LA"}
+                        class:beeswarm-key__marker--la={type === "LA average"}
+                        class:beeswarm-key__marker--region={type === "Region average"}
+                        class:beeswarm-key__marker--nation={type === "National average"}
+                        class="beeswarm-key__marker"
+                        aria-hidden="true"
+                      ></span>
+                      {type}
+                    </span>
+                  {/each}
+                </div>
               </div>
             {:else}
               <p class="snapshot-status">No beeswarm data available.</p>
@@ -2067,8 +2256,8 @@
   </Container>
 </Section>
 
-<Section title="Affordability snapshot">
-  <Grid width="full">
+<Section title="Affordability snapshot" width="full">
+  <Grid width="full" cls="three-column-grid">
     <Card title="House price to earnings ratio">
       {#if snapshotLoading}
         <p class="snapshot-status">Loading affordability ratios...</p>
@@ -2081,15 +2270,16 @@
         <div class="snapshot-ratios">
           <div class="snapshot-ratio">
             <p class="snapshot-ratio__label">
-              {propertyTypeLabels[propertyType] ?? "Selected property type"} median price /
-              median earnings
+              {propertyTypeLabels[propertyType] ?? "Selected property type"} median
+              price / median earnings
             </p>
             <p class="snapshot-ratio__value">
               {formatRatio(snapshotRatios.medianRatio)}
             </p>
             {#if showSnapshotFlag(snapshotRatios.medianRatio)}
               <p class="snapshot-ratio__flag">
-                <span class="snapshot-ratio__flag-icon" aria-hidden="true"></span>
+                <span class="snapshot-ratio__flag-icon" aria-hidden="true"
+                ></span>
                 Over {snapshotFlagThreshold}
               </p>
             {/if}
@@ -2097,15 +2287,16 @@
 
           <div class="snapshot-ratio">
             <p class="snapshot-ratio__label">
-              {propertyTypeLabels[propertyType] ?? "Selected property type"} lower quartile
-              price / lower quartile earnings
+              {propertyTypeLabels[propertyType] ?? "Selected property type"} lower
+              quartile price / lower quartile earnings
             </p>
             <p class="snapshot-ratio__value">
               {formatRatio(snapshotRatios.lowerQuartileRatio)}
             </p>
             {#if showSnapshotFlag(snapshotRatios.lowerQuartileRatio)}
               <p class="snapshot-ratio__flag">
-                <span class="snapshot-ratio__flag-icon" aria-hidden="true"></span>
+                <span class="snapshot-ratio__flag-icon" aria-hidden="true"
+                ></span>
                 Over {snapshotFlagThreshold}
               </p>
             {/if}
@@ -2113,7 +2304,8 @@
         </div>
       {:else}
         <p class="snapshot-status">
-          Select an MSOA or local authority on the map to view affordability ratios.
+          Select an MSOA or local authority on the map to view affordability
+          ratios.
         </p>
       {/if}
     </Card>
@@ -2121,7 +2313,9 @@
       {#if comparisonLoading}
         <p class="snapshot-status">Loading comparison ratios...</p>
       {:else if comparisonError}
-        <p class="snapshot-status snapshot-status--error">{comparisonError}</p>
+        <p class="snapshot-status snapshot-status--error">
+          {comparisonError}
+        </p>
       {:else if comparisonRatios}
         <div class="comparison-values">
           {#if comparisonRatios.selectionType === "msoa"}
@@ -2133,21 +2327,27 @@
             </div>
           {/if}
           <div class="comparison-value">
-            <p class="comparison-value__label">{comparisonRatios.laName} (LA)</p>
+            <p class="comparison-value__label">
+              {comparisonRatios.laName} (LA)
+            </p>
             <p class="comparison-value__number">
               {formatRatio(comparisonRatios.laMedianRatio)}
             </p>
           </div>
           {#if comparisonRatios.showRegionComparison}
             <div class="comparison-value">
-              <p class="comparison-value__label">{comparisonRatios.regionName} (Region)</p>
+              <p class="comparison-value__label">
+                {comparisonRatios.regionName} (Region)
+              </p>
               <p class="comparison-value__number">
                 {formatRatio(comparisonRatios.regionMedianRatio)}
               </p>
             </div>
           {/if}
           <div class="comparison-value">
-            <p class="comparison-value__label">{comparisonRatios.countryName}</p>
+            <p class="comparison-value__label">
+              {comparisonRatios.countryName}
+            </p>
             <p class="comparison-value__number">
               {formatRatio(comparisonRatios.countryMedianRatio)}
             </p>
@@ -2155,7 +2355,8 @@
         </div>
       {:else}
         <p class="snapshot-status">
-          Select an MSOA or local authority on the map to view comparison ratios.
+          Select an MSOA or local authority on the map to view comparison
+          ratios.
         </p>
       {/if}
     </Card>
@@ -2163,7 +2364,9 @@
       {#if salesOverTimeLoading}
         <p class="snapshot-status">Loading property sales...</p>
       {:else if salesOverTimeError}
-        <p class="snapshot-status snapshot-status--error">{salesOverTimeError}</p>
+        <p class="snapshot-status snapshot-status--error">
+          {salesOverTimeError}
+        </p>
       {:else if salesOverTimeData.length > 0}
         <p class="snapshot-area-name">{salesOverTimeName}</p>
         {#if salesOverTimePeriodLabel}
@@ -2177,7 +2380,9 @@
             xKey="year"
             yKey="sales"
             yAxisLabel="Sales"
-            xAxisLabel={salesOverTimePeriodLabel ? `Year ending ${salesOverTimePeriodLabel}` : "Year"}
+            xAxisLabel={salesOverTimePeriodLabel
+              ? `Year ending ${salesOverTimePeriodLabel}`
+              : "Year"}
             height={260}
             yTicks={5}
             padding={{ top: 0, right: 8, bottom: 28, left: 42 }}
@@ -2185,15 +2390,16 @@
         </div>
       {:else}
         <p class="snapshot-status">
-          Select an MSOA or local authority on the map to view property sales over time.
+          Select an MSOA or local authority on the map to view property sales
+          over time.
         </p>
       {/if}
     </Card>
   </Grid>
 </Section>
 
-<Section title="What would I need to buy?">
-  <Grid width="full">
+<Section title="What would I need to buy?" width="full">
+  <Grid width="full" cls="three-column-grid">
     <Card title="Property cost">
       {#if buySectionLoading}
         <p class="snapshot-status">Loading property costs...</p>
@@ -2204,7 +2410,9 @@
           {buySectionData.areaName} ({buySectionData.areaTypeLabel})
         </p>
         <p class="buy-metric-label">{buySectionData.priceLevelLabel} price</p>
-        <p class="buy-metric-value">{formatCurrency(buySectionData.propertyPrice)}</p>
+        <p class="buy-metric-value">
+          {formatCurrency(buySectionData.propertyPrice)}
+        </p>
         {#if buySectionData.priceSeries.length > 0}
           <div class="buy-price-chart">
             <LineChart
@@ -2241,7 +2449,9 @@
         <p class="buy-metric-label">
           {buySectionData.priceLevelLabel} price divided by {INCOME_MULTIPLIER}
         </p>
-        <p class="buy-metric-value">{formatCurrency(buySectionData.incomeRequired)}</p>
+        <p class="buy-metric-value">
+          {formatCurrency(buySectionData.incomeRequired)}
+        </p>
       {:else}
         <p class="snapshot-status">
           Select an MSOA or local authority on the map to view income required.
@@ -2265,7 +2475,9 @@
             compact
           />
         </div>
-        <p class="buy-metric-label">10% deposit + {totalSavingsData.transactionTaxLabel}</p>
+        <p class="buy-metric-label">
+          10% deposit + {totalSavingsData.transactionTaxLabel}
+        </p>
         <p class="buy-metric-value">{formatCurrency(totalSavingsData.total)}</p>
         <div class="savings-breakdown">
           <p class="savings-breakdown__row">
@@ -2278,27 +2490,101 @@
           </p>
         </div>
         {#if isFirstTimeBuyer && buySectionData.country === "wales"}
-          <p class="snapshot-status">First-time buyer relief is not available in Wales.</p>
-        {:else if isFirstTimeBuyer &&
-          buySectionData.country === "england" &&
-          !totalSavingsData.firstTimeBuyerReliefApplied}
-          <p class="snapshot-status">First-time buyer relief is not applied above £625,000.</p>
+          <p class="snapshot-status">
+            First-time buyer relief is not available in Wales.
+          </p>
+        {:else if isFirstTimeBuyer && buySectionData.country === "england" && !totalSavingsData.firstTimeBuyerReliefApplied}
+          <p class="snapshot-status">
+            First-time buyer relief is not applied above £625,000.
+          </p>
         {/if}
       {:else}
         <p class="snapshot-status">
-          Select an MSOA or local authority on the map to view total savings needed.
+          Select an MSOA or local authority on the map to view total savings
+          needed.
         </p>
       {/if}
     </Card>
   </Grid>
 </Section>
+</div>
 
 <style>
+  .page-container {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 980px) {
+    :global(.three-column-grid .ons-grid__col) {
+      flex-basis: 33.3333%;
+      max-width: 33.3333%;
+      width: 33.3333%;
+    }
+  }
+
   .map-beeswarm-container {
     display: flex;
     flex-direction: column;
     gap: 16px;
     width: 100%;
+  }
+
+  .beeswarm-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #414042;
+  }
+
+  .beeswarm-key__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .beeswarm-key__marker {
+    display: inline-block;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+  }
+
+  .beeswarm-key__marker--selected {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #003c57;
+  }
+
+  .beeswarm-key__marker--other {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #d9d9d9;
+  }
+
+  .beeswarm-key__marker--la {
+    border: 2px solid #003c57;
+    border-radius: 50%;
+    background: #ffffff;
+  }
+
+  .beeswarm-key__marker--region {
+    background: #fd7e14;
+  }
+
+  .beeswarm-key__marker--nation {
+    width: 10px;
+    height: 10px;
+    margin: 1px;
+    background: #e74c3c;
+    transform: rotate(45deg);
   }
 
   .map-grid {
@@ -2372,7 +2658,7 @@
 
   .snapshot-ratios {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 12px;
   }
 
@@ -2506,37 +2792,15 @@
     font-weight: 700;
   }
 
-  .selection-info {
-    padding: 12px 16px;
-    background-color: #f0f7ff;
-    border-left: 4px solid #0078d4;
-    border-radius: 2px;
+  .search-controls {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
     gap: 16px;
-    margin: 16px 0;
   }
 
-  .selection-info p {
-    margin: 0;
-    font-size: 13px;
-  }
-
-  .clear-btn {
-    padding: 6px 12px;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: background-color 0.2s;
-  }
-
-  .clear-btn:hover {
-    background-color: #f0f0f0;
+  .search-controls__select {
+    flex: 1;
+    min-width: 0;
   }
 
   .map-wrapper {
@@ -2569,32 +2833,10 @@
 
   .map-footer {
     margin-top: 12px;
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-  }
-
-  .map-info {
-    font-size: 12px;
-    color: #666;
-    padding: 8px 12px;
-    background-color: #f9f9f9;
-    border-radius: 3px;
-    border: 1px solid #ddd;
-    font-family: "Courier New", monospace;
-    flex: 1;
-    margin: 0;
   }
 
   .legend-container {
-    flex: 1;
-    min-width: 260px;
-    max-width: 420px;
-  }
-
-  .status-loading {
-    color: #0078d4;
-    font-weight: 500;
+    width: 100%;
   }
 
   .map-wrapper :global(.mapboxgl-canvas) {
@@ -2602,25 +2844,14 @@
   }
 
   @media (max-width: 768px) {
-    .snapshot-ratios {
-      grid-template-columns: 1fr;
-    }
-
     .map-wrapper {
       height: 400px;
     }
 
-    .selection-info {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .map-footer {
+    .search-controls {
+      align-items: stretch;
       flex-direction: column;
     }
 
-    .legend-container {
-      max-width: 100%;
-    }
   }
 </style>

@@ -57,13 +57,37 @@ function ensureDir(dir) {
   }
 }
 
-function getLatestNumericValue(sheet, row, startCol) {
+function parsePeriodHeader(value) {
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 1900 && value <= 2100) {
+    return String(value);
+  }
+
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  if (/^\d{4}$/.test(value)) {
+    return value;
+  }
+
+  const match = value.match(/Year ending (Mar|Jun|Sep|Dec) (\d{4})/);
+  if (!match) {
+    return null;
+  }
+
+  const quarter = { Mar: 'Q1', Jun: 'Q2', Sep: 'Q3', Dec: 'Q4' }[match[1]];
+  return `${match[2]}-${quarter}`;
+}
+
+function getLatestPeriodColumn(sheet, startCol) {
   const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
 
-  for (let col = range.e.c; col >= startCol; col--) {
-    const value = sheet[XLSX.utils.encode_cell({ r: row, c: col })]?.v;
-    if (typeof value === 'number' && Number.isFinite(value)) {
-      return Math.round(value);
+  for (let row = range.s.r; row <= Math.min(range.e.r, 15); row++) {
+    for (let col = range.e.c; col >= startCol; col--) {
+      const period = parsePeriodHeader(sheet[XLSX.utils.encode_cell({ r: row, c: col })]?.v);
+      if (period) {
+        return { col, period };
+      }
     }
   }
 
@@ -73,11 +97,16 @@ function getLatestNumericValue(sheet, row, startCol) {
 function readLatestAreaValues(workbook, sheetName) {
   const sheet = workbook.Sheets[sheetName];
   if (!sheet) {
-    return {};
+    return { period: null, values: {} };
   }
 
   const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
   const values = {};
+  const latestPeriodColumn = getLatestPeriodColumn(sheet, 2);
+
+  if (!latestPeriodColumn) {
+    return { period: null, values };
+  }
 
   for (let row = 2; row <= range.e.r; row++) {
     const code = sheet[XLSX.utils.encode_cell({ r: row, c: 0 })]?.v;
@@ -87,7 +116,7 @@ function readLatestAreaValues(workbook, sheetName) {
       continue;
     }
 
-    const latestValue = getLatestNumericValue(sheet, row, 2);
+    const latestValue = sheet[XLSX.utils.encode_cell({ r: row, c: latestPeriodColumn.col })]?.v;
     if (!Number.isFinite(latestValue)) {
       continue;
     }
@@ -95,14 +124,17 @@ function readLatestAreaValues(workbook, sheetName) {
     values[code] = {
       code,
       name,
-      value: latestValue,
+      value: Math.round(latestValue),
     };
   }
 
-  return values;
+  return {
+    period: latestPeriodColumn.period,
+    values,
+  };
 }
 
-function createAffordabilityEntry(price, earnings) {
+function createAffordabilityEntry(price, earnings, period) {
   if (!Number.isFinite(price) || !Number.isFinite(earnings) || earnings === 0) {
     return null;
   }
@@ -111,22 +143,26 @@ function createAffordabilityEntry(price, earnings) {
     price,
     earnings,
     ratio: Math.round((price / earnings) * 100) / 100,
+    period,
   };
 }
 
 function buildAreaAffordabilitySummary(code, name, medianPrices, lowerQuartilePrices, medianEarnings, lowerQuartileEarnings) {
   const median = createAffordabilityEntry(
-    medianPrices[code]?.value ?? null,
-    medianEarnings[code]?.value ?? null,
+    medianPrices.values[code]?.value ?? null,
+    medianEarnings.values[code]?.value ?? null,
+    medianPrices.period,
   );
   const lq = createAffordabilityEntry(
-    lowerQuartilePrices[code]?.value ?? null,
-    lowerQuartileEarnings[code]?.value ?? null,
+    lowerQuartilePrices.values[code]?.value ?? null,
+    lowerQuartileEarnings.values[code]?.value ?? null,
+    lowerQuartilePrices.period,
   );
 
   return {
     code,
-    name: name ?? medianPrices[code]?.name ?? lowerQuartilePrices[code]?.name ?? null,
+    name: name ?? medianPrices.values[code]?.name ?? lowerQuartilePrices.values[code]?.name ?? null,
+    latest_period: medianPrices.period,
     affordability: {
       ...(median ? { median } : {}),
       ...(lq ? { lq } : {}),
@@ -188,6 +224,7 @@ function writeNationalFiles(nationalDir, areaData) {
       JSON.stringify(
         {
           region: country.name,
+          latest_period: summary.latest_period,
           affordability: summary.affordability,
         },
         null,
@@ -219,10 +256,14 @@ function generateForPropertyType(propType) {
   const laFiles = fs.readdirSync(laDir).filter(f => f.endsWith('.json'));
   const authorities = [];
   const msoas = [];
+  const latestPeriods = new Set();
   
   for (const filename of laFiles) {
     const filePath = path.join(laDir, filename);
     const laData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    if (laData.latest_period) {
+      latestPeriods.add(laData.latest_period);
+    }
     
     // Add to authorities list with region info
     authorities.push({
@@ -259,9 +300,15 @@ function generateForPropertyType(propType) {
   const now = new Date();
   const quarter = Math.ceil((now.getMonth() + 1) / 3);
   const generatedDate = `${now.getFullYear()}-Q${quarter}`;
+  if (latestPeriods.size > 1) {
+    throw new Error(
+      `Local authority files have inconsistent latest periods for ${propType}: ${[...latestPeriods].join(', ')}`
+    );
+  }
   
   const msoasLatest = {
     generated_date: generatedDate,
+    latest_period: [...latestPeriods][0] ?? null,
     msoa_count: msoas.length,
     msoas
   };

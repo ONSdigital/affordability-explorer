@@ -1,3 +1,4 @@
+//js
 const e=({status:n,message:t})=>`<!doctype html>
 <html lang="en">
 	<head>

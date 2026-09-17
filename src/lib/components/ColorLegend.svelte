@@ -256,7 +256,6 @@
   .key-title {
     margin: 0 0 8px;
     font-weight: 600;
-    font-size: 13px;
     color: #333;
   }
 
@@ -360,7 +359,6 @@
     align-items: center;
     gap: 8px;
     color: #666;
-    font-size: 12px;
     margin-top: 6px;
   }
 

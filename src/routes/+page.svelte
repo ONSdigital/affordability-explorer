@@ -2,8 +2,6 @@
   import { onMount } from "svelte";
   import { base } from "$app/paths";
   import {
-    ColumnChart,
-    LineChart,
     ScatterChart,
   } from "@onsvisual/svelte-charts";
   import { Map, MapSource, MapLayer } from "@onsvisual/svelte-maps";
@@ -69,27 +67,10 @@
   let colorExpression = null;
   let colorBounds = [];
   let mapLoading = false;
-  let snapshotRatios = null;
-  let snapshotLoading = false;
-  let snapshotError = null;
   let selectedMsoaForSnapshot = null;
   let selectedLAForSnapshot = null;
   let selectedAreaType = null;
   let selectedAreaForData = null;
-  let snapshotSelectionKey = "";
-  let snapshotRequestId = 0;
-  let comparisonRatios = null;
-  let comparisonLoading = false;
-  let comparisonError = null;
-  let comparisonSelectionKey = "";
-  let comparisonRequestId = 0;
-  let salesOverTimeData = [];
-  let salesOverTimeName = null;
-  let salesOverTimePeriodLabel = null;
-  let salesOverTimeLoading = false;
-  let salesOverTimeError = null;
-  let salesOverTimeSelectionKey = "";
-  let salesOverTimeRequestId = 0;
   let buySectionData = null;
   let buySectionLoading = false;
   let buySectionError = null;
@@ -116,7 +97,6 @@
     "Region average",
     "National average",
   ];
-  const snapshotFlagThreshold = 5;
   const propertyTypeLabels = {
     all: "All properties",
     detached: "Detached",
@@ -124,7 +104,6 @@
     terraced: "Terraced",
     flats: "Flats and maisonettes",
   };
-  const SALES_YEARS_TO_SHOW = 10;
   const INCOME_MULTIPLIER = 4.5;
   const DEPOSIT_RATE = 0.1;
   const ENGLAND_STAMP_DUTY_BANDS = [
@@ -260,51 +239,6 @@
 
   $: legendHoverIndicatorValue = getAffordabilityRatioForCode(hovered);
   $: legendSelectedIndicatorValue = getAffordabilityRatioForCode(selected);
-
-  $: {
-    const nextSnapshotSelectionKey = selectedAreaForData
-      ? `${propertyType}:${selectedAreaForData.type}:${selectedAreaForData.code}`
-      : "";
-
-    if (nextSnapshotSelectionKey !== snapshotSelectionKey) {
-      snapshotSelectionKey = nextSnapshotSelectionKey;
-      if (selectedAreaForData) {
-        loadSnapshotRatios(propertyType, selectedAreaForData);
-      } else {
-        resetSnapshotRatios();
-      }
-    }
-  }
-
-  $: {
-    const nextComparisonSelectionKey = selectedAreaForData
-      ? `${propertyType}:${selectedAreaForData.type}:${selectedAreaForData.code}`
-      : "";
-
-    if (nextComparisonSelectionKey !== comparisonSelectionKey) {
-      comparisonSelectionKey = nextComparisonSelectionKey;
-      if (selectedAreaForData) {
-        loadComparisonRatios(propertyType, selectedAreaForData);
-      } else {
-        resetComparisonRatios();
-      }
-    }
-  }
-
-  $: {
-    const nextSalesOverTimeSelectionKey = selectedAreaForData
-      ? `${propertyType}:${selectedAreaForData.type}:${selectedAreaForData.code}`
-      : "";
-
-    if (nextSalesOverTimeSelectionKey !== salesOverTimeSelectionKey) {
-      salesOverTimeSelectionKey = nextSalesOverTimeSelectionKey;
-      if (selectedAreaForData) {
-        loadSalesOverTime(propertyType, selectedAreaForData);
-      } else {
-        resetSalesOverTime();
-      }
-    }
-  }
 
   $: {
     const nextBuySectionSelectionKey = selectedAreaForData
@@ -1409,16 +1343,6 @@
     }
   }
 
-  function parseQuarterToDate(quarterValue) {
-    const match = String(quarterValue ?? "").match(/^(\d{4})-Q([1-4])$/);
-    if (!match) return null;
-
-    const year = Number(match[1]);
-    const quarter = Number(match[2]);
-    const month = (quarter - 1) * 3;
-    return new Date(Date.UTC(year, month, 1));
-  }
-
   function formatCurrency(value) {
     if (!Number.isFinite(value)) return "—";
     return new Intl.NumberFormat("en-GB", {
@@ -1509,6 +1433,22 @@
     return level === "lq" ? "Lower quartile" : "Median";
   }
 
+  function getPropertyDescription(propertyTypeValue, priceLevelValue) {
+    const priceLevelDescription =
+      priceLevelValue === "lq" ? "an entry level" : "an average";
+    const propertyTypeDescription =
+      propertyTypeValue === "all"
+        ? "property"
+        : `${propertyTypeLabels[propertyTypeValue].toLowerCase()} property`;
+
+    return `${priceLevelDescription} ${propertyTypeDescription}`;
+  }
+
+  function roundUp(value, increment) {
+    if (!Number.isFinite(value)) return null;
+    return Math.ceil(value / increment) * increment;
+  }
+
   async function loadBuySectionData(
     propertyTypeValue,
     priceLevelValue,
@@ -1530,21 +1470,6 @@
       const msoaData = isMsoaSelection
         ? laData?.msoas?.find((msoa) => msoa.code === selection.code)
         : null;
-      const priceSeriesRaw = isMsoaSelection
-        ? (msoaData?.timeSeries?.[priceLevelValue] ?? [])
-        : (laData?.timeSeries?.[priceLevelValue] ?? []);
-
-      const priceSeries = priceSeriesRaw
-        .map((point) => {
-          const date = parseQuarterToDate(point?.quarter);
-          if (!date || !Number.isFinite(point?.price)) return null;
-          return {
-            date,
-            price: point.price,
-          };
-        })
-        .filter(Boolean);
-
       const affordabilityPrice = isMsoaSelection
         ? msoaData?.affordability?.[priceLevelValue]?.price
         : laData?.affordability?.[priceLevelValue]?.price;
@@ -1571,8 +1496,7 @@
           laData?.region_code ?? selection?.region_code,
         ),
         propertyPrice: selectedPrice,
-        incomeRequired: selectedPrice / INCOME_MULTIPLIER,
-        priceSeries,
+        incomeRequired: roundUp(selectedPrice / INCOME_MULTIPLIER, 100),
       };
     } catch (e) {
       if (requestId !== buySectionRequestId) {
@@ -2037,7 +1961,7 @@
                   bind:zoom
                   bind:center
                   minzoom={6}
-                  maxzoom={12.9}
+                  maxzoom={14}
                   controls={true}
                   attribution={true}
                   scrollZoomGuard={true}
@@ -2049,6 +1973,7 @@
                     url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{'{z}/{x}/{y}'}.pbf"
                     layer="msoa"
                     promoteId="areacd"
+                    maxzoom={12}
                   >
                     <MapLayer
                       id="msoa-fill"
@@ -2077,7 +2002,7 @@
                           ["feature-state", "color"],
                           "#ccc",
                         ],
-                        "fill-opacity": 1,
+                        "fill-opacity": 0.8,
                       }}
                     />
                     <MapLayer
@@ -2320,248 +2245,102 @@
   </Container>
 </Section>
 
-<Section title="Affordability snapshot" width="full">
-  <Grid width="full" cls="three-column-grid">
-    <Card title="House price to earnings ratio">
-      {#if snapshotLoading}
-        <p class="snapshot-status">Loading affordability ratios...</p>
-      {:else if snapshotError}
-        <p class="snapshot-status snapshot-status--error">{snapshotError}</p>
-      {:else if snapshotRatios}
-        <p class="snapshot-area-name">
-          {snapshotRatios.areaName} ({snapshotRatios.areaTypeLabel})
-        </p>
-        <div class="snapshot-ratios">
-          <div class="snapshot-ratio">
-            <p class="snapshot-ratio__label">
-              {propertyTypeLabels[propertyType] ?? "Selected property type"} median
-              price / median earnings
-            </p>
-            <p class="snapshot-ratio__value">
-              {formatRatio(snapshotRatios.medianRatio)}
-            </p>
-            {#if showSnapshotFlag(snapshotRatios.medianRatio)}
-              <p class="snapshot-ratio__flag">
-                <span class="snapshot-ratio__flag-icon" aria-hidden="true"
-                ></span>
-                Over {snapshotFlagThreshold}
-              </p>
-            {/if}
-          </div>
-
-          <div class="snapshot-ratio">
-            <p class="snapshot-ratio__label">
-              {propertyTypeLabels[propertyType] ?? "Selected property type"} lower
-              quartile price / lower quartile earnings
-            </p>
-            <p class="snapshot-ratio__value">
-              {formatRatio(snapshotRatios.lowerQuartileRatio)}
-            </p>
-            {#if showSnapshotFlag(snapshotRatios.lowerQuartileRatio)}
-              <p class="snapshot-ratio__flag">
-                <span class="snapshot-ratio__flag-icon" aria-hidden="true"
-                ></span>
-                Over {snapshotFlagThreshold}
-              </p>
-            {/if}
-          </div>
-        </div>
-      {:else}
-        <p class="snapshot-status">
-          Select an MSOA or local authority on the map to view affordability
-          ratios.
-        </p>
-      {/if}
-    </Card>
-    <Card title="Comparisons">
-      {#if comparisonLoading}
-        <p class="snapshot-status">Loading comparison ratios...</p>
-      {:else if comparisonError}
-        <p class="snapshot-status snapshot-status--error">
-          {comparisonError}
-        </p>
-      {:else if comparisonRatios}
-        <div class="comparison-values">
-          {#if comparisonRatios.selectionType === "msoa"}
-            <div class="comparison-value">
-              <p class="comparison-value__label">MSOA</p>
-              <p class="comparison-value__number">
-                {formatRatio(comparisonRatios.msoaMedianRatio)}
-              </p>
-            </div>
-          {/if}
-          <div class="comparison-value">
-            <p class="comparison-value__label">
-              {comparisonRatios.laName} (LA)
-            </p>
-            <p class="comparison-value__number">
-              {formatRatio(comparisonRatios.laMedianRatio)}
-            </p>
-          </div>
-          {#if comparisonRatios.showRegionComparison}
-            <div class="comparison-value">
-              <p class="comparison-value__label">
-                {comparisonRatios.regionName} (Region)
-              </p>
-              <p class="comparison-value__number">
-                {formatRatio(comparisonRatios.regionMedianRatio)}
-              </p>
-            </div>
-          {/if}
-          <div class="comparison-value">
-            <p class="comparison-value__label">
-              {comparisonRatios.countryName}
-            </p>
-            <p class="comparison-value__number">
-              {formatRatio(comparisonRatios.countryMedianRatio)}
-            </p>
-          </div>
-        </div>
-      {:else}
-        <p class="snapshot-status">
-          Select an MSOA or local authority on the map to view comparison
-          ratios.
-        </p>
-      {/if}
-    </Card>
-    <Card title="Property sales over time">
-      {#if salesOverTimeLoading}
-        <p class="snapshot-status">Loading property sales...</p>
-      {:else if salesOverTimeError}
-        <p class="snapshot-status snapshot-status--error">
-          {salesOverTimeError}
-        </p>
-      {:else if salesOverTimeData.length > 0}
-        <p class="snapshot-area-name">{salesOverTimeName}</p>
-        {#if salesOverTimePeriodLabel}
-          <p class="snapshot-status">
-            Rolling 4-quarter total (year ending {salesOverTimePeriodLabel})
-          </p>
-        {/if}
-        <div class="sales-over-time-chart">
-          <ColumnChart
-            data={salesOverTimeData}
-            xKey="year"
-            yKey="sales"
-            yAxisLabel="Sales"
-            xAxisLabel={salesOverTimePeriodLabel
-              ? `Year ending ${salesOverTimePeriodLabel}`
-              : "Year"}
-            height={260}
-            yTicks={5}
-            padding={{ top: 0, right: 8, bottom: 28, left: 42 }}
-          />
-        </div>
-      {:else}
-        <p class="snapshot-status">
-          Select an MSOA or local authority on the map to view property sales
-          over time.
-        </p>
-      {/if}
-    </Card>
-  </Grid>
-</Section>
-
-<Section title="What would I need to buy?" width="full">
-  <Grid width="full" cls="three-column-grid">
-    <Card title="Property cost">
+{#if selectedBoundary}
+  <Section title="What would I need to buy?" width="full">
+    <Grid width="full" cls="three-column-grid">
+    <Card cls="buy-summary-card">
       {#if buySectionLoading}
         <p class="snapshot-status">Loading property costs...</p>
       {:else if buySectionError}
         <p class="snapshot-status snapshot-status--error">{buySectionError}</p>
       {:else if buySectionData}
-        <p class="snapshot-area-name">
-          {buySectionData.areaName} ({buySectionData.areaTypeLabel})
-        </p>
-        <p class="buy-metric-label">{buySectionData.priceLevelLabel} price</p>
-        <p class="buy-metric-value">
-          {formatCurrency(buySectionData.propertyPrice)}
-        </p>
-        {#if buySectionData.priceSeries.length > 0}
-          <div class="buy-price-chart">
-            <LineChart
-              data={buySectionData.priceSeries}
-              xKey="date"
-              yKey="price"
-              xScale="time"
-              xFormatTickString="%Y"
-              xTicks={5}
-              yTicks={5}
-              yPrefix="£"
-              yAxisLabel="Price"
-              xAxisLabel="Year"
-              height={250}
-              padding={{ top: 0, right: 8, bottom: 28, left: 50 }}
-            />
+        <div class="buy-summary-content">
+          <div class="buy-icon-box">
+            <img src={`${base}/img/house.svg`} alt="" />
           </div>
-        {/if}
+          <div class="buy-summary-details">
+            <p class="buy-sentence">
+              In <Em color="#003c57" nowrap={false}>{buySectionData.areaName}</Em>,
+              {getPropertyDescription(propertyType, priceLevel)} costs:
+              <strong>{formatCurrency(buySectionData.propertyPrice)}</strong>
+            </p>
+          </div>
+        </div>
       {:else}
         <p class="snapshot-status">
           Select an MSOA or local authority on the map to view property costs.
         </p>
       {/if}
     </Card>
-    <Card title="Income required">
+    <Card cls="buy-summary-card">
       {#if buySectionLoading}
         <p class="snapshot-status">Loading income requirement...</p>
       {:else if buySectionError}
         <p class="snapshot-status snapshot-status--error">{buySectionError}</p>
       {:else if buySectionData}
-        <p class="snapshot-area-name">
-          {buySectionData.areaName} ({buySectionData.areaTypeLabel})
-        </p>
-        <p class="buy-metric-label">
-          {buySectionData.priceLevelLabel} price divided by {INCOME_MULTIPLIER}
-        </p>
-        <p class="buy-metric-value">
-          {formatCurrency(buySectionData.incomeRequired)}
-        </p>
+        <div class="buy-summary-content">
+          <div class="buy-icon-box">
+            <img src={`${base}/img/poundhouse.svg`} alt="" />
+          </div>
+          <div class="buy-summary-details">
+            <p class="buy-sentence">
+              To buy with a mortgage, you would need annual earnings of:
+              <strong>{formatCurrency(buySectionData.incomeRequired)}</strong>
+            </p>
+          </div>
+        </div>
       {:else}
         <p class="snapshot-status">
           Select an MSOA or local authority on the map to view income required.
         </p>
       {/if}
     </Card>
-    <Card title="Total savings needed">
+    <Card cls="buy-summary-card">
       {#if buySectionLoading}
         <p class="snapshot-status">Loading total savings...</p>
       {:else if buySectionError}
         <p class="snapshot-status snapshot-status--error">{buySectionError}</p>
       {:else if buySectionData && totalSavingsData}
-        <p class="snapshot-area-name">
-          {buySectionData.areaName} ({buySectionData.areaTypeLabel})
-        </p>
-        <div class="buy-checkbox">
-          <Checkbox
-            id="first-time-buyer-checkbox"
-            label="I'm a first-time buyer"
-            bind:checked={isFirstTimeBuyer}
-            compact
-          />
+        <div class="buy-summary-content">
+          <div class="buy-savings-icon-column">
+            <div class="buy-icon-box">
+              <img src={`${base}/img/piggybank.svg`} alt="" />
+            </div>
+            <div class="buy-checkbox">
+              <Checkbox
+                id="first-time-buyer-checkbox"
+                label="I'm a first-time buyer"
+                bind:checked={isFirstTimeBuyer}
+                compact
+              />
+            </div>
+          </div>
+          <div class="buy-summary-details buy-summary-details--savings">
+            <p class="buy-sentence">
+              You would also need savings of:
+              <strong>{formatCurrency(roundUp(totalSavingsData.total, 10))}</strong>
+            </p>
+            <div class="savings-breakdown">
+              <p class="savings-breakdown__row">
+                <span>10% deposit</span>
+                <strong>{formatCurrency(totalSavingsData.deposit)}</strong>
+              </p>
+              <p class="savings-breakdown__row">
+                <span>{totalSavingsData.transactionTaxLabel}</span>
+                <strong>{formatCurrency(totalSavingsData.transactionTax)}</strong>
+              </p>
+            </div>
+            {#if isFirstTimeBuyer && buySectionData.country === "wales"}
+              <p class="snapshot-status">
+                First-time buyer relief is not available in Wales.
+              </p>
+            {:else if isFirstTimeBuyer && buySectionData.country === "england" && !totalSavingsData.firstTimeBuyerReliefApplied}
+              <p class="snapshot-status">
+                First-time buyer relief is not applied above £625,000.
+              </p>
+            {/if}
+          </div>
         </div>
-        <p class="buy-metric-label">
-          10% deposit + {totalSavingsData.transactionTaxLabel}
-        </p>
-        <p class="buy-metric-value">{formatCurrency(totalSavingsData.total)}</p>
-        <div class="savings-breakdown">
-          <p class="savings-breakdown__row">
-            <span>10% deposit</span>
-            <strong>{formatCurrency(totalSavingsData.deposit)}</strong>
-          </p>
-          <p class="savings-breakdown__row">
-            <span>{totalSavingsData.transactionTaxLabel}</span>
-            <strong>{formatCurrency(totalSavingsData.transactionTax)}</strong>
-          </p>
-        </div>
-        {#if isFirstTimeBuyer && buySectionData.country === "wales"}
-          <p class="snapshot-status">
-            First-time buyer relief is not available in Wales.
-          </p>
-        {:else if isFirstTimeBuyer && buySectionData.country === "england" && !totalSavingsData.firstTimeBuyerReliefApplied}
-          <p class="snapshot-status">
-            First-time buyer relief is not applied above £625,000.
-          </p>
-        {/if}
       {:else}
         <p class="snapshot-status">
           Select an MSOA or local authority on the map to view total savings
@@ -2569,8 +2348,9 @@
         </p>
       {/if}
     </Card>
-  </Grid>
-</Section>
+    </Grid>
+  </Section>
+{/if}
 </div>
 
 <style>
@@ -2581,7 +2361,7 @@
     margin: 0 auto;
   }
 
-  @media (min-width: 980px) {
+  @media (min-width: 960px) {
     :global(.three-column-grid .ons-grid__col) {
       flex-basis: 33.3333%;
       max-width: 33.3333%;
@@ -2792,20 +2572,89 @@
     color: #4b5563;
   }
 
-  .buy-metric-value {
-    margin: 8px 0 0;
-    font-size: 34px;
-    font-weight: 700;
-    line-height: 1.1;
-    color: #222;
+  .buy-icon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    margin-bottom: 12px;
   }
 
-  .buy-price-chart {
-    margin-top: 12px;
+  .buy-icon-box img {
+    width: 90px;
+    height: 90px;
+  }
+
+  .buy-sentence {
+    margin: 0;
+    line-height: 1.5;
+    color: #414042;
+  }
+
+  .buy-sentence strong {
+    color: #222222;
+    font-weight: 700;
+  }
+
+  :global(.buy-summary-card) {
+    background: #e2e2e3;
+    padding: 12px;
+  }
+
+  @media (max-width: 959px) {
+    :global(.three-column-grid .ons-grid__col) {
+      flex-basis: 100%;
+      max-width: 100%;
+      width: 100%;
+    }
+
+    .buy-summary-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .buy-icon-box {
+      flex: 0 0 64px;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 0;
+    }
+
+    .buy-savings-icon-column {
+      flex: 0 0 64px;
+    }
+
+    .buy-savings-icon-column .buy-checkbox {
+      margin-top: 8px;
+      white-space: normal;
+    }
+
+    .buy-icon-box img {
+      width: 64px;
+      height: 64px;
+    }
+
+    .buy-summary-details {
+      flex: 1;
+      min-width: 0;
+      align-self: center;
+    }
+
+    .buy-summary-details--savings {
+      align-self: flex-start;
+    }
   }
 
   .buy-checkbox {
     margin: 8px 0 12px;
+  }
+
+  .buy-savings-icon-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .savings-breakdown {
@@ -2821,7 +2670,6 @@
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    font-size: 12px;
     color: #4b5563;
   }
 

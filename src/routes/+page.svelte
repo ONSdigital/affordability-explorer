@@ -18,6 +18,7 @@
     Card,
     Checkbox,
     Details,
+    Em,
   } from "@onsvisual/svelte-components";
   import {
     loadTopoJSON,
@@ -1207,25 +1208,33 @@
     beeswarmXMax = null;
   }
 
-  function decorateBeeswarmData(data = [], selectedArea = null, laData = null) {
+  function decorateBeeswarmData(
+    data = [],
+    selectedArea = null,
+    laData = null,
+    regionName = null,
+    countryName = null,
+  ) {
     const selectedCode =
       selectedArea?.type === "msoa" ? selectedArea.code : null;
     const decoratedData = data.map((point) => {
       if (point.type === "region") {
         return {
           ...point,
+          label: regionName ?? point.label,
           type: "Region average",
           marker: "region",
-          radius: 7,
+          radius: 7.5,
         };
       }
 
       if (point.type === "nation") {
         return {
           ...point,
+          label: countryName ?? point.label,
           type: "National average",
           marker: "nation",
-          radius: 7,
+          radius: 7.5,
         };
       }
 
@@ -1234,7 +1243,7 @@
           ...point,
           type: "Selected area",
           marker: "selected",
-          radius: 10,
+          radius: 7.5,
         };
       }
 
@@ -1249,12 +1258,12 @@
     if (Number.isFinite(laData?.affordability?.median?.ratio)) {
       decoratedData.push({
         x: laData.affordability.median.ratio,
-        label: `${laData.name} average`,
+        label: laData.name,
         code: laData.code,
         type: "LA average",
         marker: "la",
         selected: selectedArea?.type === "la",
-        radius: selectedArea?.type === "la" ? 10 : 7,
+        radius: 7.5,
       });
     }
 
@@ -1378,6 +1387,8 @@
         ),
         selectedArea,
         laData,
+        regionName,
+        country === "wales" ? "Wales" : "England",
       );
       setBeeswarmLegend(beeswarmData);
       setBeeswarmXBounds(beeswarmData);
@@ -2200,7 +2211,11 @@
 
       {#if selectedBoundary}
         <div class="beeswarm-card">
-          <Card title="MSOA Distribution">
+          <Card>
+            <h2 class="beeswarm-card__title">
+              Compare <Em color="#003c57">{selectedBoundary.name}</Em> with
+              other areas
+            </h2>
             {#if beeswarmLoading}
               <p class="snapshot-status">Loading beeswarm data...</p>
             {:else if beeswarmError}
@@ -2217,14 +2232,14 @@
                   zDomain={beeswarmLegendDomain}
                   xMin={beeswarmXMin}
                   xMax={beeswarmXMax}
-                  xAxisLabel="Affordability Ratio"
+                  xAxisLabel="House price-to-earnings ratio"
                   yAxis={false}
                   yFitBeeswarm={true}
                   legend={false}
                   rKey="radius"
                   buffer={2}
                   height={220}
-                  padding={{ top: 58, right: 8, bottom: 50, left: 20 }}
+                  padding={{ top: 130, right: 15, bottom: 50, left: 15 }}
                   colors={beeswarmLegendDomain.map(() => "transparent")}
                 >
                   <BeeswarmMarkers slot="svg" />
@@ -2232,15 +2247,56 @@
                 <div class="beeswarm-key" aria-label="Beeswarm marker key">
                   {#each beeswarmLegendDomain as type}
                     <span class="beeswarm-key__item">
-                      <span
-                        class:beeswarm-key__marker--selected={type === "Selected area"}
-                        class:beeswarm-key__marker--other={type === "Other MSOAs in LA"}
-                        class:beeswarm-key__marker--la={type === "LA average"}
-                        class:beeswarm-key__marker--region={type === "Region average"}
-                        class:beeswarm-key__marker--nation={type === "National average"}
+                      <svg
                         class="beeswarm-key__marker"
+                        viewBox="0 0 20 20"
                         aria-hidden="true"
-                      ></span>
+                      >
+                        {#if type === "Selected area"}
+                          <circle cx="10" cy="10" r="7.5" fill="#003c57" />
+                        {:else if type === "Other MSOAs in LA"}
+                          <circle
+                            cx="10"
+                            cy="10"
+                            r="5.5"
+                            fill="#d9d9d9"
+                            stroke="#bcbec0"
+                            stroke-width="1.5"
+                          />
+                        {:else if type === "LA average"}
+                          <rect
+                            x="4.7"
+                            y="4.7"
+                            width="10.6"
+                            height="10.6"
+                            fill={selectedAreaForData?.type === "la"
+                              ? "#206095"
+                              : "#ffffff"}
+                            stroke="#206095"
+                            stroke-width="2.5"
+                            transform="rotate(45 10 10)"
+                          />
+                        {:else if type === "Region average"}
+                          <rect
+                            x="4"
+                            y="4"
+                            width="12"
+                            height="12"
+                            fill="#ffffff"
+                            stroke="#a8c61e"
+                            stroke-width="2.5"
+                          />
+                        {:else if type === "National average"}
+                          <circle
+                            cx="10"
+                            cy="10"
+                            r="7.5"
+                            fill="#ffffff"
+                            stroke="#e8528a"
+                            stroke-width="2.5"
+                          />
+                        {/if}
+                      </svg>
                       {type}
                     </span>
                   {/each}
@@ -2536,7 +2592,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px 18px;
-    margin-top: 8px;
+    margin-top: 12px;
     font-size: 12px;
     color: #414042;
   }
@@ -2548,43 +2604,11 @@
   }
 
   .beeswarm-key__marker {
-    display: inline-block;
-    box-sizing: border-box;
+    display: block;
     flex: 0 0 auto;
-    width: 12px;
-    height: 12px;
-  }
-
-  .beeswarm-key__marker--selected {
     width: 20px;
     height: 20px;
-    border-radius: 50%;
-    background: #003c57;
-  }
-
-  .beeswarm-key__marker--other {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #d9d9d9;
-  }
-
-  .beeswarm-key__marker--la {
-    border: 2px solid #003c57;
-    border-radius: 50%;
-    background: #ffffff;
-  }
-
-  .beeswarm-key__marker--region {
-    background: #fd7e14;
-  }
-
-  .beeswarm-key__marker--nation {
-    width: 10px;
-    height: 10px;
-    margin: 1px;
-    background: #e74c3c;
-    transform: rotate(45deg);
+    overflow: visible;
   }
 
   .map-grid {
@@ -2602,6 +2626,12 @@
     width: 100%;
     min-width: 0;
     overflow: hidden;
+  }
+
+  .beeswarm-card__title {
+    margin: 0 0 16px;
+    font-size: 1.25rem;
+    line-height: 1.4;
   }
 
   .beeswarm-chart {

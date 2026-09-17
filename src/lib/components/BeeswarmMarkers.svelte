@@ -1,15 +1,15 @@
 <script>
   import { getContext } from "svelte";
 
-  const { data, xScale, yScale, custom, width, height } =
+  const { data, xScale, yScale, custom, width, height, padding } =
     getContext("LayerCake");
   const coords = $custom.coords;
 
   const markerColors = {
     selected: "#003c57",
-    la: "#003c57",
-    region: "#fd7e14",
-    nation: "#e74c3c",
+    la: "#206095",
+    region: "#a8c61e",
+    nation: "#e8528a",
     other: "#d9d9d9",
   };
 
@@ -20,93 +20,298 @@
     };
   }
 
-  function getReferenceLabel(point) {
-    const prefix = point.marker === "region" ? "Regional" : "National";
-    return `${prefix}: ${Number(point.x).toFixed(2)}`;
+  function getCalloutLabel(point) {
+    return `${point.label}: ${Number(point.x).toFixed(1)}`;
   }
 
-  function clampLabelX(x, labelWidth) {
-    return Math.max(labelWidth / 2, Math.min($width - labelWidth / 2, x));
+  function getCalloutWidth(point) {
+    return Math.min(
+      Math.max(`${point.label}: ${Number(point.x).toFixed(1)}`.length * 9 + 20, 82),
+      $width - 8,
+    );
+  }
+
+  function getComparisonTextColor(point) {
+    return point.marker === "la" ? "#ffffff" : "#222222";
+  }
+
+  function isSelectedPoint(point) {
+    return point.marker === "selected" || point.selected;
+  }
+
+  function getLabelWidth(point) {
+    return getCalloutWidth(point);
+  }
+
+  function placeLabels(values) {
+    const batches = [];
+
+    for (const value of values) {
+      batches.push({ size: 1, mean: value });
+
+      while (batches.length > 1) {
+        const previous = batches[batches.length - 2];
+        const current = batches[batches.length - 1];
+
+        if (previous.mean < current.mean) break;
+
+        previous.mean =
+          (previous.mean * previous.size + current.mean * current.size) /
+          (previous.size + current.size);
+        previous.size += current.size;
+        batches.pop();
+      }
+    }
+
+    return batches.flatMap((batch) =>
+      Array.from({ length: batch.size }, () => batch.mean),
+    );
+  }
+
+  function buildLabelPlacements(labelPoints) {
+    const placements = new Map();
+    const chartWidth = $width;
+    const topPadding = $padding.top;
+    const orderedPoints = [...labelPoints].sort((a, b) => a.x - b.x);
+    const rows = [];
+    const maxHorizontalDodge = 48;
+
+    function fitRow(points) {
+      const widths = points.map((point) => getLabelWidth(point));
+      const cumulativeWidths = Array(points.length).fill(0);
+
+      for (let index = 1; index < points.length; index += 1) {
+        cumulativeWidths[index] =
+          cumulativeWidths[index - 1] +
+          (widths[index - 1] + widths[index]) / 2 +
+          8;
+      }
+
+      const pointXs = points.map((point) => $xScale(point.x));
+      const baselinedXs = pointXs.map(
+        (x, index) => x - cumulativeWidths[index],
+      );
+      const regressedXs = placeLabels(baselinedXs);
+      const fittedXs = regressedXs.map(
+        (x, index) => x + cumulativeWidths[index],
+      );
+      const leftEdge = fittedXs[0] - widths[0] / 2;
+      const rightEdge = fittedXs.at(-1) + widths.at(-1) / 2;
+      const shift =
+        leftEdge < 0
+          ? -leftEdge
+          : rightEdge > chartWidth
+            ? chartWidth - rightEdge
+            : 0;
+      const xs = fittedXs.map((x) => x + shift);
+
+      return {
+        fits: rightEdge - leftEdge <= chartWidth,
+        xs,
+        maxDodge: Math.max(
+          ...xs.map((x, index) => Math.abs(x - pointXs[index])),
+        ),
+      };
+    }
+
+    for (const point of orderedPoints) {
+      let placed = false;
+
+      for (const row of rows) {
+        const candidatePoints = [...row.points, point].sort(
+          (a, b) => a.x - b.x,
+        );
+        const fit = fitRow(candidatePoints);
+
+        if (fit.fits && fit.maxDodge <= maxHorizontalDodge) {
+          row.points = candidatePoints;
+          row.fit = fit;
+          placed = true;
+          break;
+        }
+      }
+
+      if (!placed) {
+        const points = [point];
+        rows.push({ points, fit: fitRow(points) });
+      }
+    }
+
+    rows.forEach((row, rowIndex) => {
+      row.points.forEach((point, pointIndex) => {
+        placements.set(point, {
+          x: row.fit.xs[pointIndex],
+          y: -topPadding + 2 + rowIndex * 34,
+        });
+      });
+    });
+
+    return placements;
+  }
+
+  function buildElbowFractions(labelPoints, placements) {
+    const fractions = new Map();
+    const groups = { left: [], right: [] };
+
+    for (const point of labelPoints) {
+      const pointX = $xScale(point.x);
+      const labelX = placements.get(point).x;
+      const direction =
+        labelX < pointX ? "left" : labelX > pointX ? "right" : null;
+
+      if (!direction) {
+        fractions.set(point, 0.5);
+        continue;
+      }
+
+      groups[direction].push({
+        point,
+        distance: Math.abs(labelX - pointX),
+      });
+    }
+
+    for (const group of Object.values(groups)) {
+      group.sort((a, b) => b.distance - a.distance);
+      group.forEach(({ point }, index) => {
+        fractions.set(point, (index + 1) / (group.length + 1));
+      });
+    }
+
+    return fractions;
   }
 
   $: points = $coords ? $coords.map((_, index) => getPoint(index)) : [];
-  $: references = points.filter(
-    (point) => point.marker === "region" || point.marker === "nation",
+  $: selectedPoints = points.filter(
+    (point) =>
+      point.marker === "selected" || (point.marker === "la" && point.selected),
+  );
+  $: comparisons = points
+    .filter(
+      (point) =>
+        (point.marker === "la" && !point.selected) ||
+        point.marker === "region" ||
+        point.marker === "nation",
+    )
+    .sort(
+      (a, b) =>
+        ["nation", "region", "la"].indexOf(a.marker) -
+        ["nation", "region", "la"].indexOf(b.marker),
+    );
+  $: labelPoints = [...selectedPoints, ...comparisons].sort(
+    (a, b) => a.x - b.x,
+  );
+  $: labelPlacements = buildLabelPlacements(labelPoints);
+  $: elbowFractions = buildElbowFractions(labelPoints, labelPlacements);
+  $: callouts = [...labelPoints].sort(
+    (a, b) => labelPlacements.get(b).y - labelPlacements.get(a).y,
   );
 </script>
 
 {#if $coords}
-  <g class="beeswarm-reference-lines">
-    {#each references as point, index}
+  <g class="beeswarm-other-markers">
+    {#each points.filter((point) => point.marker === "other") as point}
       {@const x = $xScale(point.x)}
-      {@const labelWidth = 116}
-      {@const labelY = 2 + index * 28}
-      {@const labelX = clampLabelX(x, labelWidth)}
-      <line
-        x1={x}
-        x2={x}
-        y1={labelY + 22}
-        y2={$height}
-        stroke={markerColors[point.marker]}
+      {@const y = $yScale(point.y)}
+      <circle
+        cx={x}
+        cy={y}
+        r="5.5"
+        fill={markerColors.other}
+        stroke="#bcbec0"
         stroke-width="1.5"
       />
-      <rect
-        x={labelX - labelWidth / 2}
-        y={labelY}
-        width={labelWidth}
-        height="22"
-        fill="#ffffff"
-        stroke={markerColors[point.marker]}
-        stroke-width="1.5"
-      />
-      <text
-        x={labelX}
-        y={labelY + 15}
-        text-anchor="middle"
-        fill="#222222"
-        font-size="11"
-        font-weight="600"
-      >
-        {getReferenceLabel(point)}
-      </text>
     {/each}
   </g>
 
-  <g class="beeswarm-markers">
-    {#each points as point}
+  <g class="beeswarm-callout-lines">
+    {#each callouts as point}
+      {@const x = $xScale(point.x)}
+      {@const y = $yScale(point.y)}
+      {@const labelHeight = 30}
+      {@const placement = labelPlacements.get(point)}
+      {@const labelY = placement.y}
+      {@const labelX = placement.x}
+      {@const labelBottom = labelY + labelHeight}
+      {@const elbowY =
+        labelBottom + (y - labelBottom) * elbowFractions.get(point)}
+      <path
+        d={`M ${x} ${y} V ${elbowY} H ${labelX} V ${labelY + labelHeight}`}
+        fill="none"
+        stroke={markerColors[point.marker]}
+        stroke-width="3"
+      />
+    {/each}
+  </g>
+
+  <g class="beeswarm-highlighted-markers">
+    {#each points.filter((point) => point.marker !== "other") as point}
       {@const x = $xScale(point.x)}
       {@const y = $yScale(point.y)}
       {#if point.marker === "selected"}
-        <circle cx={x} cy={y} r="10" fill={markerColors.selected} />
+        <circle cx={x} cy={y} r="7.5" fill={markerColors.selected} />
       {:else if point.marker === "la"}
-        <circle
-          cx={x}
-          cy={y}
-          r={point.selected ? 10 : 7}
-          fill="#ffffff"
+        <rect
+          x={x - 5.3}
+          y={y - 5.3}
+          width="10.6"
+          height="10.6"
+          fill={point.selected ? markerColors.la : "#ffffff"}
           stroke={markerColors.la}
-          stroke-width="2"
+          stroke-width="2.5"
+          transform={`rotate(45 ${x} ${y})`}
         />
       {:else if point.marker === "region"}
-        <rect
-          x={x - 7}
-          y={y - 7}
-          width="14"
-          height="14"
-          fill={markerColors.region}
-        />
-      {:else if point.marker === "nation"}
         <rect
           x={x - 6}
           y={y - 6}
           width="12"
           height="12"
-          fill={markerColors.nation}
-          transform={`rotate(45 ${x} ${y})`}
+          fill="#ffffff"
+          stroke={markerColors.region}
+          stroke-width="2.5"
         />
-      {:else}
-        <circle cx={x} cy={y} r="3" fill={markerColors.other} />
+      {:else if point.marker === "nation"}
+        <circle
+          cx={x}
+          cy={y}
+          r="7.5"
+          fill="#ffffff"
+          stroke={markerColors.nation}
+          stroke-width="2.5"
+        />
       {/if}
+    {/each}
+  </g>
+
+  <g class="beeswarm-callout-labels">
+    {#each callouts as point}
+      {@const labelWidth = getCalloutWidth(point)}
+      {@const labelHeight = 30}
+      {@const placement = labelPlacements.get(point)}
+      {@const labelY = placement.y}
+      {@const labelX = placement.x}
+      <rect
+        x={labelX - labelWidth / 2}
+        y={labelY}
+        width={labelWidth}
+        height={labelHeight}
+        rx="5"
+        fill={isSelectedPoint(point)
+          ? markerColors.selected
+          : markerColors[point.marker]}
+      />
+      <text
+        x={labelX}
+        y={labelY + 21}
+        text-anchor="middle"
+        fill={isSelectedPoint(point)
+          ? "#ffffff"
+          : getComparisonTextColor(point)}
+        font-size="17"
+        font-weight="600"
+      >
+        {getCalloutLabel(point)}
+      </text>
     {/each}
   </g>
 {/if}

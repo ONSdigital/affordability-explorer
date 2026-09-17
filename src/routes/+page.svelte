@@ -2242,7 +2242,15 @@
                   padding={{ top: 130, right: 15, bottom: 50, left: 15 }}
                   colors={beeswarmLegendDomain.map(() => "transparent")}
                 >
-                  <BeeswarmMarkers slot="svg" />
+                  <BeeswarmMarkers
+                    slot="svg"
+                    on:select={({ detail }) => {
+                      const msoaData = affordabilityData[detail.code];
+                      if (msoaData) {
+                        selectMsoa(detail.code, msoaData);
+                      }
+                    }}
+                  />
                 </ScatterChart>
                 <div class="beeswarm-key" aria-label="Beeswarm marker key">
                   {#each beeswarmLegendDomain as type}

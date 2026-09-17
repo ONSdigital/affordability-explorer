@@ -1,9 +1,13 @@
 <script>
-  import { getContext } from "svelte";
+  import { createEventDispatcher, getContext } from "svelte";
 
   const { data, xScale, yScale, custom, width, height, padding } =
     getContext("LayerCake");
   const coords = $custom.coords;
+  const dispatch = createEventDispatcher();
+  const hoverColor = "#f47721";
+  const hoverRadius = 24;
+  let hoveredPoint = null;
 
   const markerColors = {
     selected: "#003c57",
@@ -180,7 +184,49 @@
     return fractions;
   }
 
+  function getPointerPosition(event) {
+    const svg = event.currentTarget.ownerSVGElement;
+    const matrix = event.currentTarget.getScreenCTM();
+
+    if (!svg || !matrix) return null;
+
+    const pointer = svg.createSVGPoint();
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
+    return pointer.matrixTransform(matrix.inverse());
+  }
+
+  function updateHoveredPoint(event) {
+    const pointer = getPointerPosition(event);
+    if (!pointer) return;
+    let closestPoint = null;
+    let closestDistance = hoverRadius;
+
+    for (const point of interactivePoints) {
+      const distance = Math.hypot(
+        pointer.x - $xScale(point.x),
+        pointer.y - $yScale(point.y),
+      );
+
+      if (distance < closestDistance) {
+        closestPoint = point;
+        closestDistance = distance;
+      }
+    }
+
+    hoveredPoint = closestPoint;
+  }
+
+  function selectHoveredPoint() {
+    if (hoveredPoint?.code) {
+      dispatch("select", { code: hoveredPoint.code });
+    }
+  }
+
   $: points = $coords ? $coords.map((_, index) => getPoint(index)) : [];
+  $: interactivePoints = points.filter(
+    (point) => point.marker === "other" || point.marker === "selected",
+  );
   $: selectedPoints = points.filter(
     (point) =>
       point.marker === "selected" || (point.marker === "la" && point.selected),
@@ -223,7 +269,7 @@
     {/each}
   </g>
 
-  <g class="beeswarm-callout-lines">
+  <g class="beeswarm-static-annotations" opacity={hoveredPoint ? 0.2 : 1}>
     {#each callouts as point}
       {@const x = $xScale(point.x)}
       {@const y = $yScale(point.y)}
@@ -241,9 +287,8 @@
         stroke-width="3"
       />
     {/each}
-  </g>
 
-  <g class="beeswarm-highlighted-markers">
+    <g class="beeswarm-highlighted-markers">
     {#each points.filter((point) => point.marker !== "other") as point}
       {@const x = $xScale(point.x)}
       {@const y = $yScale(point.y)}
@@ -281,9 +326,9 @@
         />
       {/if}
     {/each}
-  </g>
+    </g>
 
-  <g class="beeswarm-callout-labels">
+    <g class="beeswarm-callout-labels">
     {#each callouts as point}
       {@const labelWidth = getCalloutWidth(point)}
       {@const labelHeight = 30}
@@ -313,5 +358,65 @@
         {getCalloutLabel(point)}
       </text>
     {/each}
+    </g>
   </g>
+
+  <rect
+    x="0"
+    y={-$padding.top}
+    width={$width}
+    height={$height + $padding.top}
+    fill="transparent"
+    pointer-events="all"
+    on:mousemove={updateHoveredPoint}
+    on:mouseleave={() => (hoveredPoint = null)}
+    on:click={selectHoveredPoint}
+  />
+
+  {#if hoveredPoint}
+    {@const x = $xScale(hoveredPoint.x)}
+    {@const y = $yScale(hoveredPoint.y)}
+    {@const labelWidth = getCalloutWidth(hoveredPoint)}
+    {@const labelHeight = 30}
+    {@const labelX = Math.max(
+      labelWidth / 2,
+      Math.min($width - labelWidth / 2, x),
+    )}
+    {@const labelY = -$padding.top + 2}
+    {@const elbowY = labelY + labelHeight + (y - labelY - labelHeight) / 2}
+    <g class="beeswarm-hover-annotation" pointer-events="none">
+      <path
+        d={`M ${x} ${y} V ${elbowY} H ${labelX} V ${labelY + labelHeight}`}
+        fill="none"
+        stroke={hoverColor}
+        stroke-width="3"
+      />
+      <circle
+        cx={x}
+        cy={y}
+        r="7.5"
+        fill={hoverColor}
+        stroke="#ffffff"
+        stroke-width="2.5"
+      />
+      <rect
+        x={labelX - labelWidth / 2}
+        y={labelY}
+        width={labelWidth}
+        height={labelHeight}
+        rx="5"
+        fill={hoverColor}
+      />
+      <text
+        x={labelX}
+        y={labelY + 21}
+        text-anchor="middle"
+        fill="#ffffff"
+        font-size="17"
+        font-weight="600"
+      >
+        {getCalloutLabel(hoveredPoint)}
+      </text>
+    </g>
+  {/if}
 {/if}

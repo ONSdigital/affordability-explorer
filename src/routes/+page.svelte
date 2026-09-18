@@ -92,9 +92,9 @@
   let beeswarmXMax = null;
   const BEESWARM_TYPE_ORDER = [
     "Selected area",
-    "Other MSOAs in LA",
-    "LA average",
-    "Region average",
+    "Other neighbourhoods in local authority",
+    "Local authority average",
+    "Regional average",
     "National average",
   ];
   const propertyTypeLabels = {
@@ -1156,7 +1156,7 @@
         return {
           ...point,
           label: regionName ?? point.label,
-          type: "Region average",
+          type: "Regional average",
           marker: "region",
           radius: 7.5,
         };
@@ -1183,7 +1183,7 @@
 
       return {
         ...point,
-        type: "Other MSOAs in LA",
+        type: "Other neighbourhoods in local authority",
         marker: "other",
         radius: 3,
       };
@@ -1194,7 +1194,7 @@
         x: laData.affordability.median.ratio,
         label: laData.name,
         code: laData.code,
-        type: "LA average",
+        type: "Local authority average",
         marker: "la",
         selected: selectedArea?.type === "la",
         radius: 7.5,
@@ -2187,7 +2187,7 @@
                       >
                         {#if type === "Selected area"}
                           <circle cx="10" cy="10" r="7.5" fill="#003c57" />
-                        {:else if type === "Other MSOAs in LA"}
+                        {:else if type === "Other neighbourhoods in local authority"}
                           <circle
                             cx="10"
                             cy="10"
@@ -2196,7 +2196,7 @@
                             stroke="#bcbec0"
                             stroke-width="1.5"
                           />
-                        {:else if type === "LA average"}
+                        {:else if type === "Local authority average"}
                           <rect
                             x="4.7"
                             y="4.7"
@@ -2209,7 +2209,7 @@
                             stroke-width="2.5"
                             transform="rotate(45 10 10)"
                           />
-                        {:else if type === "Region average"}
+                        {:else if type === "Regional average"}
                           <rect
                             x="4"
                             y="4"
@@ -2302,10 +2302,10 @@
         <p class="snapshot-status snapshot-status--error">{buySectionError}</p>
       {:else if buySectionData && totalSavingsData}
         <div class="buy-summary-content">
-          <div class="buy-savings-icon-column">
-            <div class="buy-icon-box">
-              <img src={`${base}/img/piggybank.svg`} alt="" />
-            </div>
+          <div class="buy-icon-box">
+            <img src={`${base}/img/piggybank.svg`} alt="" />
+          </div>
+          <div class="buy-summary-details buy-summary-details--savings">
             <div class="buy-checkbox">
               <Checkbox
                 id="first-time-buyer-checkbox"
@@ -2314,11 +2314,16 @@
                 compact
               />
             </div>
-          </div>
-          <div class="buy-summary-details buy-summary-details--savings">
-            <p class="buy-sentence">
+            <p class="buy-sentence buy-sentence--desktop">
               You would also need savings of:
               <strong>{formatCurrency(roundUp(totalSavingsData.total, 10))}</strong>
+            </p>
+            <p class="buy-sentence buy-sentence--mobile">
+              You would also need savings of
+              <strong>{formatCurrency(roundUp(totalSavingsData.total, 10))}</strong>,
+              made up of a 10% deposit of <strong>{formatCurrency(totalSavingsData.deposit)}</strong>
+              and <strong>{formatCurrency(totalSavingsData.transactionTax)}</strong>
+              for stamp duty.
             </p>
             <div class="savings-breakdown">
               <p class="savings-breakdown__row">
@@ -2381,7 +2386,7 @@
     flex-wrap: wrap;
     gap: 8px 18px;
     margin-top: 12px;
-    font-size: 12px;
+    font-size: 14px;
     color: #414042;
   }
 
@@ -2459,7 +2464,7 @@
 
   .snapshot-status {
     margin: 0;
-    font-size: 13px;
+    font-size: 14px;
     color: #374151;
   }
 
@@ -2597,6 +2602,10 @@
     font-weight: 700;
   }
 
+  .buy-sentence--mobile {
+    display: none;
+  }
+
   :global(.buy-summary-card) {
     background: #e2e2e3;
     padding: 12px;
@@ -2622,15 +2631,6 @@
       margin-bottom: 0;
     }
 
-    .buy-savings-icon-column {
-      flex: 0 0 64px;
-    }
-
-    .buy-savings-icon-column .buy-checkbox {
-      margin-top: 8px;
-      white-space: normal;
-    }
-
     .buy-icon-box img {
       width: 64px;
       height: 64px;
@@ -2645,16 +2645,19 @@
     .buy-summary-details--savings {
       align-self: flex-start;
     }
+
+    .buy-summary-details--savings .buy-sentence--desktop,
+    .buy-summary-details--savings .savings-breakdown {
+      display: none;
+    }
+
+    .buy-summary-details--savings .buy-sentence--mobile {
+      display: block;
+    }
   }
 
   .buy-checkbox {
     margin: 8px 0 12px;
-  }
-
-  .buy-savings-icon-column {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
   }
 
   .savings-breakdown {

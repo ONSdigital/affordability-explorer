@@ -29,8 +29,10 @@
   }
 
   function getCalloutWidth(point) {
+    const label = getCalloutLabel(point);
+
     return Math.min(
-      Math.max(`${point.label}: ${Number(point.x).toFixed(1)}`.length * 10 + 32, 94),
+      Math.max(label.length * 9 + 24, 86),
       $width - 8,
     );
   }

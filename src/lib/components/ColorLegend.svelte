@@ -341,7 +341,7 @@
     top: 0;
     transform: translateX(-50%);
     color: #666;
-    font-size: 13px;
+    font-size: 14px;
     white-space: nowrap;
     line-height: 1.2;
   }

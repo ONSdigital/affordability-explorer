@@ -36,7 +36,7 @@
       "tiles": ["https://cdn.ons.gov.uk/maptiles/buildingmask/{z}/{x}/{y}.png"],
       "tileSize": 256,
       "maxzoom": 14,
-      "bounds": [-9, 47, 4, 61],
+      "bounds": [-12.836, 49.441, 7.604, 55.945],
       "attribution": "&copy; Ordnance Survey"
     }
   },
@@ -60,10 +60,10 @@
           "interpolate",
           ["linear"],
           ["zoom"],
+          9,
+          0.1,
           10,
-          0,
-          11,
-          0.25
+          0.9
         ]
       }
     },

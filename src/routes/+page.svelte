@@ -1932,6 +1932,7 @@
           variant="secondary"
           disabled={!selectedBoundary}
           on:click={clearSelection}
+          small={true}
         >
           Clear selection
         </Button>

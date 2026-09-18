@@ -173,7 +173,7 @@
 </script>
 
 <div class="keycontainer">
-  <div class="key-title">Affordability ratio (price / earnings)</div>
+  <div class="key-title">House price to earnings ratio</div>
 
   {#if legendRanges.length > 0}
     <div class="keyscale">

@@ -51,9 +51,9 @@
   let selected = null;
   let selectedLACode = null;
   const defaultMapView = {
-    lng: -1.9,
-    lat: 52.5,
-    zoom: 6,
+    lng: -2.245,
+    lat: 53.48,
+    zoom: 8,
   };
   let zoom = defaultMapView.zoom;
   let center = { lng: defaultMapView.lng, lat: defaultMapView.lat };
@@ -85,6 +85,7 @@
   let beeswarmData = null;
   let beeswarmLoading = false;
   let beeswarmError = null;
+  let beeswarmNoData = false;
   let beeswarmSelectionKey = "";
   let beeswarmRequestId = 0;
   let beeswarmLegendDomain = [];
@@ -1137,6 +1138,7 @@
     beeswarmData = null;
     beeswarmLoading = false;
     beeswarmError = null;
+    beeswarmNoData = false;
     beeswarmLegendDomain = [];
     beeswarmXMin = null;
     beeswarmXMax = null;
@@ -1189,7 +1191,15 @@
       };
     });
 
-    if (Number.isFinite(laData?.affordability?.median?.ratio)) {
+    const selectedMsoaMatchesLocalAuthority =
+      selectedArea?.type === "msoa" &&
+      laData?.msoas?.length === 1 &&
+      laData.msoas[0]?.code === selectedArea.code;
+
+    if (
+      !selectedMsoaMatchesLocalAuthority &&
+      Number.isFinite(laData?.affordability?.median?.ratio)
+    ) {
       decoratedData.push({
         x: laData.affordability.median.ratio,
         label: laData.name,
@@ -1242,6 +1252,7 @@
 
     beeswarmLoading = true;
     beeswarmError = null;
+    beeswarmNoData = false;
 
     try {
       let laCode = null;
@@ -1291,6 +1302,7 @@
           "Affordability data",
           laData.latest_period,
         );
+        beeswarmNoData = true;
         beeswarmData = [];
         beeswarmLegendDomain = [];
         beeswarmXMin = null;
@@ -1305,7 +1317,9 @@
       const msoas = laData.msoas || [];
 
       const [regionAffordability, nationalAffordability] = await Promise.all([
-        loadRegionalAffordability(propertyTypeValue, regionCode, regionName),
+        country === "wales"
+          ? Promise.resolve(null)
+          : loadRegionalAffordability(propertyTypeValue, regionCode, regionName),
         loadNationalAffordability(propertyTypeValue, country),
       ]);
 
@@ -1920,7 +1934,7 @@
           <AccessibleSelect
             id="search-input"
             label="Search for an area or postcode"
-            placeholder="e.g. London, SW1A 1AA, North East..."
+            placeholder="e.g. Westminister, SW1A 1AA..."
             mode="search"
             bind:value={selectedValue}
             bind:clearInput
@@ -1928,14 +1942,16 @@
             on:change={(e) => handleSelectChange(e.detail)}
           />
         </div>
-        <Button
-          variant="secondary"
-          disabled={!selectedBoundary}
-          on:click={clearSelection}
-          small={true}
-        >
-          Clear selection
-        </Button>
+        <div class="search-controls__button">
+          <Button
+            variant="secondary"
+            disabled={!selectedBoundary}
+            on:click={clearSelection}
+            small={true}
+          >
+            Clear selection
+          </Button>
+        </div>
       </div>
     {/if}
   </Container>
@@ -2139,12 +2155,17 @@
         <div class="beeswarm-card">
           <Card>
             <h2 class="beeswarm-card__title">
-              Compare <Em color="#003c57">{selectedBoundary.name}</Em> with
-              other areas
+              {#if beeswarmError || (!beeswarmLoading && (!beeswarmData || beeswarmData.length === 0))}
+                No data available for <Em color="#003c57">{selectedBoundary.name}</Em>
+                for the latest period.
+              {:else}
+                Compare <Em color="#003c57">{selectedBoundary.name}</Em> with
+                other areas
+              {/if}
             </h2>
             {#if beeswarmLoading}
               <p class="snapshot-status">Loading beeswarm data...</p>
-            {:else if beeswarmError}
+            {:else if beeswarmError && !beeswarmNoData}
               <p class="snapshot-status snapshot-status--error">
                 {beeswarmError}
               </p>
@@ -2158,7 +2179,7 @@
                   zDomain={beeswarmLegendDomain}
                   xMin={beeswarmXMin}
                   xMax={beeswarmXMax}
-                  xAxisLabel="House price-to-earnings ratio"
+                  xAxisLabel="House price to earnings ratio"
                   yAxis={false}
                   yFitBeeswarm={true}
                   legend={false}
@@ -2246,7 +2267,7 @@
   </Container>
 </Section>
 
-{#if selectedBoundary}
+{#if selectedBoundary && (buySectionLoading || buySectionData)}
   <Section title="What would I need to buy?" width="full">
     <Grid width="full" cls="three-column-grid">
     <Card cls="buy-summary-card">
@@ -2693,6 +2714,10 @@
     min-width: 0;
   }
 
+  .search-controls__button {
+    margin-bottom: 4px;
+  }
+
   .map-wrapper {
     height: 600px;
     border-radius: 4px;
@@ -2741,6 +2766,10 @@
     .search-controls {
       align-items: stretch;
       flex-direction: column;
+    }
+
+    .search-controls__button {
+      margin-bottom: 0;
     }
 
   }

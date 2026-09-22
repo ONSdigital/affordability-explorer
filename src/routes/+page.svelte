@@ -127,7 +127,7 @@
     { upTo: 1500000, rate: 0.1 },
     { upTo: Infinity, rate: 0.12 },
   ];
-  const CITY_LABEL_LAYER_ID = "place_city";
+  const CITY_LABEL_LAYER_ID = "place_city_large";
   const LA_OUTLINE_SOURCE_ID = "la-outline-source";
   const LA_OUTLINE_LAYER_ID = "la-outline-layer";
   const MSOA_OUTLINE_BASE_LAYER_ID = "msoa-outline-base";
@@ -238,8 +238,14 @@
       ? { ...selectedLAForSnapshot, type: "la" }
       : null;
 
-  $: legendHoverIndicatorValue = getAffordabilityRatioForCode(hovered);
-  $: legendSelectedIndicatorValue = getAffordabilityRatioForCode(selected);
+  $: legendHoverIndicatorValue = getAffordabilityRatioForCode(
+    hovered,
+    affordabilityData,
+  );
+  $: legendSelectedIndicatorValue = getAffordabilityRatioForCode(
+    selected,
+    affordabilityData,
+  );
 
   $: {
     const nextBuySectionSelectionKey = selectedAreaForData
@@ -443,12 +449,12 @@
     }
   }
 
-  function getAffordabilityRatioForCode(msoaCode) {
-    if (!msoaCode || !affordabilityData) {
+  function getAffordabilityRatioForCode(msoaCode, data) {
+    if (!msoaCode || !data) {
       return null;
     }
 
-    const ratio = affordabilityData[msoaCode]?.ratio;
+    const ratio = data[msoaCode]?.ratio;
     return Number.isFinite(ratio) ? ratio : null;
   }
 
@@ -2306,8 +2312,8 @@
           </div>
           <div class="buy-summary-details">
             <p class="buy-sentence">
-              To buy with a mortgage, you would need annual earnings of:
-              <strong>{formatCurrency(buySectionData.incomeRequired)}</strong>
+              Given a mortgage lender gives you 4.5x your income, to buy with a mortgage you would need at least
+              <strong>{formatCurrency(buySectionData.incomeRequired)}</strong>.
             </p>
           </div>
         </div>
@@ -2328,6 +2334,11 @@
             <img src={`${base}/img/piggybank.svg`} alt="" />
           </div>
           <div class="buy-summary-details buy-summary-details--savings">
+            <p class="buy-sentence">
+              For a typical mortgage, you would need at least
+              <strong>{formatCurrency(totalSavingsData.deposit)}</strong>
+              for a deposit.
+            </p>
             <div class="buy-checkbox">
               <Checkbox
                 id="first-time-buyer-checkbox"
@@ -2336,27 +2347,15 @@
                 compact
               />
             </div>
-            <p class="buy-sentence buy-sentence--desktop">
-              You would also need savings of:
-              <strong>{formatCurrency(roundUp(totalSavingsData.total, 10))}</strong>
+            <p class="buy-sentence">
+              You will also need
+              <strong>{formatCurrency(totalSavingsData.transactionTax)}</strong>
+              for {totalSavingsData.transactionTaxLabel}.
             </p>
-            <p class="buy-sentence buy-sentence--mobile">
-              You would also need savings of
-              <strong>{formatCurrency(roundUp(totalSavingsData.total, 10))}</strong>,
-              made up of a 10% deposit of <strong>{formatCurrency(totalSavingsData.deposit)}</strong>
-              and <strong>{formatCurrency(totalSavingsData.transactionTax)}</strong>
-              for stamp duty.
+            <p class="ons-u-mt-xs">
+                This makes a total of
+              <strong>{formatCurrency(roundUp(totalSavingsData.total, 10))}</strong>.
             </p>
-            <div class="savings-breakdown">
-              <p class="savings-breakdown__row">
-                <span>10% deposit</span>
-                <strong>{formatCurrency(totalSavingsData.deposit)}</strong>
-              </p>
-              <p class="savings-breakdown__row">
-                <span>{totalSavingsData.transactionTaxLabel}</span>
-                <strong>{formatCurrency(totalSavingsData.transactionTax)}</strong>
-              </p>
-            </div>
             {#if isFirstTimeBuyer && buySectionData.country === "wales"}
               <p class="snapshot-status">
                 First-time buyer relief is not available in Wales.
@@ -2624,10 +2623,6 @@
     font-weight: 700;
   }
 
-  .buy-sentence--mobile {
-    display: none;
-  }
-
   :global(.buy-summary-card) {
     background: #e2e2e3;
     padding: 12px;
@@ -2668,39 +2663,10 @@
       align-self: flex-start;
     }
 
-    .buy-summary-details--savings .buy-sentence--desktop,
-    .buy-summary-details--savings .savings-breakdown {
-      display: none;
-    }
-
-    .buy-summary-details--savings .buy-sentence--mobile {
-      display: block;
-    }
   }
 
   .buy-checkbox {
     margin: 8px 0 12px;
-  }
-
-  .savings-breakdown {
-    margin-top: 12px;
-    padding-top: 8px;
-    border-top: 1px solid #e5e7eb;
-    display: grid;
-    gap: 8px;
-  }
-
-  .savings-breakdown__row {
-    margin: 0;
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    color: #4b5563;
-  }
-
-  .savings-breakdown__row strong {
-    color: #222;
-    font-weight: 700;
   }
 
   .search-controls {

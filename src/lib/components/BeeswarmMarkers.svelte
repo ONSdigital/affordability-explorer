@@ -25,7 +25,12 @@
   }
 
   function getCalloutLabel(point) {
-    return `${point.label}: ${Number(point.x).toFixed(1)}`;
+    const ratio = new Intl.NumberFormat("en-GB", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    }).format(Number(point.x));
+
+    return `${point.label}: ${ratio}`;
   }
 
   function getCalloutWidth(point) {

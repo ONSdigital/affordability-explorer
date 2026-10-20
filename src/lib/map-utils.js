@@ -844,16 +844,18 @@ export async function loadNationalAffordability(
  * @param {string} propertyType - Property type (all, detached, semi-detached, terraced, flats)
  * @param {string} regionCode - Region code
  * @param {string} regionName - Region name (unused, kept for call-site compatibility)
- * @returns {object|null} Regional median affordability or null
+ * @param {string} priceLevel - Price level (median or lq)
+ * @returns {object|null} Regional affordability or null
  */
 export async function loadRegionalAffordability(
   propertyType = "all",
   regionCode = "",
   regionName = "",
+  priceLevel = "median",
 ) {
   if (!regionCode && !regionName) return null;
 
-  const cacheKey = `${propertyType}:region:${regionCode || regionName}`;
+  const cacheKey = `${propertyType}:region:${regionCode || regionName}:${priceLevel}`;
   if (regionalMedianAffordabilityCache[cacheKey]) {
     return regionalMedianAffordabilityCache[cacheKey];
   }
@@ -864,7 +866,7 @@ export async function loadRegionalAffordability(
     );
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    const regional = data?.affordability?.median || null;
+    const regional = data?.affordability?.[priceLevel] || null;
     if (!regional) {
       return null;
     }

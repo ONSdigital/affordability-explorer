@@ -86,15 +86,6 @@ function readLAEarningsAndRegions() {
 }
 
 /**
- * Get latest value from time series
- */
-function getValueForPeriod(timeSeries, priceLevel, period) {
-  const series = timeSeries[priceLevel];
-  if (!series || series.length === 0 || !period) return null;
-  return series.find(point => point.quarter === period) ?? null;
-}
-
-/**
  * Calculate affordability and enrich LA files for a property type
  */
 function enrichPropertyType(propType, earnings, regions) {
@@ -130,32 +121,31 @@ function enrichPropertyType(propType, earnings, regions) {
     const laStats = { median: { prices: [], earnings_vals: [] }, lq: { prices: [], earnings_vals: [] } };
     
     for (const msoa of laData.msoas) {
-      // Only the source dataset's current period is eligible for latest affordability.
-      const medianLatest = getValueForPeriod(msoa.timeSeries, 'median', latestPeriod);
-      if (medianLatest && medianLatest.price && laEarnings.median) {
-        const ratio = medianLatest.price / laEarnings.median;
+      const medianPrice = msoa.affordability.median.price;
+      if (medianPrice && laEarnings.median) {
+        const ratio = medianPrice / laEarnings.median;
         msoa.affordability.median = {
-          price: medianLatest.price,
+          price: medianPrice,
           earnings: laEarnings.median,
           ratio: Math.round(ratio * 100) / 100,
           period: latestPeriod
         };
-        laStats.median.prices.push(medianLatest.price);
+        laStats.median.prices.push(medianPrice);
         laStats.median.earnings_vals.push(laEarnings.median);
       } else {
         msoa.affordability.median = {};
       }
       
-      const lqLatest = getValueForPeriod(msoa.timeSeries, 'lq', latestPeriod);
-      if (lqLatest && lqLatest.price && laEarnings.lq) {
-        const ratio = lqLatest.price / laEarnings.lq;
+      const lqPrice = msoa.affordability.lq.price;
+      if (lqPrice && laEarnings.lq) {
+        const ratio = lqPrice / laEarnings.lq;
         msoa.affordability.lq = {
-          price: lqLatest.price,
+          price: lqPrice,
           earnings: laEarnings.lq,
           ratio: Math.round(ratio * 100) / 100,
           period: latestPeriod
         };
-        laStats.lq.prices.push(lqLatest.price);
+        laStats.lq.prices.push(lqPrice);
         laStats.lq.earnings_vals.push(laEarnings.lq);
       } else {
         msoa.affordability.lq = {};

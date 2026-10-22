@@ -83,35 +83,34 @@ function findHeaderRow(sheet, range, markerColumn, markerValue) {
   return -1;
 }
 
-function readQuarterColumns(sheet, range, headerRowIdx) {
-  const quarters = [];
-  for (let col = 4; col <= range.e.c; col++) {
+function readLatestQuarterColumn(sheet, range, headerRowIdx) {
+  for (let col = range.e.c; col >= 4; col--) {
     const cell = sheet[XLSX.utils.encode_cell({ r: headerRowIdx, c: col })];
     const quarter = parseQuarterHeader(cell?.v);
     if (quarter) {
-      quarters.push({ col, quarter });
+      return { col, quarter };
     }
   }
-  return quarters;
+  throw new Error('No quarterly period found in source sheet');
 }
 
 /**
  * Read a single sheet and extract MSOA data
  */
 function readSheet(filePath, sheetName) {
-  const workbook = XLSX.readFile(filePath, { blankCells: false });
+  const workbook = XLSX.readFile(filePath, { blankCells: false, sheets: sheetName });
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
-    return { areas: {}, latestPeriod: null };
+    throw new Error(`Missing sheet ${sheetName} in ${filePath}`);
   }
   
   const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
   const headerRowIdx = findHeaderRow(sheet, range, 2, 'MSOA code');
 
-  if (headerRowIdx === -1) return { areas: {}, latestPeriod: null };
+  if (headerRowIdx === -1) throw new Error(`Missing MSOA header in ${filePath} ${sheetName}`);
 
-  const quarters = readQuarterColumns(sheet, range, headerRowIdx);
+  const { col, quarter } = readLatestQuarterColumn(sheet, range, headerRowIdx);
   
   // Parse data rows
   const result = {};
@@ -129,93 +128,19 @@ function readSheet(filePath, sheetName) {
       name: msoaNameCell?.v,
       laCode: laCodeCell?.v,
       laName: laNameCell?.v,
-      data: []
+      price: null
     };
     
-    for (const { col, quarter } of quarters) {
-      const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: col })];
-      if (valueCell && typeof valueCell.v === 'number') {
-        result[msoaCode].data.push({
-          quarter,
-          value: Math.round(valueCell.v)
-        });
-      }
+    const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: col })];
+    if (valueCell && typeof valueCell.v === 'number') {
+      result[msoaCode].price = Math.round(valueCell.v);
     }
   }
   
   return {
     areas: result,
-    latestPeriod: quarters.at(-1)?.quarter ?? null
+    latestPeriod: quarter
   };
-}
-
-/**
- * Read a single administrative geography sheet (LA-level)
- */
-function readAdministrativeSheet(filePath, sheetName) {
-  const workbook = XLSX.readFile(filePath, { blankCells: false });
-  const sheet = workbook.Sheets[sheetName];
-
-  if (!sheet) {
-    return { areas: {}, latestPeriod: null };
-  }
-
-  const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
-  const headerRowIdx = findHeaderRow(sheet, range, 2, 'Local authority code');
-
-  if (headerRowIdx === -1) {
-    return { areas: {}, latestPeriod: null };
-  }
-
-  const quarters = readQuarterColumns(sheet, range, headerRowIdx);
-  const result = {};
-
-  for (let row = headerRowIdx + 1; row <= range.e.r; row++) {
-    const laCodeCell = sheet[XLSX.utils.encode_cell({ r: row, c: 2 })];
-    if (!laCodeCell || !laCodeCell.v || typeof laCodeCell.v !== 'string') continue;
-
-    const regionCodeCell = sheet[XLSX.utils.encode_cell({ r: row, c: 0 })];
-    const regionNameCell = sheet[XLSX.utils.encode_cell({ r: row, c: 1 })];
-    const laNameCell = sheet[XLSX.utils.encode_cell({ r: row, c: 3 })];
-
-    const laCode = laCodeCell.v;
-    result[laCode] = {
-      code: laCode,
-      name: laNameCell?.v ?? null,
-      regionCode: regionCodeCell?.v ?? null,
-      regionName: regionNameCell?.v ?? null,
-      data: []
-    };
-
-    for (const { col, quarter } of quarters) {
-      const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: col })];
-      if (valueCell && typeof valueCell.v === 'number') {
-        result[laCode].data.push({
-          quarter,
-          value: Math.round(valueCell.v)
-        });
-      }
-    }
-  }
-
-  return {
-    areas: result,
-    latestPeriod: quarters.at(-1)?.quarter ?? null
-  };
-}
-
-function mergePriceAndSalesSeries(priceSeries, salesSeries) {
-  const pricesByQuarter = new Map(priceSeries.map(point => [point.quarter, point.value]));
-  const salesByQuarter = new Map(salesSeries.map(point => [point.quarter, point.value]));
-  const quarters = new Set([...pricesByQuarter.keys(), ...salesByQuarter.keys()]);
-
-  return Array.from(quarters)
-    .sort()
-    .map(quarter => ({
-      quarter,
-      price: pricesByQuarter.get(quarter) ?? null,
-      sales: salesByQuarter.get(quarter) ?? null
-    }));
 }
 
 async function processPropertyType(propType, sheetLetter) {
@@ -229,7 +154,7 @@ async function processPropertyType(propType, sheetLetter) {
   
   ensureDir(laDir);
   
-  // Read all three files
+  // Read the latest period of both price series
   console.log('Reading median prices...');
   let startTime = Date.now();
   const medianResult = readSheet(path.join(DATA_DIR, 'medianpricepaidmsoa.xlsx'), sheetName);
@@ -242,99 +167,36 @@ async function processPropertyType(propType, sheetLetter) {
   const lqData = lqResult.areas;
   console.log(`  (${Math.round((Date.now() - startTime) / 1000)}s)`);
   
-  console.log('Reading sales...');
-  startTime = Date.now();
-  const salesResult = readSheet(path.join(DATA_DIR, 'salesmsoa.xlsx'), sheetName);
-  const salesData = salesResult.areas;
-  console.log(`  (${Math.round((Date.now() - startTime) / 1000)}s)`);
-
-  // Read LA-level administrative geography time series
-  const adminSheetName = `2${sheetLetter}`;
-
-  console.log(`Reading LA median prices (table ${adminSheetName})...`);
-  startTime = Date.now();
-  const laMedianResult = readAdministrativeSheet(
-    path.join(DATA_DIR, 'medianpricepaidforadministrativegeographies.xlsx'),
-    adminSheetName
-  );
-  const laMedianData = laMedianResult.areas;
-  console.log(`  ${Object.keys(laMedianData).length} LAs (${Math.round((Date.now() - startTime) / 1000)}s)`);
-
-  console.log(`Reading LA LQ prices (table ${adminSheetName})...`);
-  startTime = Date.now();
-  const laLqResult = readAdministrativeSheet(
-    path.join(DATA_DIR, 'lowerquartilepricepaidforadministrativegeographies.xlsx'),
-    adminSheetName
-  );
-  const laLqData = laLqResult.areas;
-  console.log(`  ${Object.keys(laLqData).length} LAs (${Math.round((Date.now() - startTime) / 1000)}s)`);
-  
   // Organize by LA
   console.log('Organizing by LA...');
   startTime = Date.now();
   const laMap = {};
-  const latestPeriods = [
-    medianResult.latestPeriod,
-    lqResult.latestPeriod,
-    salesResult.latestPeriod,
-    laMedianResult.latestPeriod,
-    laLqResult.latestPeriod
-  ].filter(Boolean);
-  const latestPeriod = latestPeriods[0] ?? null;
-
-  if (latestPeriods.some(period => period !== latestPeriod)) {
-    throw new Error(`Source files have inconsistent latest periods for ${propType}: ${latestPeriods.join(', ')}`);
+  const latestPeriod = medianResult.latestPeriod;
+  if (lqResult.latestPeriod !== latestPeriod) {
+    throw new Error(`Source files have inconsistent latest periods for ${propType}: ${latestPeriod}, ${lqResult.latestPeriod}`);
   }
   
   for (const msoaCode in medianData) {
     const msoa = medianData[msoaCode];
     const laCode = msoa.laCode;
     const laName = msoa.laName;
-    const laMedianSeries = laMedianData[laCode]?.data || [];
-    const laLqSeries = laLqData[laCode]?.data || [];
-    const regionCode = laMedianData[laCode]?.regionCode || null;
-    const regionName = laMedianData[laCode]?.regionName || null;
-    
     if (!laMap[laCode]) {
       laMap[laCode] = {
         code: laCode,
         name: laName,
-        region_code: regionCode,
-        region_name: regionName,
+        region_code: null,
+        region_name: null,
         latest_period: latestPeriod,
-        msoas: [],
-        timeSeries: {
-          median: laMedianSeries.map(point => ({
-            quarter: point.quarter,
-            price: point.value,
-            sales: null
-          })),
-          lq: laLqSeries.map(point => ({
-            quarter: point.quarter,
-            price: point.value,
-            sales: null
-          }))
-        }
+        msoas: []
       };
     }
-    
-    const medianTS = medianData[msoaCode]?.data || [];
-    const lqTS = lqData[msoaCode]?.data || [];
-    const salesTS = salesData[msoaCode]?.data || [];
-    
-    const medianWithSales = mergePriceAndSalesSeries(medianTS, salesTS);
-    const lqWithSales = mergePriceAndSalesSeries(lqTS, salesTS);
     
     laMap[laCode].msoas.push({
       code: msoaCode,
       name: msoa.name,
       affordability: {
-        median: { price: null, ratio: null },
-        lq: { price: null, ratio: null }
-      },
-      timeSeries: {
-        median: medianWithSales,
-        lq: lqWithSales
+        median: { price: msoa.price },
+        lq: { price: lqData[msoaCode]?.price ?? null }
       }
     });
   }
@@ -382,11 +244,7 @@ async function processData() {
   
   // Process each property type sequentially
   for (const [sheetLetter, propType] of Object.entries(PROPERTY_TYPES)) {
-    try {
-      await processPropertyType(propType, sheetLetter);
-    } catch (error) {
-      console.error(`Error processing ${propType}:`, error);
-    }
+    await processPropertyType(propType, sheetLetter);
   }
   
   console.log('\n' + '='.repeat(60));
@@ -396,7 +254,10 @@ async function processData() {
   for (const propType of Object.values(PROPERTY_TYPES)) {
     console.log(`  /static/data/${propType}/`);
   }
-  console.log('\nNext: Run calculate-affordability.js to add earnings and ratios');
+  console.log('\nNext: Run calculate-affordability-by-type.js to add earnings and ratios');
 }
 
-processData();
+processData().catch(error => {
+  console.error('Error processing data:', error);
+  process.exit(1);
+});

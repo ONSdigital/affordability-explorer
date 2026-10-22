@@ -77,19 +77,18 @@ npm run generate-data
 ```
 
 This processes:
-- 7 Excel files with 5 property types each
+- 2 MSOA price workbooks, 2 administrative price workbooks and 1 earnings workbook
 - 7,264 MSOAs across 318 Local Authorities
 - Calculates affordability ratios (price ÷ earnings)
-- Creates time series data (119 quarters: 1995-Q4 to 2025-Q2)
+- Uses only the latest quarter of MSOA prices; historical prices and sales are not exported
 - Generates map-ready files with property-type-specific aggregates
 - Creates shared geography files (authorities + regions)
 
-**Output**: ~834 MB of JSON files in `static/data/` (not committed to git)
+**Output**: JSON files in `static/data/` (not committed to git; included in the committed `build/`)
 - Shared geography folder: authorities.json + regions.json
-- 5 property-type directories: each with LA files + msoas-latest + national aggregates
-- 1,607 JSON files total
+- 5 property-type directories: each with LA files, msoas-latest, region and national summaries
 
-**Time**: ~9 minutes (5 min parse + 2 min calculate + 2 min generate)
+Rebuild `build/` with `npm run build:preview` after regenerating data for deployment.
 
 For detailed information about the data pipeline, see [PIPELINE.md](./PIPELINE.md)
 

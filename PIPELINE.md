@@ -5,7 +5,7 @@ Complete data processing pipeline for ONS Housing Affordability data, transformi
 
 ## Status: ✅ COMPLETE
 
-All 7,264 MSOAs across 318 Local Authorities in England and Wales have been processed with affordability ratios and time series data.
+All 7,264 MSOAs across 318 Local Authorities in England and Wales have been processed with latest-period affordability ratios.
 
 ## Data Structure
 
@@ -16,8 +16,9 @@ static/data/
 │   ├── authorities.json             (318 LAs with region codes/names)
 │   └── regions.json                 (10 regions: 9 England + Wales)
 ├── all/
-│   ├── la/                          (318 LA files with all affordability data)
+│   ├── la/                          (318 LA files with latest affordability data)
 │   ├── msoas-latest.json            (7,264 MSOAs with latest affordability)
+│   ├── region/                      (10 regional summaries)
 │   └── national/
 │       ├── england.json
 │       └── wales.json
@@ -43,23 +44,22 @@ static/data/
 
 ### Total Data
 - **Shared geography**: 2 files (authorities.json with 318 LAs + region codes, regions.json with 10 regions)
-- **1,590 LA files** (318 LAs × 5 property types)
+- - **1,590 LA files** (318 LAs × 5 property types)
 - **5 msoas-latest.json** (7,264 MSOAs each)
+- **50 regional summaries** (10 regions × 5 property types)
 - **10 national files** (england.json + wales.json per property type)
-- **1,607 JSON files total** (not committed to git; generate with `npm run generate-data`)
+- **1,662 JSON files total** in `static/data/` (also copied into the committed `build/data/`)
 
 ## Processing Pipeline
 
 ### 1. Data Parsing
 **Script**: `scripts/process-by-property-type.js`
 
-Reads 7 Excel files from `data/raw/`:
+Reads the latest quarter from 2 Excel files in `data/raw/`:
 - `medianpricepaidmsoa.xlsx` - Median house prices by MSOA (sheets 1a-1e for property types)
 - `lowerquartilepricepaidmsoa.xlsx` - Lower quartile prices by MSOA (sheets 1a-1e)
-- `salesmsoa.xlsx` - Sales counts by quarter by MSOA (sheets 1a-1e)
-- `aff2ratioofhousepricetoresidencebasedearnings.xlsx` - LA-level earnings (sheets 5b, 6b)
 
-**Output**: LA files with time series data (median and LQ prices + sales counts) for each MSOA
+**Output**: LA files with latest median and lower-quartile prices for each MSOA. Historical price and sales observations are not exported.
 
 ### 2. Affordability Calculation
 **Script**: `scripts/calculate-affordability-by-type.js`
@@ -70,6 +70,7 @@ Computes affordability ratios for each property type:
 - **LA average** = Mean of all MSOAs in LA
 - LA-level earnings from Excel (1 year per LA)
 - **Region info enrichment** - Adds region_code and region_name to each LA
+- Reads `aff2ratioofhousepricetoresidencebasedearnings.xlsx` (sheets 5b, 6b)
 
 **Output**: Enhanced LA files with affordability{median, lq} objects and region info added to each MSOA
 
@@ -79,6 +80,7 @@ Computes affordability ratios for each property type:
 - **msoas-latest.json** - Extract data for the dataset's latest period for all MSOAs
 - **england.json** - Aggregate affordability for all England LAs
 - **wales.json** - Aggregate affordability for all Wales LAs
+- **region/*.json** - Regional affordability based on administrative prices and earnings
 - **Shared geography files** - Creates single authorities.json and regions.json in geography/ folder
 
 **Output**: Map-ready files with all 7,264 MSOAs + national comparisons
@@ -127,12 +129,9 @@ Located in `static/data/geography/` (shared across all property types):
 - `E12000001-E12000009` - English regions
 - `W92000004` - Wales
 
-## Time Series Data
+## Latest Period Data
 
-- **Duration**: Determined by the period columns in the source workbooks
-- **Resolution**: Quarterly (Jan-Mar=Q1, Apr-Jun=Q2, Jul-Sep=Q3, Oct-Dec=Q4)
-- **Metrics**: House price + sales count per quarter per MSOA
-- **Availability**: Same for all property types except flats (starts 2005-Q2 due to data availability)
+The rightmost quarterly price column in each MSOA workbook defines the current period. Median and lower-quartile sources must agree. Missing prices in that quarter remain missing, even if an earlier price exists.
 
 ## Affordability Ratios
 
@@ -180,7 +179,7 @@ const national = await fetch(`/static/data/${propType}/national/england.json`).t
 - Load only the selected property type's data
 - Display beeswarm of affordability ratios for all MSOAs in LA
 - Show selected MSOA, LA average, regional, and national ratios
-- Visualize price/sales history with time series chart
+- Display the selected area's latest price and affordability ratio
 
 ## Generation Instructions
 
@@ -196,19 +195,13 @@ node scripts/calculate-affordability-by-type.js
 node scripts/generate-final-files.js
 ```
 
-**Total time**: ~5 minutes
-**Output size**: 834 MB
+Run `npm run build:preview` afterward to refresh the committed deployment artifact in `build/`.
 
 ### Regenerate After Raw Data Update
 If `data/raw/` files are updated:
 ```bash
-# Option 1: Fresh start
-rm -rf static/data/*
-# Then run scripts above
-
-# Option 2: Just recalculate
-node scripts/calculate-affordability-by-type.js
-node scripts/generate-final-files.js
+npm run generate-data
+npm run build:preview
 ```
 
 ## Data Quality Notes
@@ -219,21 +212,9 @@ node scripts/generate-final-files.js
 - Same earnings applied to all MSOAs in LA
 - Used for affordability ratio calculation
 
-### Sales Data
-- No median/lower quartile split
-- Single sales count per MSOA per quarter
-- Applied to both median and LQ price time series
-
-### Time Series
-- Earliest: 1995-Q4
-- Latest: Read from the rightmost period in the source workbooks
-- Flats start later (2005-Q2)
-- Monthly data converted to quarterly
-
 ### Missing Data
 - Small LAs may have limited MSOA data
-- Some property types may have fewer sales records historically
-- Earnings data is annual (applied to all quarters for that year)
+- Earnings data is annual (the latest available year is used)
 - A missing value in the latest source period remains missing. The pipeline does not substitute an older observation in `msoas-latest.json`, affordability summaries, maps, or selected-area charts.
 
 ## Architecture Decisions
@@ -263,8 +244,7 @@ Separate file with all 7,264 MSOAs + latest affordability:
 3. **PriceLevel Filter** - ButtonGroup switches between ratio.median and ratio.lq
 4. **LA Selection** - Load `la/{laCode}.json` to show all MSOAs + beeswarm
 5. **MSOA Selection** - Extract specific MSOA from LA file, display with comparisons
-6. **Time Series** - Plot `timeSeries[median|lq]` quarterly price history
-7. **National Comparison** - Load `national/{england|wales}.json` for comparison ratios
+6. **National Comparison** - Load `national/{england|wales}.json` for comparison ratios
 
 ## Troubleshooting
 
@@ -300,7 +280,7 @@ done
 ---
 
 **Last Updated**: August 2026
-**Data Version**: 2025-Q2 (latest available)
+**Data Version**: Read from the source workbook's latest quarter
 **Property Types**: 5 (all, detached, semi-detached, terraced, flats)
 **MSOAs**: 7,264 (England: 6,791, Wales: 473)
 **Local Authorities**: 318 (England: 296, Wales: 22)

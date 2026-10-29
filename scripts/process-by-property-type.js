@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Data Pipeline: Process ONS raw Excel files
+ * Data Pipeline: Process smallareamap.xlsx as source of truth
  * Generates separate LA file sets for each property type
  * 
  * Output structure:
@@ -24,26 +24,11 @@ const OUTPUT_DIR = path.join(__dirname, '../static/data');
 
 // Property type mappings
 const PROPERTY_TYPES = {
-  'a': 'all',
-  'b': 'detached',
-  'c': 'semi-detached',
-  'd': 'terraced',
-  'e': 'flats'
-};
-
-const MONTH_TO_QUARTER = {
-  Jan: 'Q1',
-  Feb: 'Q1',
-  Mar: 'Q1',
-  Apr: 'Q2',
-  May: 'Q2',
-  Jun: 'Q2',
-  Jul: 'Q3',
-  Aug: 'Q3',
-  Sep: 'Q3',
-  Oct: 'Q4',
-  Nov: 'Q4',
-  Dec: 'Q4'
+  'all': { median: 'all_median', lq: 'all_lq' },
+  'detached': { median: 'detached_median', lq: 'detached_lq' },
+  'semi-detached': { median: 'semi-detached_median', lq: 'semi-detached_lq' },
+  'terraced': { median: 'terraced_median', lq: 'terraced_lq' },
+  'flats': { median: 'flats/maisonettes_median', lq: 'flats/maisonettes_lq' }
 };
 
 function ensureDir(dir) {
@@ -52,159 +37,88 @@ function ensureDir(dir) {
   }
 }
 
-function parseQuarterHeader(value) {
-  if (typeof value !== 'string' || !value.includes('ending')) {
-    return null;
+/**
+ * Read smallareamap.xlsx and organize by LA and property type
+ */
+function readSmallAreaMap() {
+  console.log('Reading smallareamap.xlsx...');
+  const startTime = Date.now();
+  
+  const workbook = XLSX.readFile(path.join(DATA_DIR, 'smallareamap.xlsx'));
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  
+  if (!sheet) {
+    throw new Error('No sheets found in smallareamap.xlsx');
   }
-
-  const match = value.match(/Year ending (\w+) (\d{4})/);
-  if (!match) {
-    return null;
-  }
-
-  const month = match[1];
-  const year = match[2];
-  const quarter = MONTH_TO_QUARTER[month];
-  if (!quarter) {
-    return null;
-  }
-
-  return `${year}-${quarter}`;
-}
-
-function findHeaderRow(sheet, range, markerColumn, markerValue) {
-  for (let row = range.s.r; row <= Math.min(range.e.r, 15); row++) {
-    const cell = sheet[XLSX.utils.encode_cell({ r: row, c: markerColumn })];
-    if (cell?.v === markerValue) {
-      return row;
-    }
-  }
-
-  return -1;
-}
-
-function readLatestQuarterColumn(sheet, range, headerRowIdx) {
-  for (let col = range.e.c; col >= 4; col--) {
-    const cell = sheet[XLSX.utils.encode_cell({ r: headerRowIdx, c: col })];
-    const quarter = parseQuarterHeader(cell?.v);
-    if (quarter) {
-      return { col, quarter };
-    }
-  }
-  throw new Error('No quarterly period found in source sheet');
+  
+  const data = XLSX.utils.sheet_to_json(sheet);
+  console.log(`  Read ${data.length} MSOAs (${Math.round((Date.now() - startTime) / 1000)}s)`);
+  
+  return data;
 }
 
 /**
- * Read a single sheet and extract MSOA data
+ * Process a single property type
  */
-function readSheet(filePath, sheetName) {
-  const workbook = XLSX.readFile(filePath, { blankCells: false, sheets: sheetName });
-  const sheet = workbook.Sheets[sheetName];
+function processPropertyType(propType, priceColumns, msoaData) {
+  console.log(`\nProcessing: ${propType}`);
   
-  if (!sheet) {
-    throw new Error(`Missing sheet ${sheetName} in ${filePath}`);
-  }
-  
-  const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
-  const headerRowIdx = findHeaderRow(sheet, range, 2, 'MSOA code');
-
-  if (headerRowIdx === -1) throw new Error(`Missing MSOA header in ${filePath} ${sheetName}`);
-
-  const { col, quarter } = readLatestQuarterColumn(sheet, range, headerRowIdx);
-  
-  // Parse data rows
-  const result = {};
-  for (let row = headerRowIdx + 1; row <= range.e.r; row++) {
-    const msoaCodeCell = sheet[XLSX.utils.encode_cell({ r: row, c: 2 })];
-    if (!msoaCodeCell || !msoaCodeCell.v) continue;
-    
-    const laCodeCell = sheet[XLSX.utils.encode_cell({ r: row, c: 0 })];
-    const laNameCell = sheet[XLSX.utils.encode_cell({ r: row, c: 1 })];
-    const msoaNameCell = sheet[XLSX.utils.encode_cell({ r: row, c: 3 })];
-    
-    const msoaCode = msoaCodeCell.v;
-    result[msoaCode] = {
-      code: msoaCode,
-      name: msoaNameCell?.v,
-      laCode: laCodeCell?.v,
-      laName: laNameCell?.v,
-      price: null
-    };
-    
-    const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: col })];
-    if (valueCell && typeof valueCell.v === 'number') {
-      result[msoaCode].price = Math.round(valueCell.v);
-    }
-  }
-  
-  return {
-    areas: result,
-    latestPeriod: quarter
-  };
-}
-
-async function processPropertyType(propType, sheetLetter) {
-  console.log(`\n${'='.repeat(60)}`);
-  console.log(`Processing: ${propType} (sheet 1${sheetLetter})`);
-  console.log(`${'='.repeat(60)}`);
-  
-  const sheetName = `1${sheetLetter}`;
   const typeDir = path.join(OUTPUT_DIR, propType);
   const laDir = path.join(typeDir, 'la');
   
   ensureDir(laDir);
   
-  // Read the latest period of both price series
-  console.log('Reading median prices...');
-  let startTime = Date.now();
-  const medianResult = readSheet(path.join(DATA_DIR, 'medianpricepaidmsoa.xlsx'), sheetName);
-  const medianData = medianResult.areas;
-  console.log(`  ${Object.keys(medianData).length} MSOAs (${Math.round((Date.now() - startTime) / 1000)}s)`);
-  
-  console.log('Reading LQ prices...');
-  startTime = Date.now();
-  const lqResult = readSheet(path.join(DATA_DIR, 'lowerquartilepricepaidmsoa.xlsx'), sheetName);
-  const lqData = lqResult.areas;
-  console.log(`  (${Math.round((Date.now() - startTime) / 1000)}s)`);
-  
   // Organize by LA
-  console.log('Organizing by LA...');
-  startTime = Date.now();
   const laMap = {};
-  const latestPeriod = medianResult.latestPeriod;
-  if (lqResult.latestPeriod !== latestPeriod) {
-    throw new Error(`Source files have inconsistent latest periods for ${propType}: ${latestPeriod}, ${lqResult.latestPeriod}`);
-  }
   
-  for (const msoaCode in medianData) {
-    const msoa = medianData[msoaCode];
-    const laCode = msoa.laCode;
-    const laName = msoa.laName;
+  for (const row of msoaData) {
+    const laCode = row['Local authority code'];
+    const laName = row['Local authority name'];
+    const msoaCode = row['MSOA code'];
+    const msoaName = row['MSOA name'];
+    const regionCode = row['Country/Region code'];
+    const regionName = row['Country/Region name'];
+    
+    if (!laCode || !msoaCode) continue;
+    
     if (!laMap[laCode]) {
       laMap[laCode] = {
         code: laCode,
         name: laName,
-        region_code: null,
-        region_name: null,
-        latest_period: latestPeriod,
+        region_code: regionCode,
+        region_name: regionName,
         msoas: []
       };
     }
     
+    // Get prices for this property type
+    const medianPrice = row[priceColumns.median];
+    const lqPrice = row[priceColumns.lq];
+    
+    // Skip if both prices are missing (marked as [x])
+    if (medianPrice === '[x]' && lqPrice === '[x]') {
+      continue;
+    }
+    
     laMap[laCode].msoas.push({
       code: msoaCode,
-      name: msoa.name,
+      name: msoaName,
       affordability: {
-        median: { price: msoa.price },
-        lq: { price: lqData[msoaCode]?.price ?? null }
+        median: { 
+          price: medianPrice === '[x]' ? null : (typeof medianPrice === 'number' ? Math.round(medianPrice) : null)
+        },
+        lq: { 
+          price: lqPrice === '[x]' ? null : (typeof lqPrice === 'number' ? Math.round(lqPrice) : null)
+        }
       }
     });
   }
   
   // Write LA files
-  console.log(`Writing ${Object.keys(laMap).length} LA files...`);
-  startTime = Date.now();
+  console.log(`  Writing ${Object.keys(laMap).length} LA files...`);
+  const startTime = Date.now();
   let written = 0;
+  
   for (const laCode in laMap) {
     const laData = laMap[laCode];
     fs.writeFileSync(
@@ -213,14 +127,13 @@ async function processPropertyType(propType, sheetLetter) {
     );
     written++;
     if (written % 100 === 0) {
-      console.log(`  [${Math.round((written / 318) * 100)}%] ${written}/318`);
+      console.log(`    [${Math.round((written / Object.keys(laMap).length) * 100)}%] ${written}/${Object.keys(laMap).length}`);
     }
   }
-  console.log(`  (${Math.round((Date.now() - startTime) / 1000)}s)`);
+  console.log(`    Wrote ${written} files (${Math.round((Date.now() - startTime) / 1000)}s)`);
   
   // Write authorities index
-  console.log('Writing authorities.json...');
-  startTime = Date.now();
+  console.log(`  Writing authorities.json...`);
   const authorities = Object.values(laMap).map(la => ({
     code: la.code,
     name: la.name,
@@ -234,30 +147,33 @@ async function processPropertyType(propType, sheetLetter) {
     JSON.stringify({ authorities }, null, 2)
   );
   
-  // Note: regions.json is now generated once in geography/ folder by generate-final-files.js
-  
   console.log(`✓ Complete: /static/data/${propType}/`);
 }
 
 async function processData() {
-  console.log('Starting data processing pipeline (by property type)\n');
+  console.log('Starting data processing pipeline (from smallareamap.xlsx)\n');
+  console.log('='.repeat(60) + '\n');
   
-  // Process each property type sequentially
-  for (const [sheetLetter, propType] of Object.entries(PROPERTY_TYPES)) {
-    await processPropertyType(propType, sheetLetter);
+  try {
+    const msoaData = readSmallAreaMap();
+    
+    // Process each property type
+    for (const [propType, priceColumns] of Object.entries(PROPERTY_TYPES)) {
+      processPropertyType(propType, priceColumns, msoaData);
+    }
+    
+    console.log('\n' + '='.repeat(60));
+    console.log('✓ Data processing complete!');
+    console.log('='.repeat(60));
+    console.log('\nGenerated directories:');
+    for (const propType of Object.keys(PROPERTY_TYPES)) {
+      console.log(`  /static/data/${propType}/`);
+    }
+    console.log('\nNext: Run calculate-affordability-by-type.js to add earnings and ratios');
+  } catch (error) {
+    console.error('Error processing data:', error);
+    process.exit(1);
   }
-  
-  console.log('\n' + '='.repeat(60));
-  console.log('✓ Data processing complete!');
-  console.log('='.repeat(60));
-  console.log('\nGenerated directories:');
-  for (const propType of Object.values(PROPERTY_TYPES)) {
-    console.log(`  /static/data/${propType}/`);
-  }
-  console.log('\nNext: Run calculate-affordability-by-type.js to add earnings and ratios');
 }
 
-processData().catch(error => {
-  console.error('Error processing data:', error);
-  process.exit(1);
-});
+processData();

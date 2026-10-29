@@ -3,14 +3,21 @@
   "name": "Merton",
   "region_code": "E12000007",
   "region_name": "London",
-  "latest_period": "2025-Q3",
   "msoas": [
     {
       "code": "E02000689",
       "name": "Wimbledon Park & Durnsford Road",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 3500000,
+          "earnings": 50844,
+          "ratio": 68.84
+        },
+        "lq": {
+          "price": 3170000,
+          "earnings": 36363,
+          "ratio": 87.18
+        }
       }
     },
     {
@@ -18,25 +25,15 @@
       "name": "Wimbledon Common",
       "affordability": {
         "median": {
-          "price": 3600000,
+          "price": 4012500,
           "earnings": 50844,
-          "ratio": 70.8,
-          "period": "2025-Q3"
+          "ratio": 78.92
         },
         "lq": {
-          "price": 2496250,
+          "price": 2573750,
           "earnings": 36363,
-          "ratio": 68.65,
-          "period": "2025-Q3"
+          "ratio": 70.78
         }
-      }
-    },
-    {
-      "code": "E02000691",
-      "name": "Wimbledon Broadway North",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -44,57 +41,15 @@
       "name": "Wimbledon Hill",
       "affordability": {
         "median": {
-          "price": 2100000,
+          "price": 2150000,
           "earnings": 50844,
-          "ratio": 41.3,
-          "period": "2025-Q3"
+          "ratio": 42.29
         },
         "lq": {
-          "price": 1951000,
+          "price": 1988250,
           "earnings": 36363,
-          "ratio": 53.65,
-          "period": "2025-Q3"
+          "ratio": 54.68
         }
-      }
-    },
-    {
-      "code": "E02000693",
-      "name": "Colliers Wood",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000694",
-      "name": "South Wimbledon",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000695",
-      "name": "Graveney",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000696",
-      "name": "Lavender Park",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000697",
-      "name": "Wimbledon Broadway South",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -102,105 +57,15 @@
       "name": "Cottenham Park",
       "affordability": {
         "median": {
-          "price": 2500000,
+          "price": 2662500,
           "earnings": 50844,
-          "ratio": 49.17,
-          "period": "2025-Q3"
+          "ratio": 52.37
         },
         "lq": {
-          "price": 2062500,
+          "price": 2193750,
           "earnings": 36363,
-          "ratio": 56.72,
-          "period": "2025-Q3"
+          "ratio": 60.33
         }
-      }
-    },
-    {
-      "code": "E02000699",
-      "name": "Wimbledon Chase",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000700",
-      "name": "Merton Church Road & Phipps Bridge",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000701",
-      "name": "Mitcham East",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000702",
-      "name": "Lonesome",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000703",
-      "name": "Merton Park",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000704",
-      "name": "Raynes Park",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000705",
-      "name": "Rowan Road",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000706",
-      "name": "Mitcham West",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000707",
-      "name": "Pollards Hill",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000708",
-      "name": "West Barnes",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000709",
-      "name": "Cannon Hill",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -210,54 +75,26 @@
         "median": {
           "price": 725000,
           "earnings": 50844,
-          "ratio": 14.26,
-          "period": "2025-Q3"
+          "ratio": 14.26
         },
         "lq": {
           "price": 585000,
           "earnings": 36363,
-          "ratio": 16.09,
-          "period": "2025-Q3"
+          "ratio": 16.09
         }
-      }
-    },
-    {
-      "code": "E02000711",
-      "name": "Morden Central",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000712",
-      "name": "St Helier North",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000713",
-      "name": "Lower Morden",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     }
   ],
   "affordability": {
     "median": {
-      "price": 2231250,
+      "price": 2610000,
       "earnings": 50844,
-      "ratio": 43.88,
-      "period": "2025-Q3"
+      "ratio": 51.33
     },
     "lq": {
-      "price": 1773688,
+      "price": 2102150,
       "earnings": 36363,
-      "ratio": 48.78,
-      "period": "2025-Q3"
+      "ratio": 57.81
     }
   }
 }

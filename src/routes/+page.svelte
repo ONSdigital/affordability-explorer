@@ -41,6 +41,7 @@
   } from "../lib/map-utils.js";
   import ColorLegend from "../lib/components/ColorLegend.svelte";
   import BeeswarmMarkers from "../lib/components/BeeswarmMarkers.svelte";
+  import { createLegendRangeExpression } from "../lib/map-data.js";
 
   let map;
   let geojson;
@@ -483,79 +484,41 @@
     return Number.isFinite(ratio) ? ratio : null;
   }
 
-  function isLegendRangeMatch(value, range) {
-    if (!Number.isFinite(value) || !range) {
-      return false;
-    }
-
-    const min = Number(range.min);
-    const max = Number(range.max);
-    if (!Number.isFinite(min) || !Number.isFinite(max)) {
-      return false;
-    }
-
-    return value >= min && (range.isLast ? value <= max : value < max);
-  }
-
   function clearLegendRangeHighlight() {
-    if (
-      !map ||
-      !affordabilityData ||
-      Object.keys(affordabilityData).length === 0
-    ) {
-      return;
-    }
-
-    try {
-      if (!map.getSource("msoa-source")) {
-        return;
-      }
-    } catch (e) {
-      return;
-    }
-
-    for (const msoaCode of Object.keys(affordabilityData)) {
-      try {
-        map.setFeatureState(
-          { source: "msoa-source", sourceLayer: "msoa", id: msoaCode },
-          { legendActive: false, legendMatch: false },
-        );
-      } catch (e) {
-        // Feature may not be available at current zoom.
-      }
-    }
+    applyLegendRangeHighlight(null);
   }
 
   function applyLegendRangeHighlight(range) {
-    if (
-      !map ||
-      !range ||
-      !affordabilityData ||
-      Object.keys(affordabilityData).length === 0
-    ) {
-      return;
-    }
+    if (!map) return;
 
     try {
-      if (!map.getSource("msoa-source")) {
-        return;
+      const match = createLegendRangeExpression(range);
+      if (map.getLayer("msoa-outline-base")) {
+        const opacity = range ? ["case", match, 1, 0.2] : 1;
+        if (
+          JSON.stringify(
+            map.getPaintProperty("msoa-outline-base", "line-opacity"),
+          ) !== JSON.stringify(opacity)
+        ) {
+          map.setPaintProperty("msoa-outline-base", "line-opacity", opacity);
+        }
+      }
+      if (map.getLayer(MSOA_LEGEND_MATCH_LAYER_ID)) {
+        const opacity = range ? ["case", match, 1, 0] : 0;
+        if (
+          JSON.stringify(
+            map.getPaintProperty(MSOA_LEGEND_MATCH_LAYER_ID, "line-opacity"),
+          ) !== JSON.stringify(opacity)
+        ) {
+          map.setPaintProperty(
+            MSOA_LEGEND_MATCH_LAYER_ID,
+            "line-opacity",
+            opacity,
+          );
+        }
       }
     } catch (e) {
-      return;
-    }
-
-    for (const [msoaCode, msoaData] of Object.entries(affordabilityData)) {
-      const ratio = msoaData?.ratio;
-      const legendMatch = isLegendRangeMatch(ratio, range);
-
-      try {
-        map.setFeatureState(
-          { source: "msoa-source", sourceLayer: "msoa", id: msoaCode },
-          { legendActive: true, legendMatch },
-        );
-      } catch (e) {
-        // Feature may not be available at current zoom.
-      }
+      console.error("Could not apply legend range highlight:", e.message);
     }
   }
 
@@ -580,7 +543,7 @@
 
     if (
       !Number.isFinite(min) ||
-      !Number.isFinite(max) ||
+      !(Number.isFinite(max) || (range.isLast && max === Infinity)) ||
       !Number.isFinite(index)
     ) {
       return null;
@@ -2125,17 +2088,7 @@
                             11,
                             1,
                           ],
-                          "line-opacity": [
-                            "case",
-                            ["==", ["feature-state", "legendActive"], true],
-                            [
-                              "case",
-                              ["==", ["feature-state", "legendMatch"], true],
-                              1,
-                              0.2,
-                            ],
-                            1,
-                          ],
+                          "line-opacity": 1,
                         }}
                       />
                       <MapLayer
@@ -2145,12 +2098,7 @@
                         paint={{
                           "line-color": ONS_GREY_100,
                           "line-width": 1.5,
-                          "line-opacity": [
-                            "case",
-                            ["==", ["feature-state", "legendMatch"], true],
-                            1,
-                            0,
-                          ],
+                          "line-opacity": 0,
                         }}
                       />
                       <MapLayer
@@ -2244,9 +2192,11 @@
                           <p>
                             An average {getHouseTypeDescription(propertyType)} in
                             <Em color="#003c57">{selectedBoundary.name}</Em> costs
-                            <strong>{formatAffordabilityRatio(
-                              selectedMsoaForSnapshot.ratio,
-                            )}</strong> times the annual earnings.
+                            <strong
+                              >{formatAffordabilityRatio(
+                                selectedMsoaForSnapshot.ratio,
+                              )}</strong
+                            > times the annual earnings.
                           </p>
                           {#if mapComparison}
                             <p>
@@ -2258,18 +2208,22 @@
                                   mapComparison.regionalRatio,
                                 )}
                                 the regional average of
-                                <strong>{formatAffordabilityRatio(
-                                  mapComparison.regionalRatio,
-                                )}</strong> and
+                                <strong
+                                  >{formatAffordabilityRatio(
+                                    mapComparison.regionalRatio,
+                                  )}</strong
+                                > and
                               {/if}
                               {compareAffordabilityRatios(
                                 selectedMsoaForSnapshot.ratio,
                                 mapComparison.nationalRatio,
                               )}
                               the national average of
-                              <strong>{formatAffordabilityRatio(
-                                mapComparison.nationalRatio,
-                              )}</strong>.
+                              <strong
+                                >{formatAffordabilityRatio(
+                                  mapComparison.nationalRatio,
+                                )}</strong
+                              >.
                             </p>
                           {/if}
                         </div>

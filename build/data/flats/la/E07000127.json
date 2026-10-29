@@ -3,14 +3,21 @@
   "name": "West Lancashire",
   "region_code": "E12000002",
   "region_name": "North West",
-  "latest_period": "2025-Q3",
   "msoas": [
     {
       "code": "E02005304",
       "name": "Hesketh Bank & Tarleton",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 138000,
+          "earnings": 38102,
+          "ratio": 3.62
+        },
+        "lq": {
+          "price": 115000,
+          "earnings": 27906,
+          "ratio": 4.12
+        }
       }
     },
     {
@@ -20,23 +27,13 @@
         "median": {
           "price": 124995,
           "earnings": 38102,
-          "ratio": 3.28,
-          "period": "2025-Q3"
+          "ratio": 3.28
         },
         "lq": {
           "price": 118000,
           "earnings": 27906,
-          "ratio": 4.23,
-          "period": "2025-Q3"
+          "ratio": 4.23
         }
-      }
-    },
-    {
-      "code": "E02005306",
-      "name": "Scarisbrick, Halsall & Haskayne",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -46,23 +43,13 @@
         "median": {
           "price": 158500,
           "earnings": 38102,
-          "ratio": 4.16,
-          "period": "2025-Q3"
+          "ratio": 4.16
         },
         "lq": {
-          "price": 137250,
+          "price": 137750,
           "earnings": 27906,
-          "ratio": 4.92,
-          "period": "2025-Q3"
+          "ratio": 4.94
         }
-      }
-    },
-    {
-      "code": "E02005308",
-      "name": "Parbold, Appley Bridge & Wrightington",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -72,14 +59,12 @@
         "median": {
           "price": 122498,
           "earnings": 38102,
-          "ratio": 3.22,
-          "period": "2025-Q3"
+          "ratio": 3.22
         },
         "lq": {
-          "price": 104500,
+          "price": 100750,
           "earnings": 27906,
-          "ratio": 3.74,
-          "period": "2025-Q3"
+          "ratio": 3.61
         }
       }
     },
@@ -88,16 +73,14 @@
       "name": "Ormskirk Town & East",
       "affordability": {
         "median": {
-          "price": 136500,
+          "price": 130250,
           "earnings": 38102,
-          "ratio": 3.58,
-          "period": "2025-Q3"
+          "ratio": 3.42
         },
         "lq": {
-          "price": 106000,
+          "price": 101250,
           "earnings": 27906,
-          "ratio": 3.8,
-          "period": "2025-Q3"
+          "ratio": 3.63
         }
       }
     },
@@ -105,24 +88,16 @@
       "code": "E02005311",
       "name": "Bickerstaffe & Newburgh",
       "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02005312",
-      "name": "Skelmersdale Ashurst",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02005313",
-      "name": "Skelmersdale Central",
-      "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 285000,
+          "earnings": 38102,
+          "ratio": 7.48
+        },
+        "lq": {
+          "price": 250000,
+          "earnings": 27906,
+          "ratio": 8.96
+        }
       }
     },
     {
@@ -132,14 +107,12 @@
         "median": {
           "price": 92750,
           "earnings": 38102,
-          "ratio": 2.43,
-          "period": "2025-Q3"
+          "ratio": 2.43
         },
         "lq": {
           "price": 74950,
           "earnings": 27906,
-          "ratio": 2.69,
-          "period": "2025-Q3"
+          "ratio": 2.69
         }
       }
     },
@@ -148,56 +121,28 @@
       "name": "Aughton",
       "affordability": {
         "median": {
-          "price": 241250,
+          "price": 233750,
           "earnings": 38102,
-          "ratio": 6.33,
-          "period": "2025-Q3"
+          "ratio": 6.13
         },
         "lq": {
           "price": 135000,
           "earnings": 27906,
-          "ratio": 4.84,
-          "period": "2025-Q3"
+          "ratio": 4.84
         }
-      }
-    },
-    {
-      "code": "E02005316",
-      "name": "Skelmersdale East",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02005317",
-      "name": "Skelmersdale South East",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02005318",
-      "name": "Upholland",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     }
   ],
   "affordability": {
     "median": {
-      "price": 146082,
+      "price": 160718,
       "earnings": 38102,
-      "ratio": 3.83,
-      "period": "2025-Q3"
+      "ratio": 4.22
     },
     "lq": {
-      "price": 112617,
+      "price": 129088,
       "earnings": 27906,
-      "ratio": 4.04,
-      "period": "2025-Q3"
+      "ratio": 4.63
     }
   }
 }

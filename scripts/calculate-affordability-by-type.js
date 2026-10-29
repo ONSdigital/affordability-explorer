@@ -2,6 +2,7 @@
 
 /**
  * Calculate affordability ratios for each property type
+ * Uses smallareamap.xlsx for MSOA data and aff2 for earnings
  */
 
 import XLSX from 'xlsx';
@@ -17,10 +18,10 @@ const OUTPUT_DIR = path.join(__dirname, '../static/data');
 const PROPERTY_TYPES = ['all', 'detached', 'semi-detached', 'terraced', 'flats'];
 
 /**
- * Read LA-level earnings AND region mapping
+ * Read LA-level earnings AND region mapping from aff2
  */
 function readLAEarningsAndRegions() {
-  console.log('Reading LA-level earnings and region mappings...');
+  console.log('Reading LA-level earnings and region mappings from aff2...');
   
   const workbook = XLSX.readFile(path.join(DATA_DIR, 'aff2ratioofhousepricetoresidencebasedearnings.xlsx'));
   
@@ -111,7 +112,6 @@ function enrichPropertyType(propType, earnings, regions) {
     const laEarnings = earnings[laCode];
     const laRegion = regions[laCode];
     if (!laEarnings) continue;
-    const latestPeriod = laData.latest_period;
     
     // Add region information to LA
     laData.region_code = laRegion?.code || null;
@@ -127,8 +127,7 @@ function enrichPropertyType(propType, earnings, regions) {
         msoa.affordability.median = {
           price: medianPrice,
           earnings: laEarnings.median,
-          ratio: Math.round(ratio * 100) / 100,
-          period: latestPeriod
+          ratio: Math.round(ratio * 100) / 100
         };
         laStats.median.prices.push(medianPrice);
         laStats.median.earnings_vals.push(laEarnings.median);
@@ -142,8 +141,7 @@ function enrichPropertyType(propType, earnings, regions) {
         msoa.affordability.lq = {
           price: lqPrice,
           earnings: laEarnings.lq,
-          ratio: Math.round(ratio * 100) / 100,
-          period: latestPeriod
+          ratio: Math.round(ratio * 100) / 100
         };
         laStats.lq.prices.push(lqPrice);
         laStats.lq.earnings_vals.push(laEarnings.lq);
@@ -164,8 +162,7 @@ function enrichPropertyType(propType, earnings, regions) {
       laData.affordability.median = {
         price: avgPrice,
         earnings: avgEarnings,
-        ratio: Math.round((avgPrice / avgEarnings) * 100) / 100,
-        period: latestPeriod
+        ratio: Math.round((avgPrice / avgEarnings) * 100) / 100
       };
     }
     
@@ -175,8 +172,7 @@ function enrichPropertyType(propType, earnings, regions) {
       laData.affordability.lq = {
         price: avgPrice,
         earnings: avgEarnings,
-        ratio: Math.round((avgPrice / avgEarnings) * 100) / 100,
-        period: latestPeriod
+        ratio: Math.round((avgPrice / avgEarnings) * 100) / 100
       };
     }
     
@@ -212,7 +208,7 @@ async function main() {
     
     console.log('='.repeat(60));
     console.log('✓ Affordability calculation complete!\n');
-    console.log('Next: Run generate-msoas-latest.js and generate-national.js');
+    console.log('Next: Run generate-final-files.js');
     
   } catch (error) {
     console.error('Error:', error);

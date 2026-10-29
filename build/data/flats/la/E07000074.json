@@ -3,30 +3,37 @@
   "name": "Maldon",
   "region_code": "E12000006",
   "region_name": "East of England",
-  "latest_period": "2025-Q3",
   "msoas": [
-    {
-      "code": "E02004555",
-      "name": "Tollesbury, Tolleshunt & Goldhanger",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
     {
       "code": "E02004556",
       "name": "Great Totham, Wickham Bishops & Woodham",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 235000,
+          "earnings": 43385,
+          "ratio": 5.42
+        },
+        "lq": {
+          "price": 192000,
+          "earnings": 30701,
+          "ratio": 6.25
+        }
       }
     },
     {
       "code": "E02004557",
       "name": "Heybridge",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 173000,
+          "earnings": 43385,
+          "ratio": 3.99
+        },
+        "lq": {
+          "price": 170000,
+          "earnings": 30701,
+          "ratio": 5.54
+        }
       }
     },
     {
@@ -34,16 +41,14 @@
       "name": "Maldon North",
       "affordability": {
         "median": {
-          "price": 182500,
+          "price": 195000,
           "earnings": 43385,
-          "ratio": 4.21,
-          "period": "2025-Q3"
+          "ratio": 4.49
         },
         "lq": {
-          "price": 116250,
+          "price": 130000,
           "earnings": 30701,
-          "ratio": 3.79,
-          "period": "2025-Q3"
+          "ratio": 4.23
         }
       }
     },
@@ -52,16 +57,14 @@
       "name": "Maldon South",
       "affordability": {
         "median": {
-          "price": 127500,
+          "price": 125000,
           "earnings": 43385,
-          "ratio": 2.94,
-          "period": "2025-Q3"
+          "ratio": 2.88
         },
         "lq": {
-          "price": 99438,
+          "price": 102500,
           "earnings": 30701,
-          "ratio": 3.24,
-          "period": "2025-Q3"
+          "ratio": 3.34
         }
       }
     },
@@ -72,14 +75,12 @@
         "median": {
           "price": 149375,
           "earnings": 43385,
-          "ratio": 3.44,
-          "period": "2025-Q3"
+          "ratio": 3.44
         },
         "lq": {
-          "price": 137188,
+          "price": 135000,
           "earnings": 30701,
-          "ratio": 4.47,
-          "period": "2025-Q3"
+          "ratio": 4.4
         }
       }
     },
@@ -90,14 +91,12 @@
         "median": {
           "price": 155000,
           "earnings": 43385,
-          "ratio": 3.57,
-          "period": "2025-Q3"
+          "ratio": 3.57
         },
         "lq": {
           "price": 132500,
           "earnings": 30701,
-          "ratio": 4.32,
-          "period": "2025-Q3"
+          "ratio": 4.32
         }
       }
     },
@@ -106,32 +105,28 @@
       "name": "Burnham-on-Crouch",
       "affordability": {
         "median": {
-          "price": 222000,
+          "price": 223000,
           "earnings": 43385,
-          "ratio": 5.12,
-          "period": "2025-Q3"
+          "ratio": 5.14
         },
         "lq": {
-          "price": 174500,
+          "price": 198250,
           "earnings": 30701,
-          "ratio": 5.68,
-          "period": "2025-Q3"
+          "ratio": 6.46
         }
       }
     }
   ],
   "affordability": {
     "median": {
-      "price": 167275,
+      "price": 179339,
       "earnings": 43385,
-      "ratio": 3.86,
-      "period": "2025-Q3"
+      "ratio": 4.13
     },
     "lq": {
-      "price": 131975,
+      "price": 151464,
       "earnings": 30701,
-      "ratio": 4.3,
-      "period": "2025-Q3"
+      "ratio": 4.93
     }
   }
 }

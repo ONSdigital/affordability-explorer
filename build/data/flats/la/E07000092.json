@@ -3,14 +3,21 @@
   "name": "Rushmoor",
   "region_code": "E12000008",
   "region_name": "South East",
-  "latest_period": "2025-Q3",
   "msoas": [
     {
       "code": "E02004802",
       "name": "Hawley Lane & Fox Lane",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 237500,
+          "earnings": 37883,
+          "ratio": 6.27
+        },
+        "lq": {
+          "price": 237000,
+          "earnings": 29692,
+          "ratio": 7.98
+        }
       }
     },
     {
@@ -18,16 +25,14 @@
       "name": "Mayfield",
       "affordability": {
         "median": {
-          "price": 251500,
+          "price": 250000,
           "earnings": 37883,
-          "ratio": 6.64,
-          "period": "2025-Q3"
+          "ratio": 6.6
         },
         "lq": {
-          "price": 248000,
+          "price": 244000,
           "earnings": 29692,
-          "ratio": 8.35,
-          "period": "2025-Q3"
+          "ratio": 8.22
         }
       }
     },
@@ -38,14 +43,12 @@
         "median": {
           "price": 185000,
           "earnings": 37883,
-          "ratio": 4.88,
-          "period": "2025-Q3"
+          "ratio": 4.88
         },
         "lq": {
           "price": 150000,
           "earnings": 29692,
-          "ratio": 5.05,
-          "period": "2025-Q3"
+          "ratio": 5.05
         }
       }
     },
@@ -54,16 +57,14 @@
       "name": "Farnborough Hill",
       "affordability": {
         "median": {
-          "price": 216000,
+          "price": 213500,
           "earnings": 37883,
-          "ratio": 5.7,
-          "period": "2025-Q3"
+          "ratio": 5.64
         },
         "lq": {
-          "price": 180250,
+          "price": 183875,
           "earnings": 29692,
-          "ratio": 6.07,
-          "period": "2025-Q3"
+          "ratio": 6.19
         }
       }
     },
@@ -72,16 +73,14 @@
       "name": "Cove & Southwood",
       "affordability": {
         "median": {
-          "price": 176250,
+          "price": 172500,
           "earnings": 37883,
-          "ratio": 4.65,
-          "period": "2025-Q3"
+          "ratio": 4.55
         },
         "lq": {
-          "price": 166875,
+          "price": 166250,
           "earnings": 29692,
-          "ratio": 5.62,
-          "period": "2025-Q3"
+          "ratio": 5.6
         }
       }
     },
@@ -90,16 +89,14 @@
       "name": "Farnborough Town",
       "affordability": {
         "median": {
-          "price": 187500,
+          "price": 228500,
           "earnings": 37883,
-          "ratio": 4.95,
-          "period": "2025-Q3"
+          "ratio": 6.03
         },
         "lq": {
-          "price": 144750,
+          "price": 161500,
           "earnings": 29692,
-          "ratio": 4.88,
-          "period": "2025-Q3"
+          "ratio": 5.44
         }
       }
     },
@@ -110,14 +107,12 @@
         "median": {
           "price": 205000,
           "earnings": 37883,
-          "ratio": 5.41,
-          "period": "2025-Q3"
+          "ratio": 5.41
         },
         "lq": {
           "price": 169250,
           "earnings": 29692,
-          "ratio": 5.7,
-          "period": "2025-Q3"
+          "ratio": 5.7
         }
       }
     },
@@ -126,16 +121,14 @@
       "name": "Aldershot Town",
       "affordability": {
         "median": {
-          "price": 185000,
+          "price": 190000,
           "earnings": 37883,
-          "ratio": 4.88,
-          "period": "2025-Q3"
+          "ratio": 5.02
         },
         "lq": {
-          "price": 140000,
+          "price": 150750,
           "earnings": 29692,
-          "ratio": 4.72,
-          "period": "2025-Q3"
+          "ratio": 5.08
         }
       }
     },
@@ -144,16 +137,14 @@
       "name": "Aldershot North Town",
       "affordability": {
         "median": {
-          "price": 182500,
+          "price": 180000,
           "earnings": 37883,
-          "ratio": 4.82,
-          "period": "2025-Q3"
+          "ratio": 4.75
         },
         "lq": {
-          "price": 155500,
+          "price": 156000,
           "earnings": 29692,
-          "ratio": 5.24,
-          "period": "2025-Q3"
+          "ratio": 5.25
         }
       }
     },
@@ -164,14 +155,12 @@
         "median": {
           "price": 171500,
           "earnings": 37883,
-          "ratio": 4.53,
-          "period": "2025-Q3"
+          "ratio": 4.53
         },
         "lq": {
-          "price": 131250,
+          "price": 128750,
           "earnings": 29692,
-          "ratio": 4.42,
-          "period": "2025-Q3"
+          "ratio": 4.34
         }
       }
     },
@@ -180,40 +169,28 @@
       "name": "Aldershot Manor Park",
       "affordability": {
         "median": {
-          "price": 227500,
+          "price": 228000,
           "earnings": 37883,
-          "ratio": 6.01,
-          "period": "2025-Q3"
+          "ratio": 6.02
         },
         "lq": {
-          "price": 204000,
+          "price": 216500,
           "earnings": 29692,
-          "ratio": 6.87,
-          "period": "2025-Q3"
+          "ratio": 7.29
         }
-      }
-    },
-    {
-      "code": "E02004813",
-      "name": "Aldershot Park",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     }
   ],
   "affordability": {
     "median": {
-      "price": 198775,
+      "price": 205591,
       "earnings": 37883,
-      "ratio": 5.25,
-      "period": "2025-Q3"
+      "ratio": 5.43
     },
     "lq": {
-      "price": 168988,
+      "price": 178534,
       "earnings": 29692,
-      "ratio": 5.69,
-      "period": "2025-Q3"
+      "ratio": 6.01
     }
   }
 }

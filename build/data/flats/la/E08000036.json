@@ -3,38 +3,21 @@
   "name": "Wakefield",
   "region_code": "E12000003",
   "region_name": "Yorkshire and The Humber",
-  "latest_period": "2025-Q3",
   "msoas": [
-    {
-      "code": "E02002438",
-      "name": "Ferry Fryston",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002439",
-      "name": "Castleford Town",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002440",
-      "name": "Airedale",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
     {
       "code": "E02002441",
       "name": "Castleford West",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 110000,
+          "earnings": 34400,
+          "ratio": 3.2
+        },
+        "lq": {
+          "price": 92625,
+          "earnings": 26863,
+          "ratio": 3.45
+        }
       }
     },
     {
@@ -42,25 +25,15 @@
       "name": "Glasshoughton",
       "affordability": {
         "median": {
-          "price": 107000,
+          "price": 106000,
           "earnings": 34400,
-          "ratio": 3.11,
-          "period": "2025-Q3"
+          "ratio": 3.08
         },
         "lq": {
-          "price": 105000,
+          "price": 101250,
           "earnings": 26863,
-          "ratio": 3.91,
-          "period": "2025-Q3"
+          "ratio": 3.77
         }
-      }
-    },
-    {
-      "code": "E02002443",
-      "name": "Outwood East",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -68,57 +41,15 @@
       "name": "Stanley, Moorhouse & Bottomboat",
       "affordability": {
         "median": {
-          "price": 135250,
+          "price": 133000,
           "earnings": 34400,
-          "ratio": 3.93,
-          "period": "2025-Q3"
+          "ratio": 3.87
         },
         "lq": {
-          "price": 118000,
+          "price": 121475,
           "earnings": 26863,
-          "ratio": 4.39,
-          "period": "2025-Q3"
+          "ratio": 4.52
         }
-      }
-    },
-    {
-      "code": "E02002445",
-      "name": "Outwood West",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002446",
-      "name": "Altofts",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002447",
-      "name": "Knottingley",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002448",
-      "name": "Ferrybridge & West Knottingley",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002449",
-      "name": "Pontefract North East",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -128,23 +59,13 @@
         "median": {
           "price": 99000,
           "earnings": 34400,
-          "ratio": 2.88,
-          "period": "2025-Q3"
+          "ratio": 2.88
         },
         "lq": {
           "price": 97500,
           "earnings": 26863,
-          "ratio": 3.63,
-          "period": "2025-Q3"
+          "ratio": 3.63
         }
-      }
-    },
-    {
-      "code": "E02002451",
-      "name": "Wrenthorpe & Kirkhamgate",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -152,25 +73,15 @@
       "name": "Pontefract North West",
       "affordability": {
         "median": {
-          "price": 87750,
+          "price": 87375,
           "earnings": 34400,
-          "ratio": 2.55,
-          "period": "2025-Q3"
+          "ratio": 2.54
         },
         "lq": {
-          "price": 84250,
+          "price": 82625,
           "earnings": 26863,
-          "ratio": 3.14,
-          "period": "2025-Q3"
+          "ratio": 3.08
         }
-      }
-    },
-    {
-      "code": "E02002453",
-      "name": "Normanton West",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -178,16 +89,14 @@
       "name": "Wakefield Central",
       "affordability": {
         "median": {
-          "price": 90000,
+          "price": 107750,
           "earnings": 34400,
-          "ratio": 2.62,
-          "period": "2025-Q3"
+          "ratio": 3.13
         },
         "lq": {
           "price": 80000,
           "earnings": 26863,
-          "ratio": 2.98,
-          "period": "2025-Q3"
+          "ratio": 2.98
         }
       }
     },
@@ -198,14 +107,12 @@
         "median": {
           "price": 105000,
           "earnings": 34400,
-          "ratio": 3.05,
-          "period": "2025-Q3"
+          "ratio": 3.05
         },
         "lq": {
           "price": 100000,
           "earnings": 26863,
-          "ratio": 3.72,
-          "period": "2025-Q3"
+          "ratio": 3.72
         }
       }
     },
@@ -214,25 +121,15 @@
       "name": "Wakefield St John's",
       "affordability": {
         "median": {
-          "price": 136000,
+          "price": 142000,
           "earnings": 34400,
-          "ratio": 3.95,
-          "period": "2025-Q3"
+          "ratio": 4.13
         },
         "lq": {
-          "price": 107500,
+          "price": 111250,
           "earnings": 26863,
-          "ratio": 4,
-          "period": "2025-Q3"
+          "ratio": 4.14
         }
-      }
-    },
-    {
-      "code": "E02002457",
-      "name": "Eastmoor",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -242,14 +139,12 @@
         "median": {
           "price": 129250,
           "earnings": 34400,
-          "ratio": 3.76,
-          "period": "2025-Q3"
+          "ratio": 3.76
         },
         "lq": {
           "price": 107500,
           "earnings": 26863,
-          "ratio": 4,
-          "period": "2025-Q3"
+          "ratio": 4
         }
       }
     },
@@ -260,31 +155,13 @@
         "median": {
           "price": 110000,
           "earnings": 34400,
-          "ratio": 3.2,
-          "period": "2025-Q3"
+          "ratio": 3.2
         },
         "lq": {
           "price": 110000,
           "earnings": 26863,
-          "ratio": 4.09,
-          "period": "2025-Q3"
+          "ratio": 4.09
         }
-      }
-    },
-    {
-      "code": "E02002460",
-      "name": "Pontefract South West",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002461",
-      "name": "Streethouse & Sharlston Common",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -292,25 +169,15 @@
       "name": "Ossett West",
       "affordability": {
         "median": {
-          "price": 110750,
+          "price": 114000,
           "earnings": 34400,
-          "ratio": 3.22,
-          "period": "2025-Q3"
+          "ratio": 3.31
         },
         "lq": {
-          "price": 97750,
+          "price": 98500,
           "earnings": 26863,
-          "ratio": 3.64,
-          "period": "2025-Q3"
+          "ratio": 3.67
         }
-      }
-    },
-    {
-      "code": "E02002463",
-      "name": "Lupset",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -318,16 +185,14 @@
       "name": "Featherstone",
       "affordability": {
         "median": {
-          "price": 120000,
+          "price": 117500,
           "earnings": 34400,
-          "ratio": 3.49,
-          "period": "2025-Q3"
+          "ratio": 3.42
         },
         "lq": {
-          "price": 115000,
+          "price": 96250,
           "earnings": 26863,
-          "ratio": 4.28,
-          "period": "2025-Q3"
+          "ratio": 3.58
         }
       }
     },
@@ -336,25 +201,15 @@
       "name": "Thornes",
       "affordability": {
         "median": {
-          "price": 94975,
+          "price": 100000,
           "earnings": 34400,
-          "ratio": 2.76,
-          "period": "2025-Q3"
+          "ratio": 2.91
         },
         "lq": {
-          "price": 82488,
+          "price": 84975,
           "earnings": 26863,
-          "ratio": 3.07,
-          "period": "2025-Q3"
+          "ratio": 3.16
         }
-      }
-    },
-    {
-      "code": "E02002466",
-      "name": "Ossett South East & Horbury Bridge",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -362,73 +217,31 @@
       "name": "Agbrigg & Belle Isle",
       "affordability": {
         "median": {
-          "price": 92500,
+          "price": 95000,
           "earnings": 34400,
-          "ratio": 2.69,
-          "period": "2025-Q3"
+          "ratio": 2.76
         },
         "lq": {
-          "price": 85750,
+          "price": 87250,
           "earnings": 26863,
-          "ratio": 3.19,
-          "period": "2025-Q3"
+          "ratio": 3.25
         }
-      }
-    },
-    {
-      "code": "E02002468",
-      "name": "Horbury",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002469",
-      "name": "Crofton",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
       "code": "E02002470",
       "name": "Sandal",
       "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002471",
-      "name": "Ackworth & Darrington",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002472",
-      "name": "Netherton & Middlestown",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002473",
-      "name": "Durkar & Crigglestone",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002474",
-      "name": "Kettlethorpe & Chapelthorpe",
-      "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 107500,
+          "earnings": 34400,
+          "ratio": 3.13
+        },
+        "lq": {
+          "price": 79500,
+          "earnings": 26863,
+          "ratio": 2.96
+        }
       }
     },
     {
@@ -438,47 +251,29 @@
         "median": {
           "price": 152000,
           "earnings": 34400,
-          "ratio": 4.42,
-          "period": "2025-Q3"
+          "ratio": 4.42
         },
         "lq": {
           "price": 138500,
           "earnings": 26863,
-          "ratio": 5.16,
-          "period": "2025-Q3"
+          "ratio": 5.16
         }
-      }
-    },
-    {
-      "code": "E02002476",
-      "name": "Kinsley & Fitzwilliam",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002477",
-      "name": "Ryhill & South Hiendley",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002478",
-      "name": "Upton",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
       "code": "E02002479",
       "name": "Hemsworth Town",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 100000,
+          "earnings": 34400,
+          "ratio": 2.91
+        },
+        "lq": {
+          "price": 71500,
+          "earnings": 26863,
+          "ratio": 2.66
+        }
       }
     },
     {
@@ -488,46 +283,26 @@
         "median": {
           "price": 60000,
           "earnings": 34400,
-          "ratio": 1.74,
-          "period": "2025-Q3"
+          "ratio": 1.74
         },
         "lq": {
           "price": 60000,
           "earnings": 26863,
-          "ratio": 2.23,
-          "period": "2025-Q3"
+          "ratio": 2.23
         }
-      }
-    },
-    {
-      "code": "E02002481",
-      "name": "South Elmsall",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002482",
-      "name": "South Kirkby",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     }
   ],
   "affordability": {
     "median": {
-      "price": 108632,
+      "price": 109743,
       "earnings": 34400,
-      "ratio": 3.16,
-      "period": "2025-Q3"
+      "ratio": 3.19
     },
     "lq": {
-      "price": 99283,
+      "price": 95594,
       "earnings": 26863,
-      "ratio": 3.7,
-      "period": "2025-Q3"
+      "ratio": 3.56
     }
   }
 }

@@ -4,23 +4,29 @@
  * Generate msoas-latest.json and national files for each property type
  */
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import XLSX from 'xlsx';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import XLSX from "xlsx";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUTPUT_DIR = path.join(__dirname, '../static/data');
-const GEOGRAPHY_DIR = path.join(OUTPUT_DIR, 'geography');
-const DATA_DIR = path.join(__dirname, '../data/raw');
+const OUTPUT_DIR = path.join(__dirname, "../static/data");
+const GEOGRAPHY_DIR = path.join(OUTPUT_DIR, "geography");
+const DATA_DIR = path.join(__dirname, "../data/raw");
 
-const PROPERTY_TYPES = ['all', 'detached', 'semi-detached', 'terraced', 'flats'];
+const PROPERTY_TYPES = [
+  "all",
+  "detached",
+  "semi-detached",
+  "terraced",
+  "flats",
+];
 const PROPERTY_TYPE_SHEET_LETTERS = {
-  all: 'a',
-  detached: 'b',
-  'semi-detached': 'c',
-  terraced: 'd',
-  flats: 'e',
+  all: "a",
+  detached: "b",
+  "semi-detached": "c",
+  terraced: "d",
+  flats: "e",
 };
 
 const REGIONS = [
@@ -33,22 +39,25 @@ const REGIONS = [
   { cd: "E12000007", nm: "London" },
   { cd: "E12000008", nm: "South East" },
   { cd: "E12000009", nm: "South West" },
-  { cd: "W92000004", nm: "Wales" }
+  { cd: "W92000004", nm: "Wales" },
 ];
 
 const COUNTRIES = [
-  { code: 'E92000001', slug: 'england', name: 'England' },
-  { code: 'W92000004', slug: 'wales', name: 'Wales' },
+  { code: "E92000001", slug: "england", name: "England" },
+  { code: "W92000004", slug: "wales", name: "Wales" },
 ];
 
 const medianAdministrativeWorkbook = XLSX.readFile(
-  path.join(DATA_DIR, 'medianpricepaidforadministrativegeographies.xlsx'),
+  path.join(DATA_DIR, "medianpricepaidforadministrativegeographies.xlsx"),
 );
 const lowerQuartileAdministrativeWorkbook = XLSX.readFile(
-  path.join(DATA_DIR, 'lowerquartilepricepaidforadministrativegeographies.xlsx'),
+  path.join(
+    DATA_DIR,
+    "lowerquartilepricepaidforadministrativegeographies.xlsx",
+  ),
 );
 const affordabilityWorkbook = XLSX.readFile(
-  path.join(DATA_DIR, 'aff2ratioofhousepricetoresidencebasedearnings.xlsx'),
+  path.join(DATA_DIR, "aff2ratioofhousepricetoresidencebasedearnings.xlsx"),
 );
 
 function ensureDir(dir) {
@@ -58,11 +67,16 @@ function ensureDir(dir) {
 }
 
 function parsePeriodHeader(value) {
-  if (typeof value === 'number' && Number.isInteger(value) && value >= 1900 && value <= 2100) {
+  if (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 1900 &&
+    value <= 2100
+  ) {
     return String(value);
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return null;
   }
 
@@ -75,16 +89,18 @@ function parsePeriodHeader(value) {
     return null;
   }
 
-  const quarter = { Mar: 'Q1', Jun: 'Q2', Sep: 'Q3', Dec: 'Q4' }[match[1]];
+  const quarter = { Mar: "Q1", Jun: "Q2", Sep: "Q3", Dec: "Q4" }[match[1]];
   return `${match[2]}-${quarter}`;
 }
 
 function getLatestPeriodColumn(sheet, startCol) {
-  const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
+  const range = XLSX.utils.decode_range(sheet["!ref"] || "A1");
 
   for (let row = range.s.r; row <= Math.min(range.e.r, 15); row++) {
     for (let col = range.e.c; col >= startCol; col--) {
-      const period = parsePeriodHeader(sheet[XLSX.utils.encode_cell({ r: row, c: col })]?.v);
+      const period = parsePeriodHeader(
+        sheet[XLSX.utils.encode_cell({ r: row, c: col })]?.v,
+      );
       if (period) {
         return { col, period };
       }
@@ -100,7 +116,7 @@ function readLatestAreaValues(workbook, sheetName) {
     return { period: null, values: {} };
   }
 
-  const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
+  const range = XLSX.utils.decode_range(sheet["!ref"] || "A1");
   const values = {};
   const latestPeriodColumn = getLatestPeriodColumn(sheet, 2);
 
@@ -112,11 +128,12 @@ function readLatestAreaValues(workbook, sheetName) {
     const code = sheet[XLSX.utils.encode_cell({ r: row, c: 0 })]?.v;
     const name = sheet[XLSX.utils.encode_cell({ r: row, c: 1 })]?.v ?? null;
 
-    if (!code || typeof code !== 'string') {
+    if (!code || typeof code !== "string") {
       continue;
     }
 
-    const latestValue = sheet[XLSX.utils.encode_cell({ r: row, c: latestPeriodColumn.col })]?.v;
+    const latestValue =
+      sheet[XLSX.utils.encode_cell({ r: row, c: latestPeriodColumn.col })]?.v;
     if (!Number.isFinite(latestValue)) {
       continue;
     }
@@ -147,7 +164,14 @@ function createAffordabilityEntry(price, earnings, period) {
   };
 }
 
-function buildAreaAffordabilitySummary(code, name, medianPrices, lowerQuartilePrices, medianEarnings, lowerQuartileEarnings) {
+function buildAreaAffordabilitySummary(
+  code,
+  name,
+  medianPrices,
+  lowerQuartilePrices,
+  medianEarnings,
+  lowerQuartileEarnings,
+) {
   const median = createAffordabilityEntry(
     medianPrices.values[code]?.value ?? null,
     medianEarnings.values[code]?.value ?? null,
@@ -161,7 +185,11 @@ function buildAreaAffordabilitySummary(code, name, medianPrices, lowerQuartilePr
 
   return {
     code,
-    name: name ?? medianPrices.values[code]?.name ?? lowerQuartilePrices.values[code]?.name ?? null,
+    name:
+      name ??
+      medianPrices.values[code]?.name ??
+      lowerQuartilePrices.values[code]?.name ??
+      null,
     latest_period: medianPrices.period,
     affordability: {
       ...(median ? { median } : {}),
@@ -171,14 +199,23 @@ function buildAreaAffordabilitySummary(code, name, medianPrices, lowerQuartilePr
 }
 
 function writeRegionFiles(typeDir, propType) {
-  const regionDir = path.join(typeDir, 'region');
+  const regionDir = path.join(typeDir, "region");
   ensureDir(regionDir);
 
   const sheetLetter = PROPERTY_TYPE_SHEET_LETTERS[propType];
-  const medianPrices = readLatestAreaValues(medianAdministrativeWorkbook, `1${sheetLetter}`);
-  const lowerQuartilePrices = readLatestAreaValues(lowerQuartileAdministrativeWorkbook, `1${sheetLetter}`);
-  const medianEarnings = readLatestAreaValues(affordabilityWorkbook, '1b');
-  const lowerQuartileEarnings = readLatestAreaValues(affordabilityWorkbook, '2b');
+  const medianPrices = readLatestAreaValues(
+    medianAdministrativeWorkbook,
+    `1${sheetLetter}`,
+  );
+  const lowerQuartilePrices = readLatestAreaValues(
+    lowerQuartileAdministrativeWorkbook,
+    `1${sheetLetter}`,
+  );
+  const medianEarnings = readLatestAreaValues(affordabilityWorkbook, "1b");
+  const lowerQuartileEarnings = readLatestAreaValues(
+    affordabilityWorkbook,
+    "2b",
+  );
 
   for (const region of REGIONS) {
     const summary = buildAreaAffordabilitySummary(
@@ -238,42 +275,42 @@ function writeNationalFiles(nationalDir, areaData) {
 
 function generateForPropertyType(propType) {
   console.log(`\nProcessing: ${propType}`);
-  
+
   const typeDir = path.join(OUTPUT_DIR, propType);
-  const laDir = path.join(typeDir, 'la');
-  const nationalDir = path.join(typeDir, 'national');
-  
+  const laDir = path.join(typeDir, "la");
+  const nationalDir = path.join(typeDir, "national");
+
   if (!fs.existsSync(laDir)) {
-    console.log('  Skipped (directory not found)');
+    console.log("  Skipped (directory not found)");
     return;
   }
-  
+
   if (!fs.existsSync(nationalDir)) {
     fs.mkdirSync(nationalDir, { recursive: true });
   }
-  
+
   // Read all LA files and build authorities list + aggregate data
-  const laFiles = fs.readdirSync(laDir).filter(f => f.endsWith('.json'));
+  const laFiles = fs.readdirSync(laDir).filter((f) => f.endsWith(".json"));
   const authorities = [];
   const msoas = [];
   const latestPeriods = new Set();
-  
+
   for (const filename of laFiles) {
     const filePath = path.join(laDir, filename);
-    const laData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    const laData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     if (laData.latest_period) {
       latestPeriods.add(laData.latest_period);
     }
-    
+
     // Add to authorities list with region info
     authorities.push({
       code: laData.code,
       name: laData.name,
       region_code: laData.region_code,
       region_name: laData.region_name,
-      msoa_count: laData.msoas.length
+      msoa_count: laData.msoas.length,
     });
-    
+
     // Collect MSOAs for msoas-latest.json
     for (const msoa of laData.msoas) {
       msoas.push({
@@ -283,41 +320,56 @@ function generateForPropertyType(propType) {
         la_name: laData.name,
         region_code: laData.region_code,
         region_name: laData.region_name,
-        affordability: msoa.affordability
+        affordability: msoa.affordability,
       });
     }
   }
-  
+
   // Note: authorities.json is now generated once in geography/ folder (see main function)
-  
+
   // Generate msoas-latest.json
   msoas.sort((a, b) => {
-    if (a.region_code !== b.region_code) return a.region_code.localeCompare(b.region_code);
+    if (a.region_code !== b.region_code)
+      return a.region_code.localeCompare(b.region_code);
     if (a.la_code !== b.la_code) return a.la_code.localeCompare(b.la_code);
     return a.code.localeCompare(b.code);
   });
-  
+
   const now = new Date();
   const quarter = Math.ceil((now.getMonth() + 1) / 3);
   const generatedDate = `${now.getFullYear()}-Q${quarter}`;
   if (latestPeriods.size > 1) {
     throw new Error(
-      `Local authority files have inconsistent latest periods for ${propType}: ${[...latestPeriods].join(', ')}`
+      `Local authority files have inconsistent latest periods for ${propType}: ${[...latestPeriods].join(", ")}`,
     );
   }
-  
+
   const msoasLatest = {
     generated_date: generatedDate,
     latest_period: [...latestPeriods][0] ?? null,
     msoa_count: msoas.length,
-    msoas
+    msoas,
   };
-  
+
   fs.writeFileSync(
-    path.join(typeDir, 'msoas-latest.json'),
-    JSON.stringify(msoasLatest, null, 2)
+    path.join(typeDir, "msoas-latest.json"),
+    JSON.stringify(msoasLatest, null, 2),
   );
-  
+
+  fs.writeFileSync(
+    path.join(typeDir, "msoas-map.json"),
+    JSON.stringify({
+      generated_date: generatedDate,
+      latest_period: msoasLatest.latest_period,
+      msoa_count: msoas.length,
+      msoas: msoas.map(({ affordability, ...area }) => ({
+        ...area,
+        median: affordability?.median?.ratio ?? null,
+        lq: affordability?.lq?.ratio ?? null,
+      })),
+    }),
+  );
+
   console.log(`  ✓ msoas-latest.json (${msoas.length} MSOAs)`);
 
   const areaData = writeRegionFiles(typeDir, propType);
@@ -325,80 +377,88 @@ function generateForPropertyType(propType) {
 }
 
 async function main() {
-  console.log('Generating msoas-latest and national files\n');
-  console.log('='.repeat(60));
-  
+  console.log("Generating msoas-latest and national files\n");
+  console.log("=".repeat(60));
+
   // Ensure geography directory exists
   if (!fs.existsSync(GEOGRAPHY_DIR)) {
     fs.mkdirSync(GEOGRAPHY_DIR, { recursive: true });
   }
-  
+
   // Generate shared geography files (only once from 'all' property type)
-  const allLADir = path.join(OUTPUT_DIR, 'all', 'la');
+  const allLADir = path.join(OUTPUT_DIR, "all", "la");
   if (fs.existsSync(allLADir)) {
-    const laFiles = fs.readdirSync(allLADir).filter(f => f.endsWith('.json'));
+    const laFiles = fs.readdirSync(allLADir).filter((f) => f.endsWith(".json"));
     const authorities = [];
     const regionSet = new Map();
-    
+
     for (const filename of laFiles) {
       const filePath = path.join(allLADir, filename);
-      const laData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      
+      const laData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+
       authorities.push({
         code: laData.code,
         name: laData.name,
         region_code: laData.region_code,
         region_name: laData.region_name,
-        msoa_count: laData.msoas.length
+        msoa_count: laData.msoas.length,
       });
-      
+
       if (!regionSet.has(laData.region_code)) {
-        const countryCode = laData.region_code.startsWith('E') ? 'E92000001' : 'W92000004';
-        const countryName = laData.region_code.startsWith('E') ? 'England' : 'Wales';
+        const countryCode = laData.region_code.startsWith("E")
+          ? "E92000001"
+          : "W92000004";
+        const countryName = laData.region_code.startsWith("E")
+          ? "England"
+          : "Wales";
         regionSet.set(laData.region_code, {
           name: laData.region_name,
           country_code: countryCode,
-          country_name: countryName
+          country_name: countryName,
         });
       }
     }
-    
+
     // Write authorities.json
     fs.writeFileSync(
-      path.join(GEOGRAPHY_DIR, 'authorities.json'),
-      JSON.stringify({ authorities }, null, 2)
+      path.join(GEOGRAPHY_DIR, "authorities.json"),
+      JSON.stringify({ authorities }, null, 2),
     );
-    
+
     // Write regions.json with country hierarchy
     const regions = Array.from(regionSet.entries())
       .map(([code, data]) => ({
         code,
         name: data.name,
         country_code: data.country_code,
-        country_name: data.country_name
+        country_name: data.country_name,
       }))
       .sort((a, b) => a.code.localeCompare(b.code));
-    
+
     fs.writeFileSync(
-      path.join(GEOGRAPHY_DIR, 'regions.json'),
-      JSON.stringify({ regions }, null, 2)
+      path.join(GEOGRAPHY_DIR, "regions.json"),
+      JSON.stringify({ regions }, null, 2),
     );
-    
+
     console.log(`\nShared Geography Files:`);
-    console.log(`  ✓ geography/authorities.json (${authorities.length} LAs with region info)`);
-    console.log(`  ✓ geography/regions.json (${regions.length} regions with country hierarchy)`);
+    console.log(
+      `  ✓ geography/authorities.json (${authorities.length} LAs with region info)`,
+    );
+    console.log(
+      `  ✓ geography/regions.json (${regions.length} regions with country hierarchy)`,
+    );
   }
-  
-  console.log('');
+
+  console.log("");
   for (const propType of PROPERTY_TYPES) {
     generateForPropertyType(propType);
   }
-  
-  console.log('\n' + '='.repeat(60));
-  console.log('✓ Generation complete!');
+
+  console.log("\n" + "=".repeat(60));
+  console.log("✓ Generation complete!");
 }
 
-main().catch(err => {
-  console.error('Error:', err);
+main().catch((err) => {
+  console.error("Error:", err);
   process.exit(1);
 });

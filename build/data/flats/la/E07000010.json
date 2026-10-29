@@ -3,22 +3,21 @@
   "name": "Fenland",
   "region_code": "E12000006",
   "region_name": "East of England",
-  "latest_period": "2025-Q3",
   "msoas": [
-    {
-      "code": "E02003742",
-      "name": "Leverington, Gorefield & Tydd St Giles",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
     {
       "code": "E02003743",
       "name": "Wisbech North",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 66950,
+          "earnings": 34170,
+          "ratio": 1.96
+        },
+        "lq": {
+          "price": 65000,
+          "earnings": 27362,
+          "ratio": 2.38
+        }
       }
     },
     {
@@ -28,23 +27,13 @@
         "median": {
           "price": 72000,
           "earnings": 34170,
-          "ratio": 2.11,
-          "period": "2025-Q3"
+          "ratio": 2.11
         },
         "lq": {
           "price": 56750,
           "earnings": 27362,
-          "ratio": 2.07,
-          "period": "2025-Q3"
+          "ratio": 2.07
         }
-      }
-    },
-    {
-      "code": "E02003745",
-      "name": "Wisbech St Mary, Waldersea & Christchurch",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -54,23 +43,13 @@
         "median": {
           "price": 112500,
           "earnings": 34170,
-          "ratio": 3.29,
-          "period": "2025-Q3"
+          "ratio": 3.29
         },
         "lq": {
           "price": 112500,
           "earnings": 27362,
-          "ratio": 4.11,
-          "period": "2025-Q3"
+          "ratio": 4.11
         }
-      }
-    },
-    {
-      "code": "E02003747",
-      "name": "Whittlesey",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -78,41 +57,15 @@
       "name": "March East",
       "affordability": {
         "median": {
-          "price": 106500,
+          "price": 109500,
           "earnings": 34170,
-          "ratio": 3.12,
-          "period": "2025-Q3"
+          "ratio": 3.2
         },
         "lq": {
-          "price": 82000,
+          "price": 88125,
           "earnings": 27362,
-          "ratio": 3,
-          "period": "2025-Q3"
+          "ratio": 3.22
         }
-      }
-    },
-    {
-      "code": "E02003749",
-      "name": "Coates, Benwick & Pondersbridge",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02003750",
-      "name": "March West",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02003751",
-      "name": "Doddington, Wimblington & Manea",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -120,32 +73,28 @@
       "name": "Chatteris",
       "affordability": {
         "median": {
-          "price": 103500,
+          "price": 102000,
           "earnings": 34170,
-          "ratio": 3.03,
-          "period": "2025-Q3"
+          "ratio": 2.99
         },
         "lq": {
-          "price": 100500,
+          "price": 98500,
           "earnings": 27362,
-          "ratio": 3.67,
-          "period": "2025-Q3"
+          "ratio": 3.6
         }
       }
     }
   ],
   "affordability": {
     "median": {
-      "price": 98625,
+      "price": 92590,
       "earnings": 34170,
-      "ratio": 2.89,
-      "period": "2025-Q3"
+      "ratio": 2.71
     },
     "lq": {
-      "price": 87938,
+      "price": 84175,
       "earnings": 27362,
-      "ratio": 3.21,
-      "period": "2025-Q3"
+      "ratio": 3.08
     }
   }
 }

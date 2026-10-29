@@ -3,16 +3,7 @@
   "name": "Forest of Dean",
   "region_code": "E12000009",
   "region_name": "South West",
-  "latest_period": "2025-Q3",
   "msoas": [
-    {
-      "code": "E02004626",
-      "name": "Dymock, Hartpury & Huntley",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
     {
       "code": "E02004627",
       "name": "Newent",
@@ -20,31 +11,29 @@
         "median": {
           "price": 111750,
           "earnings": 42326,
-          "ratio": 2.64,
-          "period": "2025-Q3"
+          "ratio": 2.64
         },
         "lq": {
           "price": 90000,
           "earnings": 32729,
-          "ratio": 2.75,
-          "period": "2025-Q3"
+          "ratio": 2.75
         }
-      }
-    },
-    {
-      "code": "E02004628",
-      "name": "Mitcheldean, Drybrook & Ruardean",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
       "code": "E02004629",
       "name": "Cinderford",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 100000,
+          "earnings": 42326,
+          "ratio": 2.36
+        },
+        "lq": {
+          "price": 100000,
+          "earnings": 32729,
+          "ratio": 3.06
+        }
       }
     },
     {
@@ -54,23 +43,13 @@
         "median": {
           "price": 250000,
           "earnings": 42326,
-          "ratio": 5.91,
-          "period": "2025-Q3"
+          "ratio": 5.91
         },
         "lq": {
           "price": 245000,
           "earnings": 32729,
-          "ratio": 7.49,
-          "period": "2025-Q3"
+          "ratio": 7.49
         }
-      }
-    },
-    {
-      "code": "E02004631",
-      "name": "Lydbrook, Newland & St Briavels",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -78,25 +57,15 @@
       "name": "Coleford",
       "affordability": {
         "median": {
-          "price": 119000,
+          "price": 98000,
           "earnings": 42326,
-          "ratio": 2.81,
-          "period": "2025-Q3"
+          "ratio": 2.32
         },
         "lq": {
-          "price": 88750,
+          "price": 88500,
           "earnings": 32729,
-          "ratio": 2.71,
-          "period": "2025-Q3"
+          "ratio": 2.7
         }
-      }
-    },
-    {
-      "code": "E02004633",
-      "name": "Bream, Pillowell & Yorkley",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -104,40 +73,28 @@
       "name": "Lydney",
       "affordability": {
         "median": {
-          "price": 110000,
+          "price": 120000,
           "earnings": 42326,
-          "ratio": 2.6,
-          "period": "2025-Q3"
+          "ratio": 2.84
         },
         "lq": {
-          "price": 99000,
+          "price": 107000,
           "earnings": 32729,
-          "ratio": 3.02,
-          "period": "2025-Q3"
+          "ratio": 3.27
         }
-      }
-    },
-    {
-      "code": "E02004635",
-      "name": "Tidenham & Woolaston",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     }
   ],
   "affordability": {
     "median": {
-      "price": 147688,
+      "price": 135950,
       "earnings": 42326,
-      "ratio": 3.49,
-      "period": "2025-Q3"
+      "ratio": 3.21
     },
     "lq": {
-      "price": 130688,
+      "price": 126100,
       "earnings": 32729,
-      "ratio": 3.99,
-      "period": "2025-Q3"
+      "ratio": 3.85
     }
   }
 }

@@ -3,78 +3,21 @@
   "name": "Bridgend",
   "region_code": "W92000004",
   "region_name": "Wales",
-  "latest_period": "2025-Q3",
   "msoas": [
-    {
-      "code": "W02000218",
-      "name": "Caerau",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "W02000219",
-      "name": "Maesteg East",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "W02000220",
-      "name": "Nant-y-moel, Ogmore Vale & Blackmill",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "W02000221",
-      "name": "Blaengarw, Pontycymer & Bettws",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "W02000222",
-      "name": "Maesteg West, Garth & Llangynwyd",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "W02000223",
-      "name": "Ynysawdre & Aberkenfig",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "W02000224",
-      "name": "Sarn, Bryn-coch & Bryncethin",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "W02000225",
-      "name": "Pyle, Kenfig Hill & Cefncribwr",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
     {
       "code": "W02000226",
       "name": "Pen-prysg, Hendre & Felindre",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 99500,
+          "earnings": 37002,
+          "ratio": 2.69
+        },
+        "lq": {
+          "price": 95000,
+          "earnings": 28745,
+          "ratio": 3.3
+        }
       }
     },
     {
@@ -84,39 +27,29 @@
         "median": {
           "price": 94500,
           "earnings": 37002,
-          "ratio": 2.55,
-          "period": "2025-Q3"
+          "ratio": 2.55
         },
         "lq": {
           "price": 85500,
           "earnings": 28745,
-          "ratio": 2.97,
-          "period": "2025-Q3"
+          "ratio": 2.97
         }
-      }
-    },
-    {
-      "code": "W02000228",
-      "name": "Pen-dre, Litchard & Coity",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
       "code": "W02000229",
       "name": "Cefn-glas & Bryntirion",
       "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "W02000230",
-      "name": "Pen-y-fai, Laleston & Merthyr Mawr",
-      "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 120000,
+          "earnings": 37002,
+          "ratio": 3.24
+        },
+        "lq": {
+          "price": 108000,
+          "earnings": 28745,
+          "ratio": 3.76
+        }
       }
     },
     {
@@ -126,39 +59,29 @@
         "median": {
           "price": 120000,
           "earnings": 37002,
-          "ratio": 3.24,
-          "period": "2025-Q3"
+          "ratio": 3.24
         },
         "lq": {
           "price": 112500,
           "earnings": 28745,
-          "ratio": 3.91,
-          "period": "2025-Q3"
+          "ratio": 3.91
         }
-      }
-    },
-    {
-      "code": "W02000232",
-      "name": "Brackla East & Coychurch Lower",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "W02000233",
-      "name": "Brackla West",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
       "code": "W02000234",
       "name": "Broadlands",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 124000,
+          "earnings": 37002,
+          "ratio": 3.35
+        },
+        "lq": {
+          "price": 120000,
+          "earnings": 28745,
+          "ratio": 4.17
+        }
       }
     },
     {
@@ -166,16 +89,14 @@
       "name": "Porthcawl West",
       "affordability": {
         "median": {
-          "price": 197650,
+          "price": 210000,
           "earnings": 37002,
-          "ratio": 5.34,
-          "period": "2025-Q3"
+          "ratio": 5.68
         },
         "lq": {
-          "price": 148500,
+          "price": 155000,
           "earnings": 28745,
-          "ratio": 5.17,
-          "period": "2025-Q3"
+          "ratio": 5.39
         }
       }
     },
@@ -186,30 +107,26 @@
         "median": {
           "price": 135000,
           "earnings": 37002,
-          "ratio": 3.65,
-          "period": "2025-Q3"
+          "ratio": 3.65
         },
         "lq": {
           "price": 120000,
           "earnings": 28745,
-          "ratio": 4.17,
-          "period": "2025-Q3"
+          "ratio": 4.17
         }
       }
     }
   ],
   "affordability": {
     "median": {
-      "price": 136788,
+      "price": 129000,
       "earnings": 37002,
-      "ratio": 3.7,
-      "period": "2025-Q3"
+      "ratio": 3.49
     },
     "lq": {
-      "price": 116625,
+      "price": 113714,
       "earnings": 28745,
-      "ratio": 4.06,
-      "period": "2025-Q3"
+      "ratio": 3.96
     }
   }
 }

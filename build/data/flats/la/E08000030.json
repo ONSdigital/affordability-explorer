@@ -3,30 +3,21 @@
   "name": "Walsall",
   "region_code": "E12000005",
   "region_name": "West Midlands",
-  "latest_period": "2025-Q3",
   "msoas": [
     {
       "code": "E02002110",
       "name": "Brownhills West & Clayhanger",
       "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002111",
-      "name": "Brownhills",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002112",
-      "name": "Pelsall North",
-      "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 120000,
+          "earnings": 34036,
+          "ratio": 3.53
+        },
+        "lq": {
+          "price": 112500,
+          "earnings": 26122,
+          "ratio": 4.31
+        }
       }
     },
     {
@@ -36,14 +27,12 @@
         "median": {
           "price": 125000,
           "earnings": 34036,
-          "ratio": 3.67,
-          "period": "2025-Q3"
+          "ratio": 3.67
         },
         "lq": {
-          "price": 98500,
+          "price": 105000,
           "earnings": 26122,
-          "ratio": 3.77,
-          "period": "2025-Q3"
+          "ratio": 4.02
         }
       }
     },
@@ -52,16 +41,14 @@
       "name": "Pelsall South",
       "affordability": {
         "median": {
-          "price": 155000,
+          "price": 135000,
           "earnings": 34036,
-          "ratio": 4.55,
-          "period": "2025-Q3"
+          "ratio": 3.97
         },
         "lq": {
-          "price": 115000,
+          "price": 111888,
           "earnings": 26122,
-          "ratio": 4.4,
-          "period": "2025-Q3"
+          "ratio": 4.28
         }
       }
     },
@@ -72,71 +59,29 @@
         "median": {
           "price": 107500,
           "earnings": 34036,
-          "ratio": 3.16,
-          "period": "2025-Q3"
+          "ratio": 3.16
         },
         "lq": {
-          "price": 100000,
+          "price": 97500,
           "earnings": 26122,
-          "ratio": 3.83,
-          "period": "2025-Q3"
+          "ratio": 3.73
         }
-      }
-    },
-    {
-      "code": "E02002116",
-      "name": "Aldridge North",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002117",
-      "name": "Bloxwich Central & North",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002118",
-      "name": "Bloxwich North West",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
       "code": "E02002119",
       "name": "Shelfield",
       "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002120",
-      "name": "Ashmore",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002121",
-      "name": "Blakenall North",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002122",
-      "name": "Blakenall South",
-      "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 112500,
+          "earnings": 34036,
+          "ratio": 3.31
+        },
+        "lq": {
+          "price": 90000,
+          "earnings": 26122,
+          "ratio": 3.45
+        }
       }
     },
     {
@@ -144,16 +89,14 @@
       "name": "New Invention",
       "affordability": {
         "median": {
-          "price": 120000,
+          "price": 122750,
           "earnings": 34036,
-          "ratio": 3.53,
-          "period": "2025-Q3"
+          "ratio": 3.61
         },
         "lq": {
           "price": 120000,
           "earnings": 26122,
-          "ratio": 4.59,
-          "period": "2025-Q3"
+          "ratio": 4.59
         }
       }
     },
@@ -162,33 +105,15 @@
       "name": "Aldridge Central",
       "affordability": {
         "median": {
-          "price": 141500,
+          "price": 160000,
           "earnings": 34036,
-          "ratio": 4.16,
-          "period": "2025-Q3"
+          "ratio": 4.7
         },
         "lq": {
-          "price": 111125,
+          "price": 125000,
           "earnings": 26122,
-          "ratio": 4.25,
-          "period": "2025-Q3"
+          "ratio": 4.79
         }
-      }
-    },
-    {
-      "code": "E02002125",
-      "name": "Rushall",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002126",
-      "name": "Bloxwich South",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -196,16 +121,14 @@
       "name": "Walsall Ryecroft",
       "affordability": {
         "median": {
-          "price": 95750,
+          "price": 93500,
           "earnings": 34036,
-          "ratio": 2.81,
-          "period": "2025-Q3"
+          "ratio": 2.75
         },
         "lq": {
-          "price": 92375,
+          "price": 91000,
           "earnings": 26122,
-          "ratio": 3.54,
-          "period": "2025-Q3"
+          "ratio": 3.48
         }
       }
     },
@@ -216,47 +139,29 @@
         "median": {
           "price": 118000,
           "earnings": 34036,
-          "ratio": 3.47,
-          "period": "2025-Q3"
+          "ratio": 3.47
         },
         "lq": {
           "price": 79500,
           "earnings": 26122,
-          "ratio": 3.04,
-          "period": "2025-Q3"
+          "ratio": 3.04
         }
-      }
-    },
-    {
-      "code": "E02002129",
-      "name": "Short Heath West",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002130",
-      "name": "Leamore",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
       "code": "E02002131",
       "name": "Aldridge South",
       "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002132",
-      "name": "Bentley",
-      "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 172500,
+          "earnings": 34036,
+          "ratio": 5.07
+        },
+        "lq": {
+          "price": 135000,
+          "earnings": 26122,
+          "ratio": 5.17
+        }
       }
     },
     {
@@ -266,23 +171,13 @@
         "median": {
           "price": 101000,
           "earnings": 34036,
-          "ratio": 2.97,
-          "period": "2025-Q3"
+          "ratio": 2.97
         },
         "lq": {
-          "price": 83500,
+          "price": 77000,
           "earnings": 26122,
-          "ratio": 3.2,
-          "period": "2025-Q3"
+          "ratio": 2.95
         }
-      }
-    },
-    {
-      "code": "E02002134",
-      "name": "Willenhall Park",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -292,14 +187,12 @@
         "median": {
           "price": 100750,
           "earnings": 34036,
-          "ratio": 2.96,
-          "period": "2025-Q3"
+          "ratio": 2.96
         },
         "lq": {
           "price": 83500,
           "earnings": 26122,
-          "ratio": 3.2,
-          "period": "2025-Q3"
+          "ratio": 3.2
         }
       }
     },
@@ -310,14 +203,12 @@
         "median": {
           "price": 85000,
           "earnings": 34036,
-          "ratio": 2.5,
-          "period": "2025-Q3"
+          "ratio": 2.5
         },
         "lq": {
-          "price": 68250,
+          "price": 68500,
           "earnings": 26122,
-          "ratio": 2.61,
-          "period": "2025-Q3"
+          "ratio": 2.62
         }
       }
     },
@@ -328,14 +219,12 @@
         "median": {
           "price": 149000,
           "earnings": 34036,
-          "ratio": 4.38,
-          "period": "2025-Q3"
+          "ratio": 4.38
         },
         "lq": {
-          "price": 124250,
+          "price": 124750,
           "earnings": 26122,
-          "ratio": 4.76,
-          "period": "2025-Q3"
+          "ratio": 4.78
         }
       }
     },
@@ -346,14 +235,12 @@
         "median": {
           "price": 126000,
           "earnings": 34036,
-          "ratio": 3.7,
-          "period": "2025-Q3"
+          "ratio": 3.7
         },
         "lq": {
           "price": 106250,
           "earnings": 26122,
-          "ratio": 4.07,
-          "period": "2025-Q3"
+          "ratio": 4.07
         }
       }
     },
@@ -362,16 +249,14 @@
       "name": "Walsall Central",
       "affordability": {
         "median": {
-          "price": 93000,
+          "price": 83500,
           "earnings": 34036,
-          "ratio": 2.73,
-          "period": "2025-Q3"
+          "ratio": 2.45
         },
         "lq": {
           "price": 61196,
           "earnings": 26122,
-          "ratio": 2.34,
-          "period": "2025-Q3"
+          "ratio": 2.34
         }
       }
     },
@@ -379,8 +264,16 @@
       "code": "E02002140",
       "name": "Pleck",
       "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 95000,
+          "earnings": 34036,
+          "ratio": 2.79
+        },
+        "lq": {
+          "price": 69000,
+          "earnings": 26122,
+          "ratio": 2.64
+        }
       }
     },
     {
@@ -390,39 +283,13 @@
         "median": {
           "price": 181500,
           "earnings": 34036,
-          "ratio": 5.33,
-          "period": "2025-Q3"
+          "ratio": 5.33
         },
         "lq": {
           "price": 160000,
           "earnings": 26122,
-          "ratio": 6.13,
-          "period": "2025-Q3"
+          "ratio": 6.13
         }
-      }
-    },
-    {
-      "code": "E02002142",
-      "name": "Darlaston East",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002143",
-      "name": "Palfrey",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002144",
-      "name": "Walsall South East",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -432,31 +299,13 @@
         "median": {
           "price": 97000,
           "earnings": 34036,
-          "ratio": 2.85,
-          "period": "2025-Q3"
+          "ratio": 2.85
         },
         "lq": {
           "price": 80000,
           "earnings": 26122,
-          "ratio": 3.06,
-          "period": "2025-Q3"
+          "ratio": 3.06
         }
-      }
-    },
-    {
-      "code": "E02002146",
-      "name": "The Delves",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02002147",
-      "name": "Darlaston West",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
@@ -464,32 +313,28 @@
       "name": "Pheasey & Sutton Road",
       "affordability": {
         "median": {
-          "price": 167500,
+          "price": 167750,
           "earnings": 34036,
-          "ratio": 4.92,
-          "period": "2025-Q3"
+          "ratio": 4.93
         },
         "lq": {
-          "price": 145000,
+          "price": 148712,
           "earnings": 26122,
-          "ratio": 5.55,
-          "period": "2025-Q3"
+          "ratio": 5.69
         }
       }
     }
   ],
   "affordability": {
     "median": {
-      "price": 122719,
+      "price": 122663,
       "earnings": 34036,
-      "ratio": 3.61,
-      "period": "2025-Q3"
+      "ratio": 3.6
     },
     "lq": {
-      "price": 101778,
+      "price": 102315,
       "earnings": 26122,
-      "ratio": 3.9,
-      "period": "2025-Q3"
+      "ratio": 3.92
     }
   }
 }

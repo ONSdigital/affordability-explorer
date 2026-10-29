@@ -3,31 +3,20 @@
   "name": "Camden",
   "region_code": "E12000007",
   "region_name": "London",
-  "latest_period": "2025-Q3",
   "msoas": [
-    {
-      "code": "E02000166",
-      "name": "Highgate West",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
     {
       "code": "E02000167",
       "name": "Hampstead Town",
       "affordability": {
         "median": {
-          "price": 5250000,
+          "price": 5175000,
           "earnings": 53133,
-          "ratio": 98.81,
-          "period": "2025-Q3"
+          "ratio": 97.4
         },
         "lq": {
-          "price": 3915000,
+          "price": 3850000,
           "earnings": 36831,
-          "ratio": 106.3,
-          "period": "2025-Q3"
+          "ratio": 104.53
         }
       }
     },
@@ -38,14 +27,12 @@
         "median": {
           "price": 2280000,
           "earnings": 53133,
-          "ratio": 42.91,
-          "period": "2025-Q3"
+          "ratio": 42.91
         },
         "lq": {
-          "price": 1581500,
+          "price": 1260500,
           "earnings": 36831,
-          "ratio": 42.94,
-          "period": "2025-Q3"
+          "ratio": 34.22
         }
       }
     },
@@ -54,16 +41,14 @@
       "name": "Frognal",
       "affordability": {
         "median": {
-          "price": 6500000,
+          "price": 6000000,
           "earnings": 53133,
-          "ratio": 122.33,
-          "period": "2025-Q3"
+          "ratio": 112.92
         },
         "lq": {
-          "price": 6000000,
+          "price": 2000000,
           "earnings": 36831,
-          "ratio": 162.91,
-          "period": "2025-Q3"
+          "ratio": 54.3
         }
       }
     },
@@ -72,208 +57,44 @@
       "name": "Fortune Green",
       "affordability": {
         "median": {
-          "price": 1565000,
+          "price": 1590000,
           "earnings": 53133,
-          "ratio": 29.45,
-          "period": "2025-Q3"
+          "ratio": 29.92
         },
         "lq": {
-          "price": 1342000,
+          "price": 1384000,
           "earnings": 36831,
-          "ratio": 36.44,
-          "period": "2025-Q3"
+          "ratio": 37.58
         }
-      }
-    },
-    {
-      "code": "E02000171",
-      "name": "Mansfield Road & Park Hill Road",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000172",
-      "name": "Kentish Town West",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000173",
-      "name": "Fitzjohns & Royal Free",
-      "affordability": {
-        "median": {},
-        "lq": {}
       }
     },
     {
       "code": "E02000174",
       "name": "Kentish Town East",
       "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000175",
-      "name": "West Hampstead",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000176",
-      "name": "Belsize Park",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000177",
-      "name": "Chalk Farm",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000178",
-      "name": "Kilburn Grange",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000179",
-      "name": "Adelaide Road",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000180",
-      "name": "Camden Road South",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000181",
-      "name": "South Hampstead",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000182",
-      "name": "Swiss Cottage",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000183",
-      "name": "Primrose Hill",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000184",
-      "name": "Camden Street & Elm Village",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000185",
-      "name": "Kilburn East",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000186",
-      "name": "Camden Town & Mornington Crescent",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000187",
-      "name": "Somers Town",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000188",
-      "name": "Euston",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000191",
-      "name": "Fitzrovia East & Bloomsbury West",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000192",
-      "name": "Hatton Garden & Theobalds Road",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02000193",
-      "name": "Holborn, St Giles & Bloomsbury South",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
-    },
-    {
-      "code": "E02007115",
-      "name": "King's Cross & Bloomsbury North",
-      "affordability": {
-        "median": {},
-        "lq": {}
+        "median": {
+          "price": 2325000,
+          "earnings": 53133,
+          "ratio": 43.76
+        },
+        "lq": {
+          "price": 2231250,
+          "earnings": 36831,
+          "ratio": 60.58
+        }
       }
     }
   ],
   "affordability": {
     "median": {
-      "price": 3898750,
+      "price": 3474000,
       "earnings": 53133,
-      "ratio": 73.38,
-      "period": "2025-Q3"
+      "ratio": 65.38
     },
     "lq": {
-      "price": 3209625,
+      "price": 2145150,
       "earnings": 36831,
-      "ratio": 87.14,
-      "period": "2025-Q3"
+      "ratio": 58.24
     }
   }
 }

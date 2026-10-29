@@ -1,6 +1,7 @@
 import * as topojson from "topojson-client";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { base } from "$app/paths";
+import { loadMapData } from "./map-data.js";
 
 let boundaries = [];
 let areaNames = [];
@@ -240,6 +241,7 @@ export function findBoundaryAtPoint(lng, lat, boundaryType = "ltla") {
 
 // Cache for affordability data by property type and price level
 const affordabilityCache = {};
+const appliedMapStates = new WeakMap();
 const localAuthorityAffordabilityCache = {};
 const localAuthorityDataCache = {};
 const nationalAffordabilityCache = {};
@@ -255,7 +257,7 @@ const AFFORDABILITY_COLOR_PALETTE = [
   "#002D7D",
   "#000D54",
 ];
-const AFFORDABILITY_COLOR_BREAKS = [1, 5, 10, 15, 20, 40, 60];
+const AFFORDABILITY_COLOR_BREAKS = [1, 5, 10, 20, 35, Infinity];
 
 function roundToTwoDecimals(value) {
   return Math.round(value * 100) / 100;
@@ -277,17 +279,15 @@ export async function loadAffordabilityData(
   }
 
   try {
-    const response = await fetch(
-      withBase(`/data/${propertyType}/msoas-latest.json`),
+    const data = await loadMapData(
+      withBase(`/data/${propertyType}/msoas-map.json`),
     );
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
 
     // Create a map: MSOA code -> affordability ratio
     const msoas = {};
     if (data.msoas && Array.isArray(data.msoas)) {
       data.msoas.forEach((msoa) => {
-        const ratio = msoa.affordability?.[priceLevel]?.ratio;
+        const ratio = msoa[priceLevel];
         msoas[msoa.code] = {
           code: msoa.code,
           name: msoa.name,
@@ -635,6 +635,16 @@ export function updateMapFeatureStates(
     (Array.isArray(colorBounds) ? colorBounds.length : 0) - 1,
   );
   const activePalette = getPaletteForBreaks(colorPalette, intervalCount);
+  const styleKey = JSON.stringify([colorBounds, activePalette]);
+  const previous = appliedMapStates.get(map);
+  if (
+    previous?.source === source &&
+    previous.msoas === msoas &&
+    previous.styleKey === styleKey
+  ) {
+    return;
+  }
+  let failed = false;
 
   // Update feature state for each MSOA with its color
   Object.entries(msoas).forEach(([msoacd, data]) => {
@@ -648,7 +658,7 @@ export function updateMapFeatureStates(
           const lowerBound = colorBounds[i];
           const upperBound = colorBounds[i + 1];
 
-          if (i === 0 && data.ratio <= upperBound) {
+          if (i === 0 && data.ratio < upperBound) {
             color = activePalette[i];
             break;
           } else if (i === intervalCount - 1 && data.ratio >= lowerBound) {
@@ -663,12 +673,16 @@ export function updateMapFeatureStates(
 
       map.setFeatureState(
         { source: sourceId, sourceLayer: "msoa", id: msoacd },
-        { color: color },
+        { color, ratio: Number.isFinite(data.ratio) ? data.ratio : null },
       );
     } catch (e) {
+      failed = true;
       // Feature may not exist on current zoom level
     }
   });
+  if (!failed) {
+    appliedMapStates.set(map, { source, msoas, styleKey });
+  }
 }
 
 /**

@@ -1,8 +1,16 @@
 <script>
   import { createEventDispatcher } from "svelte";
+  import { getLegendDisplayBounds } from "../map-data.js";
 
   export let bounds = [];
-  export let colorPalette = ["#EAECB1", "#A9D891", "#00A7BA", "#004EA6", "#002D7D", "#000D54"];
+  export let colorPalette = [
+    "#EAECB1",
+    "#A9D891",
+    "#00A7BA",
+    "#004EA6",
+    "#002D7D",
+    "#000D54",
+  ];
   export let unavailableColor = "#ccc";
   export let selectedRangeIndex = null;
   export let hoverValue = null;
@@ -39,11 +47,16 @@
       return null;
     }
 
-    const minBound = currentBounds[0];
-    const maxBound = currentBounds[currentBounds.length - 1];
+    const displayBounds = getLegendDisplayBounds(currentBounds);
+    const minBound = displayBounds[0];
+    const maxBound = displayBounds[displayBounds.length - 1];
     const domain = maxBound - minBound;
 
-    if (!Number.isFinite(minBound) || !Number.isFinite(maxBound) || domain <= 0) {
+    if (
+      !Number.isFinite(minBound) ||
+      !Number.isFinite(maxBound) ||
+      domain <= 0
+    ) {
       return null;
     }
 
@@ -60,7 +73,9 @@
     }
 
     return Array.from({ length: breakCount }, (_, i) => {
-      const paletteIndex = Math.round((i * (colorPalette.length - 1)) / (breakCount - 1));
+      const paletteIndex = Math.round(
+        (i * (colorPalette.length - 1)) / (breakCount - 1),
+      );
       return colorPalette[paletteIndex];
     });
   }
@@ -70,11 +85,12 @@
       return [];
     }
 
-    const minBound = currentBounds[0];
-    const maxBound = currentBounds[currentBounds.length - 1];
+    const displayBounds = getLegendDisplayBounds(currentBounds);
+    const minBound = displayBounds[0];
+    const maxBound = displayBounds[displayBounds.length - 1];
     const domain = maxBound - minBound;
 
-    return currentBounds.map((value, index) => {
+    return currentBounds.filter(Number.isFinite).map((value, index) => {
       const left =
         Number.isFinite(domain) && domain > 0
           ? ((value - minBound) / domain) * 100
@@ -87,7 +103,12 @@
       return {
         value,
         left,
-        label: formatIntegerValue(roundedValue),
+        label:
+          formatIntegerValue(roundedValue) +
+          (index === currentBounds.length - 2 &&
+          currentBounds.at(-1) === Infinity
+            ? "+"
+            : ""),
       };
     });
   }
@@ -97,8 +118,9 @@
       return [];
     }
 
-    const minBound = currentBounds[0];
-    const maxBound = currentBounds[currentBounds.length - 1];
+    const displayBounds = getLegendDisplayBounds(currentBounds);
+    const minBound = displayBounds[0];
+    const maxBound = displayBounds[displayBounds.length - 1];
     const domain = maxBound - minBound;
     const breakCount = currentBounds.length - 1;
     const palette = getPaletteForBreaks(breakCount);
@@ -110,7 +132,10 @@
         Number.isFinite(domain) && domain > 0
           ? ((min - minBound) / domain) * 100
           : (index / breakCount) * 100;
-      const width = Number.isFinite(domain) && domain > 0 ? ((max - min) / domain) * 100 : 100 / breakCount;
+      const width =
+        Number.isFinite(domain) && domain > 0
+          ? ((displayBounds[index + 1] - min) / domain) * 100
+          : 100 / breakCount;
 
       return {
         index,
@@ -118,10 +143,10 @@
         max,
         isLast: index === breakCount - 1,
         minLabel: formatIntegerValue(
-          roundBoundaryValue(min, { isFirst: index === 0 })
+          roundBoundaryValue(min, { isFirst: index === 0 }),
         ),
         maxLabel: formatIntegerValue(
-          roundBoundaryValue(max, { isLast: index === breakCount - 1 })
+          roundBoundaryValue(max, { isLast: index === breakCount - 1 }),
         ),
         color: palette[index] ?? colorPalette[colorPalette.length - 1],
         left,
@@ -131,6 +156,7 @@
   }
 
   function getRangeLabel(range) {
+    if (range.max === Infinity) return `${range.minLabel} or more`;
     return `${range.minLabel} to ${range.maxLabel}`;
   }
 
@@ -215,7 +241,8 @@
             class="keyscale-rect"
             class:is-dimmed={isRangeDimmed(range.index)}
             class:is-hovered={hoveredRangeIndex === range.index}
-            class:is-selected={hoveredRangeIndex === null && selectedRangeIndex === range.index}
+            class:is-selected={hoveredRangeIndex === null &&
+              selectedRangeIndex === range.index}
             style="left: {range.left}%; width: {range.width}%; background-color: {range.color};"
             aria-label={`Select affordability range ${getRangeLabel(range)}`}
             aria-pressed={selectedRangeIndex === range.index}
@@ -242,7 +269,10 @@
   {/if}
 
   <div class="legend-unavailable">
-    <span class="legend-unavailable__swatch" style="background-color: {unavailableColor};"></span>
+    <span
+      class="legend-unavailable__swatch"
+      style="background-color: {unavailableColor};"
+    ></span>
     <span>Data unavailable</span>
   </div>
 </div>

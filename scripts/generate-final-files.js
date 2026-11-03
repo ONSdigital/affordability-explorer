@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import XLSX from "xlsx";
+import { readLatestAreaValues } from "./latest-area-values.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = path.join(__dirname, "../static/data");
@@ -64,91 +65,6 @@ function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-}
-
-function parsePeriodHeader(value) {
-  if (
-    typeof value === "number" &&
-    Number.isInteger(value) &&
-    value >= 1900 &&
-    value <= 2100
-  ) {
-    return String(value);
-  }
-
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  if (/^\d{4}$/.test(value)) {
-    return value;
-  }
-
-  const match = value.match(/Year ending (Mar|Jun|Sep|Dec) (\d{4})/);
-  if (!match) {
-    return null;
-  }
-
-  const quarter = { Mar: "Q1", Jun: "Q2", Sep: "Q3", Dec: "Q4" }[match[1]];
-  return `${match[2]}-${quarter}`;
-}
-
-function getLatestPeriodColumn(sheet, startCol) {
-  const range = XLSX.utils.decode_range(sheet["!ref"] || "A1");
-
-  for (let row = range.s.r; row <= Math.min(range.e.r, 15); row++) {
-    for (let col = range.e.c; col >= startCol; col--) {
-      const period = parsePeriodHeader(
-        sheet[XLSX.utils.encode_cell({ r: row, c: col })]?.v,
-      );
-      if (period) {
-        return { col, period };
-      }
-    }
-  }
-
-  return null;
-}
-
-function readLatestAreaValues(workbook, sheetName) {
-  const sheet = workbook.Sheets[sheetName];
-  if (!sheet) {
-    return { period: null, values: {} };
-  }
-
-  const range = XLSX.utils.decode_range(sheet["!ref"] || "A1");
-  const values = {};
-  const latestPeriodColumn = getLatestPeriodColumn(sheet, 2);
-
-  if (!latestPeriodColumn) {
-    return { period: null, values };
-  }
-
-  for (let row = 2; row <= range.e.r; row++) {
-    const code = sheet[XLSX.utils.encode_cell({ r: row, c: 0 })]?.v;
-    const name = sheet[XLSX.utils.encode_cell({ r: row, c: 1 })]?.v ?? null;
-
-    if (!code || typeof code !== "string") {
-      continue;
-    }
-
-    const latestValue =
-      sheet[XLSX.utils.encode_cell({ r: row, c: latestPeriodColumn.col })]?.v;
-    if (!Number.isFinite(latestValue)) {
-      continue;
-    }
-
-    values[code] = {
-      code,
-      name,
-      value: Math.round(latestValue),
-    };
-  }
-
-  return {
-    period: latestPeriodColumn.period,
-    values,
-  };
 }
 
 function createAffordabilityEntry(price, earnings, period) {

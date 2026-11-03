@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import { createServer } from "vite";
+import { createExpression } from "@maplibre/maplibre-gl-style-spec";
 
 let server;
 let mapUtils;
@@ -87,4 +88,119 @@ test("map colours use five bands including 35+ and avoid repeated feature-state 
   assert.equal(map.setFeatureState.mock.callCount(), 20);
   update({ ...data });
   assert.equal(map.setFeatureState.mock.callCount(), 30);
+});
+
+test("sparse property data retains selectable metadata without borrowing ratios", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () => ({
+    ok: true,
+    json: async () => ({
+      msoas: [{ code: "other-area", name: "Other area", median: 7, lq: 6 }],
+    }),
+  }));
+  for (const priceLevel of ["median", "lq"]) {
+    const data = await mapUtils.loadAffordabilityData("flats", priceLevel);
+    assert.equal(data.E02002483.name, "Clavering");
+    assert.equal(data.E02002483.la_code, "E06000001");
+    assert.equal(data.E02002483.ratio, null);
+    assert.equal(data["other-area"].ratio, priceLevel === "median" ? 7 : 6);
+  }
+  assert.equal(fetchMock.mock.callCount(), 1);
+});
+
+test("beeswarm uses the chosen price level for neighbourhoods and comparisons", async (t) => {
+  const affordability = {
+    median: { ratio: 5.18 },
+    lq: { ratio: 4.43 },
+  };
+  const fetchMock = t.mock.method(globalThis, "fetch", async () => ({
+    ok: true,
+    json: async () => ({ affordability }),
+  }));
+  const msoas = [
+    { code: "E02002483", name: "Clavering", affordability },
+    {
+      code: "missing-entry",
+      affordability: { median: { ratio: 6 }, lq: { ratio: null } },
+    },
+  ];
+  for (const priceLevel of ["median", "lq", "median"]) {
+    const [region, nation] = await Promise.all([
+      mapUtils.loadRegionalAffordability(
+        "all",
+        "E12000001",
+        "North East",
+        priceLevel,
+      ),
+      mapUtils.loadNationalAffordability("all", "england", priceLevel),
+    ]);
+    const points = mapUtils.transformMsoaDataForBeeswarm(
+      msoas,
+      region,
+      nation,
+      priceLevel,
+    );
+    assert.equal(
+      points.find((point) => point.code === msoas[0].code).x,
+      affordability[priceLevel].ratio,
+    );
+    assert.equal(
+      points.find((point) => point.type === "region").x,
+      affordability[priceLevel].ratio,
+    );
+    assert.equal(
+      points.find((point) => point.type === "nation").x,
+      affordability[priceLevel].ratio,
+    );
+    assert.equal(
+      points.some((point) => point.code === "missing-entry"),
+      priceLevel === "median",
+    );
+  }
+  assert.equal(fetchMock.mock.callCount(), 4);
+  assert.equal(
+    (await mapUtils.loadNationalAffordability()).ratio,
+    affordability.median.ratio,
+  );
+  assert.equal(
+    mapUtils.transformMsoaDataForBeeswarm(msoas)[0].x,
+    affordability.median.ratio,
+  );
+});
+
+test("switching to a sparse property dataset clears omitted areas and restores them on return", (t) => {
+  const source = {};
+  const states = new Map();
+  const map = {
+    getSource: () => source,
+    setFeatureState: t.mock.fn((feature, state) => {
+      states.set(feature.id, state);
+    }),
+  };
+  const all = { Jesmond: { ratio: 3.29 }, Clavering: { ratio: 5.18 } };
+  const flats = { Clavering: { ratio: 4.43 } };
+  const update = (data) =>
+    mapUtils.updateMapFeatureStates(
+      map,
+      "msoa-source",
+      data,
+      mapUtils.calculateColorBreaks(),
+    );
+  update(all);
+  const original = { ...states.get("Jesmond") };
+  update(flats);
+  assert.deepEqual(states.get("Jesmond"), { color: "#ccc", ratio: null });
+  assert.equal(states.get("Clavering").ratio, 4.43);
+  const writes = map.setFeatureState.mock.callCount();
+  update(flats);
+  assert.equal(map.setFeatureState.mock.callCount(), writes);
+  update(all);
+  assert.deepEqual(states.get("Jesmond"), original);
+
+  const expression = createExpression(mapUtils.createColorExpression());
+  assert.equal(expression.result, "success");
+  assert.equal(expression.value.evaluate({}, null, {}), "#ccc");
+  assert.equal(
+    expression.value.evaluate({}, null, { color: original.color }),
+    original.color,
+  );
 });

@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { base } from "$app/paths";
   import { ScatterChart } from "@onsvisual/svelte-charts";
+  import { compareTo, format } from "@onsvisual/robo-utils";
   import { Map, MapSource, MapLayer } from "@onsvisual/svelte-maps";
   import {
     AccessibleSelect,
@@ -303,13 +304,13 @@
 
   $: {
     const nextBeeswarmSelectionKey = selectedAreaForData
-      ? `${propertyType}:${selectedAreaForData.type}:${selectedAreaForData.code}`
+      ? `${propertyType}:${priceLevel}:${selectedAreaForData.type}:${selectedAreaForData.code}`
       : "";
 
     if (nextBeeswarmSelectionKey !== beeswarmSelectionKey) {
       beeswarmSelectionKey = nextBeeswarmSelectionKey;
       if (selectedAreaForData) {
-        loadBeeswarmData(propertyType, selectedAreaForData);
+        loadBeeswarmData(propertyType, priceLevel, selectedAreaForData);
       } else {
         resetBeeswarmData();
       }
@@ -1144,6 +1145,7 @@
     laData = null,
     regionName = null,
     countryName = null,
+    priceLevelValue = "median",
   ) {
     const selectedCode =
       selectedArea?.type === "msoa" ? selectedArea.code : null;
@@ -1192,10 +1194,10 @@
 
     if (
       !selectedMsoaMatchesLocalAuthority &&
-      Number.isFinite(laData?.affordability?.median?.ratio)
+      Number.isFinite(laData?.affordability?.[priceLevelValue]?.ratio)
     ) {
       decoratedData.push({
-        x: laData.affordability.median.ratio,
+        x: laData.affordability[priceLevelValue].ratio,
         label: laData.name,
         code: laData.code,
         type: "Local authority average",
@@ -1236,7 +1238,11 @@
     beeswarmXMax = max + padding;
   }
 
-  async function loadBeeswarmData(propertyTypeValue, selectedArea) {
+  async function loadBeeswarmData(
+    propertyTypeValue,
+    priceLevelValue,
+    selectedArea,
+  ) {
     const requestId = ++beeswarmRequestId;
 
     if (!selectedArea) {
@@ -1289,8 +1295,8 @@
       const selectedAffordability =
         selectedArea.type === "msoa"
           ? laData.msoas?.find((msoa) => msoa.code === selectedArea.code)
-              ?.affordability?.median
-          : laData.affordability?.median;
+              ?.affordability?.[priceLevelValue]
+          : laData.affordability?.[priceLevelValue];
       if (!Number.isFinite(selectedAffordability?.ratio)) {
         beeswarmError = getLatestPeriodUnavailableMessage(
           "Affordability data",
@@ -1317,8 +1323,9 @@
               propertyTypeValue,
               regionCode,
               regionName,
+              priceLevelValue,
             ),
-        loadNationalAffordability(propertyTypeValue, country),
+        loadNationalAffordability(propertyTypeValue, country, priceLevelValue),
       ]);
 
       if (requestId !== beeswarmRequestId) {
@@ -1330,11 +1337,13 @@
           msoas,
           regionAffordability,
           nationalAffordability,
+          priceLevelValue,
         ),
         selectedArea,
         laData,
         regionName,
         country === "wales" ? "Wales" : "England",
+        priceLevelValue,
       );
       setBeeswarmLegend(beeswarmData);
       setBeeswarmXBounds(beeswarmData);
@@ -1449,19 +1458,6 @@
     if (type === "all") return "property";
     if (type === "flats") return "flat or maisonette";
     return `${propertyTypeLabels[type].toLowerCase()} property`;
-  }
-
-  function formatAffordabilityRatio(ratio) {
-    return new Intl.NumberFormat("en-GB", {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    }).format(ratio);
-  }
-
-  function compareAffordabilityRatios(selectedRatio, averageRatio) {
-    if (selectedRatio > averageRatio) return "higher than";
-    if (selectedRatio < averageRatio) return "lower than";
-    return "the same as";
   }
 
   async function loadMapComparison(type, level, selection, requestId) {
@@ -2180,7 +2176,7 @@
                       on:rangeleave={handleLegendRangeLeave}
                       on:rangeselect={handleLegendRangeSelect}
                     />
-                    {#if selectedBoundary && Number.isFinite(selectedMsoaForSnapshot?.ratio)}
+                    {#if selectedBoundary && selectedMsoaForSnapshot}
                       <Highlight
                         cls="ons-u-mb-s"
                         width="full"
@@ -2189,41 +2185,55 @@
                         marginTop
                       >
                         <div class="ons-u-m-l">
-                          <p>
-                            An average {getHouseTypeDescription(propertyType)} in
-                            <Em color="#003c57">{selectedBoundary.name}</Em> costs
-                            <strong
-                              >{formatAffordabilityRatio(
-                                selectedMsoaForSnapshot.ratio,
-                              )}</strong
-                            > times the annual earnings.
-                          </p>
-                          {#if mapComparison}
+                          {#if Number.isFinite(selectedMsoaForSnapshot.ratio)}
                             <p>
-                              The house price to earnings ratio in
-                              <Em color="#003c57">{selectedBoundary.name}</Em> was
-                              {#if mapComparison.country !== "wales"}
-                                {compareAffordabilityRatios(
-                                  selectedMsoaForSnapshot.ratio,
-                                  mapComparison.regionalRatio,
-                                )}
-                                the regional average of
-                                <strong
-                                  >{formatAffordabilityRatio(
-                                    mapComparison.regionalRatio,
-                                  )}</strong
-                                > and
-                              {/if}
-                              {compareAffordabilityRatios(
-                                selectedMsoaForSnapshot.ratio,
-                                mapComparison.nationalRatio,
-                              )}
-                              the national average of
+                              An average {getHouseTypeDescription(propertyType)} in
+                              <Em color="#003c57">{selectedBoundary.name}</Em> costs
                               <strong
-                                >{formatAffordabilityRatio(
-                                  mapComparison.nationalRatio,
+                                >{format(
+                                  selectedMsoaForSnapshot.ratio,
+                                  ",.1f",
                                 )}</strong
-                              >.
+                              > times the annual earnings.
+                            </p>
+                            {#if mapComparison}
+                              <p>
+                                The house price to earnings ratio in
+                                <Em color="#003c57">{selectedBoundary.name}</Em> was
+                                {#if mapComparison.country !== "wales"}
+                                  {compareTo(
+                                    selectedMsoaForSnapshot.ratio,
+                                    mapComparison.regionalRatio,
+                                  )}
+                                  the regional average of
+                                  <strong
+                                    >{format(
+                                      mapComparison.regionalRatio,
+                                      ",.1f",
+                                    )}</strong
+                                  > and
+                                {/if}
+                                {compareTo(
+                                  selectedMsoaForSnapshot.ratio,
+                                  mapComparison.nationalRatio,
+                                )}
+                                the national average of
+                                <strong
+                                  >{format(
+                                    mapComparison.nationalRatio,
+                                    ",.1f",
+                                  )}</strong
+                                >.
+                              </p>
+                            {/if}
+                          {:else}
+                            <p>
+                              House price to earnings data for
+                              {getHouseTypeDescription(propertyType)} at the
+                              {getPriceLevelLabel(priceLevel).toLowerCase()} price
+                              point is unavailable in
+                              <Em color="#003c57">{selectedBoundary.name}</Em>
+                              for the latest period.
                             </p>
                           {/if}
                         </div>
@@ -2347,8 +2357,6 @@
                     {/each}
                   </div>
                 </div>
-              {:else}
-                <p class="snapshot-status">No beeswarm data available.</p>
               {/if}
             </Card>
           </div>

@@ -279,12 +279,18 @@ export async function loadAffordabilityData(
   }
 
   try {
-    const data = await loadMapData(
-      withBase(`/data/${propertyType}/msoas-map.json`),
-    );
+    const [data, allProperties] = await Promise.all([
+      loadMapData(withBase(`/data/${propertyType}/msoas-map.json`)),
+      loadMapData(withBase("/data/all/msoas-map.json")),
+    ]);
 
     // Create a map: MSOA code -> affordability ratio
     const msoas = {};
+    // Keep omitted areas selectable without borrowing all-property ratios.
+    allProperties.msoas.forEach((msoa) => {
+      const { median, lq, ...metadata } = msoa;
+      msoas[msoa.code] = { ...metadata, ratio: null };
+    });
     if (data.msoas && Array.isArray(data.msoas)) {
       data.msoas.forEach((msoa) => {
         const ratio = msoa[priceLevel];
@@ -593,12 +599,12 @@ export function createColorExpression(colorPalette = null) {
     colorPalette = AFFORDABILITY_COLOR_PALETTE;
   }
 
-  // Simple expression: if feature-state color is set, use it; otherwise transparent
+  // Areas omitted from the dataset have no feature state.
   return [
     "case",
     ["!=", ["feature-state", "color"], null],
     ["feature-state", "color"],
-    "rgba(255, 255, 255, 0)",
+    "#ccc",
   ];
 }
 
@@ -646,25 +652,29 @@ export function updateMapFeatureStates(
   }
   let failed = false;
 
-  // Update feature state for each MSOA with its color
-  Object.entries(msoas).forEach(([msoacd, data]) => {
+  const codes = new Set([
+    ...Object.keys(previous?.source === source ? previous.msoas : {}),
+    ...Object.keys(msoas),
+  ]);
+  codes.forEach((msoacd) => {
+    const ratio = msoas[msoacd]?.ratio;
     try {
       // Calculate the color for this MSOA based on its ratio
       let color = "#ccc"; // default unavailable
 
-      if (Number.isFinite(data.ratio) && intervalCount > 0) {
+      if (Number.isFinite(ratio) && intervalCount > 0) {
         // Find which color range this ratio falls into
         for (let i = 0; i < intervalCount; i++) {
           const lowerBound = colorBounds[i];
           const upperBound = colorBounds[i + 1];
 
-          if (i === 0 && data.ratio < upperBound) {
+          if (i === 0 && ratio < upperBound) {
             color = activePalette[i];
             break;
-          } else if (i === intervalCount - 1 && data.ratio >= lowerBound) {
+          } else if (i === intervalCount - 1 && ratio >= lowerBound) {
             color = activePalette[i];
             break;
-          } else if (data.ratio >= lowerBound && data.ratio < upperBound) {
+          } else if (ratio >= lowerBound && ratio < upperBound) {
             color = activePalette[i];
             break;
           }
@@ -673,7 +683,7 @@ export function updateMapFeatureStates(
 
       map.setFeatureState(
         { source: sourceId, sourceLayer: "msoa", id: msoacd },
-        { color, ratio: Number.isFinite(data.ratio) ? data.ratio : null },
+        { color, ratio: Number.isFinite(ratio) ? ratio : null },
       );
     } catch (e) {
       failed = true;
@@ -825,13 +835,15 @@ export function getLocalAuthorityGeoJSON() {
  * Load national affordability for a property type
  * @param {string} propertyType - Property type (all, detached, semi-detached, terraced, flats)
  * @param {string} country - 'england' or 'wales'
+ * @param {string} priceLevel - Price level (median or lq)
  * @returns {object|null} National affordability data or null
  */
 export async function loadNationalAffordability(
   propertyType = "all",
   country = "england",
+  priceLevel = "median",
 ) {
-  const cacheKey = `${propertyType}:national:${country}`;
+  const cacheKey = `${propertyType}:national:${country}:${priceLevel}`;
   if (nationalAffordabilityCache[cacheKey]) {
     return nationalAffordabilityCache[cacheKey];
   }
@@ -842,7 +854,8 @@ export async function loadNationalAffordability(
     );
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    nationalAffordabilityCache[cacheKey] = data.affordability?.median || null;
+    nationalAffordabilityCache[cacheKey] =
+      data.affordability?.[priceLevel] || null;
     return nationalAffordabilityCache[cacheKey];
   } catch (error) {
     console.error(
@@ -902,19 +915,21 @@ export async function loadRegionalAffordability(
  * @param {array} msoas - Array of MSOA objects with affordability data
  * @param {object} regionAffordability - Region average affordability
  * @param {object} nationalAffordability - National average affordability
+ * @param {string} priceLevel - Price level (median or lq)
  * @returns {array} Array formatted for ScatterChart
  */
 export function transformMsoaDataForBeeswarm(
   msoas = [],
   regionAffordability = null,
   nationalAffordability = null,
+  priceLevel = "median",
 ) {
   const data = [];
 
   msoas.forEach((msoa) => {
-    if (msoa?.affordability?.median?.ratio) {
+    if (Number.isFinite(msoa?.affordability?.[priceLevel]?.ratio)) {
       data.push({
-        x: msoa.affordability.median.ratio,
+        x: msoa.affordability[priceLevel].ratio,
         label: msoa.name || msoa.code,
         code: msoa.code,
         type: "msoa",

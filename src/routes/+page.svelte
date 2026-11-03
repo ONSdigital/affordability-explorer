@@ -2413,10 +2413,10 @@
               <div class="buy-summary-details">
                 <p class="buy-sentence">
                   Given a mortgage lender gives you 4.5x your income, to buy
-                  with a mortgage you would need at least
+                  with a mortgage your household would need to earn at least
                   <strong
                     >{formatCurrency(buySectionData.incomeRequired)}</strong
-                  >.
+                  > per year.
                 </p>
               </div>
             </div>

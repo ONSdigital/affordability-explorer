@@ -1,5 +1,4 @@
 <script>
-  import { createEventDispatcher } from "svelte";
   import { getLegendDisplayBounds } from "../map-data.js";
 
   export let bounds = [];
@@ -12,12 +11,8 @@
     "#000D54",
   ];
   export let unavailableColor = "#ccc";
-  export let selectedRangeIndex = null;
   export let hoverValue = null;
   export let selectedValue = null;
-
-  const dispatch = createEventDispatcher();
-  let hoveredRangeIndex = null;
 
   function formatIntegerValue(val) {
     if (!Number.isFinite(val)) return "—";
@@ -160,38 +155,6 @@
     return `${range.minLabel} to ${range.maxLabel}`;
   }
 
-  function setHoveredRange(range) {
-    hoveredRangeIndex = range.index;
-    dispatch("rangehover", { range });
-  }
-
-  function clearHoveredRange() {
-    hoveredRangeIndex = null;
-    dispatch("rangeleave");
-  }
-
-  function handleKeyScaleFocusOut(event) {
-    if (!event.currentTarget.contains(event.relatedTarget)) {
-      clearHoveredRange();
-    }
-  }
-
-  function selectRange(range) {
-    dispatch("rangeselect", { range });
-  }
-
-  function isRangeDimmed(index) {
-    if (hoveredRangeIndex !== null) {
-      return hoveredRangeIndex !== index;
-    }
-
-    if (selectedRangeIndex !== null && selectedRangeIndex !== undefined) {
-      return selectedRangeIndex !== index;
-    }
-
-    return false;
-  }
-
   $: tickMarks = createTickMarks(bounds);
   $: legendRanges = createLegendRanges(bounds);
   $: hoverIndicatorPosition = toIndicatorPosition(hoverValue, bounds);
@@ -232,24 +195,14 @@
         class="keyscale-bar"
         role="group"
         aria-label="Affordability legend ranges"
-        on:mouseleave={clearHoveredRange}
-        on:focusout={handleKeyScaleFocusOut}
       >
         {#each legendRanges as range}
-          <button
-            type="button"
+          <div
             class="keyscale-rect"
-            class:is-dimmed={isRangeDimmed(range.index)}
-            class:is-hovered={hoveredRangeIndex === range.index}
-            class:is-selected={hoveredRangeIndex === null &&
-              selectedRangeIndex === range.index}
             style="left: {range.left}%; width: {range.width}%; background-color: {range.color};"
-            aria-label={`Select affordability range ${getRangeLabel(range)}`}
-            aria-pressed={selectedRangeIndex === range.index}
-            on:mouseenter={() => setHoveredRange(range)}
-            on:focus={() => setHoveredRange(range)}
-            on:click={() => selectRange(range)}
-          ></button>
+            role="img"
+            aria-label={`Affordability range ${getRangeLabel(range)}`}
+          ></div>
         {/each}
       </div>
 
@@ -340,24 +293,6 @@
     border: 0;
     margin: 0;
     padding: 0;
-    cursor: pointer;
-  }
-
-  .keyscale-rect.is-dimmed {
-    opacity: 0.35;
-  }
-
-  .keyscale-rect.is-hovered,
-  .keyscale-rect.is-selected {
-    box-shadow: inset 0 0 0 2px #414042;
-    opacity: 1;
-    z-index: 1;
-  }
-
-  .keyscale-rect:focus-visible {
-    outline: 3px solid #fbc900;
-    outline-offset: 2px;
-    z-index: 3;
   }
 
   .keyscale-ticks {

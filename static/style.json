@@ -56,15 +56,7 @@
       "source": "mask-raster",
       "paint": {
         "raster-brightness-max": 0.95,
-        "raster-opacity": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          9,
-          0.1,
-          10,
-          0.9
-        ]
+        "raster-opacity": 0.1
       }
     },
     {

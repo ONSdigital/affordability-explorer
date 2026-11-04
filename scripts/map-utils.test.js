@@ -46,12 +46,12 @@ test("map loader shares a compact payload across median and lower-quartile filte
   assert.equal(fetchMock.mock.callCount(), 1);
 });
 
-test("map colours use five bands including 35+ and avoid repeated feature-state writes", (t) => {
+test("map colours use five bands including 20+ and avoid repeated feature-state writes", (t) => {
   const bounds = mapUtils.calculateColorBreaks();
-  assert.deepEqual(bounds, [1, 5, 10, 20, 35, Infinity]);
+  assert.deepEqual(bounds, [0, 5, 10, 15, 20, Infinity]);
   const palette = ["a", "b", "c", "d", "e"];
   const data = Object.fromEntries(
-    [0.71, 1, 4.99, 5, 10, 20, 34.99, 35, 120.84, null].map((ratio, id) => [
+    [0.71, 1, 4.99, 5, 10, 15, 19.99, 20, 120.84, null].map((ratio, id) => [
       String(id),
       { ratio },
     ]),

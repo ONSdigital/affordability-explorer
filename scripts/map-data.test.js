@@ -81,14 +81,14 @@ test("legend expressions preserve range boundaries and exclude unavailable ratio
   assert.equal(cleared.value.evaluate({}, null, { ratio: 7 }), false);
 });
 
-test("35+ matches the boundary and extreme ratios without matching missing data", () => {
+test("20+ matches the boundary and extreme ratios without matching missing data", () => {
   const result = createExpression(
-    createLegendRangeExpression({ min: 35, max: Infinity, isLast: true }),
+    createLegendRangeExpression({ min: 20, max: Infinity, isLast: true }),
   );
   assert.equal(result.result, "success");
   for (const [ratio, expected] of [
-    [34.99, false],
-    [35, true],
+    [19.99, false],
+    [20, true],
     [120.84, true],
     [null, false],
   ]) {
@@ -96,8 +96,25 @@ test("35+ matches the boundary and extreme ratios without matching missing data"
   }
 });
 
+test("the first legend band includes zero and ratios below one", () => {
+  const result = createExpression(
+    createLegendRangeExpression({ min: 0, max: 5, isLast: false }),
+  );
+  assert.equal(result.result, "success");
+  for (const [ratio, expected] of [
+    [-1, false],
+    [0, true],
+    [0.71, true],
+    [4.99, true],
+    [5, false],
+    [null, false],
+  ]) {
+    assert.equal(result.value.evaluate({}, null, { ratio }), expected);
+  }
+});
+
 test("open-ended legend has a finite display extent without changing its cutoffs", () => {
-  const bounds = [1, 5, 10, 20, 35, Infinity];
-  assert.deepEqual(getLegendDisplayBounds(bounds), [1, 5, 10, 20, 35, 50]);
+  const bounds = [0, 5, 10, 15, 20, Infinity];
+  assert.deepEqual(getLegendDisplayBounds(bounds), [0, 5, 10, 15, 20, 25]);
   assert.equal(bounds.at(-1), Infinity);
 });

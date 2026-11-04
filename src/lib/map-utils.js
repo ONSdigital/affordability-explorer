@@ -257,7 +257,7 @@ const AFFORDABILITY_COLOR_PALETTE = [
   "#002D7D",
   "#000D54",
 ];
-const AFFORDABILITY_COLOR_BREAKS = [1, 5, 10, 20, 35, Infinity];
+const AFFORDABILITY_COLOR_BREAKS = [0, 5, 10, 15, 20, Infinity];
 
 function roundToTwoDecimals(value) {
   return Math.round(value * 100) / 100;

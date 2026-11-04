@@ -42,7 +42,6 @@
   } from "../lib/map-utils.js";
   import ColorLegend from "../lib/components/ColorLegend.svelte";
   import BeeswarmMarkers from "../lib/components/BeeswarmMarkers.svelte";
-  import { createLegendRangeExpression } from "../lib/map-data.js";
 
   let map;
   let geojson;
@@ -84,8 +83,6 @@
   let buySectionRequestId = 0;
   let isFirstTimeBuyer = false;
   let totalSavingsData = null;
-  let legendHoveredRange = null;
-  let legendSelectedRange = null;
   let legendHoverIndicatorValue = null;
   let legendSelectedIndicatorValue = null;
   let beeswarmData = null;
@@ -137,7 +134,6 @@
   const LA_OUTLINE_SOURCE_ID = "la-outline-source";
   const LA_OUTLINE_LAYER_ID = "la-outline-layer";
   const MSOA_OUTLINE_BASE_LAYER_ID = "msoa-outline-base";
-  const MSOA_LEGEND_MATCH_LAYER_ID = "msoa-legend-match";
   const NO_LA_SELECTION = "__no_la_selection__";
 
   let mapStyle = null;
@@ -199,17 +195,11 @@
     const reapplyMapColors = () => {
       applyAffordabilityColors();
       syncLocalAuthorityOutline(selectedLACode);
-      if (legendHoveredRange || legendSelectedRange) {
-        refreshLegendRangeHighlight();
-      }
     };
 
     const handleSourceData = (event) => {
       if (event?.sourceId === "msoa-source") {
         applyAffordabilityColors();
-        if (legendHoveredRange || legendSelectedRange) {
-          refreshLegendRangeHighlight();
-        }
       }
       syncLocalAuthorityOutline(selectedLACode);
     };
@@ -432,12 +422,6 @@
       const msoaOutlineBaseExists = Boolean(
         map.getLayer(MSOA_OUTLINE_BASE_LAYER_ID),
       );
-      const msoaLegendMatchExists = Boolean(
-        map.getLayer(MSOA_LEGEND_MATCH_LAYER_ID),
-      );
-      const targetBeforeLayer = msoaLegendMatchExists
-        ? MSOA_LEGEND_MATCH_LAYER_ID
-        : CITY_LABEL_LAYER_ID;
 
       if (!map.getLayer(LA_OUTLINE_LAYER_ID)) {
         map.addLayer(
@@ -456,7 +440,7 @@
               "line-opacity": 1,
             },
           },
-          targetBeforeLayer,
+          CITY_LABEL_LAYER_ID,
         );
         return;
       }
@@ -466,9 +450,7 @@
         getLocalAuthorityOutlineFilter(laCode),
       );
 
-      if (msoaLegendMatchExists) {
-        map.moveLayer(LA_OUTLINE_LAYER_ID, MSOA_LEGEND_MATCH_LAYER_ID);
-      } else if (msoaOutlineBaseExists) {
+      if (msoaOutlineBaseExists) {
         map.moveLayer(LA_OUTLINE_LAYER_ID, CITY_LABEL_LAYER_ID);
       }
     } catch (e) {
@@ -483,115 +465,6 @@
 
     const ratio = data[msoaCode]?.ratio;
     return Number.isFinite(ratio) ? ratio : null;
-  }
-
-  function clearLegendRangeHighlight() {
-    applyLegendRangeHighlight(null);
-  }
-
-  function applyLegendRangeHighlight(range) {
-    if (!map) return;
-
-    try {
-      const match = createLegendRangeExpression(range);
-      if (map.getLayer("msoa-outline-base")) {
-        const opacity = range ? ["case", match, 1, 0.2] : 1;
-        if (
-          JSON.stringify(
-            map.getPaintProperty("msoa-outline-base", "line-opacity"),
-          ) !== JSON.stringify(opacity)
-        ) {
-          map.setPaintProperty("msoa-outline-base", "line-opacity", opacity);
-        }
-      }
-      if (map.getLayer(MSOA_LEGEND_MATCH_LAYER_ID)) {
-        const opacity = range ? ["case", match, 1, 0] : 0;
-        if (
-          JSON.stringify(
-            map.getPaintProperty(MSOA_LEGEND_MATCH_LAYER_ID, "line-opacity"),
-          ) !== JSON.stringify(opacity)
-        ) {
-          map.setPaintProperty(
-            MSOA_LEGEND_MATCH_LAYER_ID,
-            "line-opacity",
-            opacity,
-          );
-        }
-      }
-    } catch (e) {
-      console.error("Could not apply legend range highlight:", e.message);
-    }
-  }
-
-  function refreshLegendRangeHighlight() {
-    const activeRange = legendHoveredRange ?? legendSelectedRange;
-    if (activeRange) {
-      applyLegendRangeHighlight(activeRange);
-      return;
-    }
-
-    clearLegendRangeHighlight();
-  }
-
-  function normalizeLegendRange(range) {
-    if (!range) {
-      return null;
-    }
-
-    const min = Number(range.min);
-    const max = Number(range.max);
-    const index = Number(range.index);
-
-    if (
-      !Number.isFinite(min) ||
-      !(Number.isFinite(max) || (range.isLast && max === Infinity)) ||
-      !Number.isFinite(index)
-    ) {
-      return null;
-    }
-
-    return {
-      min,
-      max,
-      index,
-      isLast: Boolean(range.isLast),
-    };
-  }
-
-  function isSameLegendRange(left, right) {
-    if (!left || !right) {
-      return false;
-    }
-
-    return (
-      left.index === right.index &&
-      left.min === right.min &&
-      left.max === right.max &&
-      left.isLast === right.isLast
-    );
-  }
-
-  function handleLegendRangeHover(event) {
-    legendHoveredRange = normalizeLegendRange(event?.detail?.range);
-    refreshLegendRangeHighlight();
-  }
-
-  function handleLegendRangeLeave() {
-    legendHoveredRange = null;
-    refreshLegendRangeHighlight();
-  }
-
-  function handleLegendRangeSelect(event) {
-    const nextRange = normalizeLegendRange(event?.detail?.range);
-    if (!nextRange) {
-      return;
-    }
-
-    legendSelectedRange = isSameLegendRange(legendSelectedRange, nextRange)
-      ? null
-      : nextRange;
-    legendHoveredRange = null;
-    refreshLegendRangeHighlight();
   }
 
   function highlightLA(laCode) {
@@ -610,8 +483,6 @@
     mapLoading = true;
     try {
       affordabilityData = await loadAffordabilityData(pType, pLevel);
-      legendHoveredRange = null;
-      legendSelectedRange = null;
 
       if (Object.keys(affordabilityData).length === 0) {
         error = "Failed to load affordability data";
@@ -663,7 +534,6 @@
       }
 
       applyAffordabilityColors();
-      clearLegendRangeHighlight();
 
       mapLoading = false;
     } catch (e) {
@@ -1911,8 +1781,6 @@
     selectedAreaType = null;
     selectedLAForSnapshot = null;
     selectedValue = null;
-    legendHoveredRange = null;
-    legendSelectedRange = null;
     error = null;
 
     // Clear LA highlight if one was set
@@ -1924,8 +1792,6 @@
     if (clearInput) {
       clearInput();
     }
-
-    clearLegendRangeHighlight();
 
     // Reset map back to the default England and Wales framing.
     if (map) {
@@ -2088,16 +1954,6 @@
                         }}
                       />
                       <MapLayer
-                        id="msoa-legend-match"
-                        type="line"
-                        order={CITY_LABEL_LAYER_ID}
-                        paint={{
-                          "line-color": ONS_GREY_100,
-                          "line-width": 1.5,
-                          "line-opacity": 0,
-                        }}
-                      />
-                      <MapLayer
                         id="msoa-hover-white"
                         type="line"
                         order={CITY_LABEL_LAYER_ID}
@@ -2167,14 +2023,8 @@
                   <div class="legend-container">
                     <ColorLegend
                       bounds={colorBounds}
-                      selectedRangeIndex={legendSelectedRange
-                        ? legendSelectedRange.index
-                        : null}
                       hoverValue={legendHoverIndicatorValue}
                       selectedValue={legendSelectedIndicatorValue}
-                      on:rangehover={handleLegendRangeHover}
-                      on:rangeleave={handleLegendRangeLeave}
-                      on:rangeselect={handleLegendRangeSelect}
                     />
                     {#if selectedBoundary && selectedMsoaForSnapshot}
                       <Highlight
@@ -2198,7 +2048,7 @@
                             </p>
                             {#if mapComparison}
                               <p>
-                                The house price to earnings ratio in
+                                The ratio in
                                 <Em color="#003c57">{selectedBoundary.name}</Em> was
                                 {#if mapComparison.country !== "wales"}
                                   {compareTo(

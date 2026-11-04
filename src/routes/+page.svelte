@@ -16,8 +16,6 @@
     Checkbox,
     Details,
     Em,
-    Divider,
-    Highlight,
   } from "@onsvisual/svelte-components";
   import {
     loadTopoJSON,
@@ -42,6 +40,7 @@
   } from "../lib/map-utils.js";
   import ColorLegend from "../lib/components/ColorLegend.svelte";
   import BeeswarmMarkers from "../lib/components/BeeswarmMarkers.svelte";
+  import { retainHeight } from "../lib/retain-height.js";
 
   let map;
   let geojson;
@@ -79,6 +78,7 @@
   let buySectionData = null;
   let buySectionLoading = false;
   let buySectionError = null;
+  let buySectionNoData = false;
   let buySectionSelectionKey = "";
   let buySectionRequestId = 0;
   let isFirstTimeBuyer = false;
@@ -995,6 +995,7 @@
     buySectionData = null;
     buySectionLoading = false;
     buySectionError = null;
+    buySectionNoData = false;
   }
 
   function resetBeeswarmData() {
@@ -1388,6 +1389,7 @@
     const requestId = ++buySectionRequestId;
     buySectionLoading = true;
     buySectionError = null;
+    buySectionNoData = false;
 
     try {
       const isMsoaSelection = selection?.type === "msoa";
@@ -1410,10 +1412,7 @@
 
       if (!Number.isFinite(selectedPrice)) {
         buySectionData = null;
-        buySectionError = getLatestPeriodUnavailableMessage(
-          "Property price data",
-          laData?.latest_period,
-        );
+        buySectionNoData = true;
         return;
       }
 
@@ -1808,31 +1807,6 @@
 <div class="page-container">
   <Section width="full">
     <Container width="full">
-      <ButtonGroup
-        name="property-type"
-        legend="Property type"
-        bind:value={propertyType}
-      >
-        <ButtonGroupItem value="all" label="All properties" />
-        <ButtonGroupItem value="detached" label="Detached" />
-        <ButtonGroupItem value="semi-detached" label="Semi-detached" />
-        <ButtonGroupItem value="terraced" label="Terraced" />
-        <ButtonGroupItem value="flats" label="Flats and maisonettes" />
-      </ButtonGroup>
-
-      <ButtonGroup
-        name="price-level"
-        legend="Price level"
-        bind:value={priceLevel}
-      >
-        <ButtonGroupItem value="median" label="Median" />
-        <ButtonGroupItem value="lq" label="Entry level" />
-      </ButtonGroup>
-    </Container>
-  </Section>
-
-  <Section title="Explore an area" width="full">
-    <Container width="full">
       {#if error}
         <div class="error-message">
           <p><strong>Error:</strong> {error}</p>
@@ -1866,9 +1840,176 @@
             </Button>
           </div>
         </div>
+        <div class="ons-u-mt-s">
+          <Details title="Adjust property type and price level">
+            <ButtonGroup
+              name="property-type"
+              legend="Property type"
+              bind:value={propertyType}
+            >
+              <ButtonGroupItem value="all" label="All properties" />
+              <ButtonGroupItem value="detached" label="Detached" />
+              <ButtonGroupItem value="semi-detached" label="Semi-detached" />
+              <ButtonGroupItem value="terraced" label="Terraced" />
+              <ButtonGroupItem value="flats" label="Flats and maisonettes" />
+            </ButtonGroup>
+
+            <ButtonGroup
+              name="price-level"
+              legend="Price level"
+              bind:value={priceLevel}
+            >
+              <ButtonGroupItem value="median" label="Average" />
+              <ButtonGroupItem value="lq" label="Entry level" />
+            </ButtonGroup>
+          </Details>
+        </div>
       {/if}
     </Container>
   </Section>
+
+  {#if selectedBoundary}
+    <div class="selection-section" use:retainHeight={!buySectionNoData}>
+      <Section title="" width="full">
+        {#if !buySectionLoading && buySectionNoData}
+          <p>
+            No data available for <Em color="#003c57" nowrap={false}
+              >{selectedBoundary.name}</Em
+            > for the latest period.
+          </p>
+        {:else if !buySectionLoading && buySectionError}
+          <p class="snapshot-status snapshot-status--error" role="alert">
+            {buySectionError}
+          </p>
+        {:else}
+          <Grid width="full" cls="three-column-grid">
+            <Card cls="buy-summary-card">
+              {#if buySectionLoading}
+                <p class="snapshot-status">Loading property costs...</p>
+              {:else if buySectionError}
+                <p class="snapshot-status snapshot-status--error">
+                  {buySectionError}
+                </p>
+              {:else if buySectionData}
+                <div class="buy-summary-content">
+                  <div class="buy-icon-box">
+                    <img src={`${base}/img/house.svg`} alt="" />
+                  </div>
+                  <div class="buy-summary-details">
+                    <p class="buy-sentence">
+                      In <Em color="#003c57" nowrap={false}
+                        >{buySectionData.areaName}</Em
+                      >,
+                      {getPropertyDescription(propertyType, priceLevel)} costs:
+                      <strong
+                        >{formatCurrency(buySectionData.propertyPrice)}</strong
+                      >.
+                    </p>
+                    <p class="buy-sentence">
+                      This is <strong
+                        >{format(selectedMsoaForSnapshot.ratio, ",.1f")}</strong
+                      > times the annual earnings.
+                    </p>
+                  </div>
+                </div>
+              {:else}
+                <p class="snapshot-status">
+                  Select an MSOA or local authority on the map to view property
+                  costs.
+                </p>
+              {/if}
+            </Card>
+            <Card cls="buy-summary-card">
+              {#if buySectionLoading}
+                <p class="snapshot-status">Loading income requirement...</p>
+              {:else if buySectionError}
+                <p class="snapshot-status snapshot-status--error">
+                  {buySectionError}
+                </p>
+              {:else if buySectionData}
+                <div class="buy-summary-content">
+                  <div class="buy-icon-box">
+                    <img src={`${base}/img/poundhouse.svg`} alt="" />
+                  </div>
+                  <div class="buy-summary-details">
+                    <p class="buy-sentence">
+                      Given a mortgage lender gives you 4.5x your income, to buy
+                      with a mortgage your household would need to earn at least
+                      <strong
+                        >{formatCurrency(buySectionData.incomeRequired)}</strong
+                      > per year.
+                    </p>
+                  </div>
+                </div>
+              {:else}
+                <p class="snapshot-status">
+                  Select an MSOA or local authority on the map to view income
+                  required.
+                </p>
+              {/if}
+            </Card>
+            <Card cls="buy-summary-card">
+              {#if buySectionLoading}
+                <p class="snapshot-status">Loading total savings...</p>
+              {:else if buySectionError}
+                <p class="snapshot-status snapshot-status--error">
+                  {buySectionError}
+                </p>
+              {:else if buySectionData && totalSavingsData}
+                <div class="buy-summary-content">
+                  <div class="buy-icon-box">
+                    <img src={`${base}/img/piggybank.svg`} alt="" />
+                  </div>
+                  <div class="buy-summary-details buy-summary-details--savings">
+                    <p class="buy-sentence">
+                      For a typical mortgage, you would need at least <strong
+                        >{formatCurrency(
+                          roundUp(totalSavingsData.total, 10),
+                        )}</strong
+                      >
+                      up front, made up of a
+                      <strong>{formatCurrency(totalSavingsData.deposit)}</strong
+                      >
+                      deposit plus
+                      <strong
+                        >{formatCurrency(
+                          totalSavingsData.transactionTax,
+                        )}</strong
+                      >
+                      for {totalSavingsData.transactionTaxLabel}.
+                    </p>
+                    <div class="buy-checkbox">
+                      <Checkbox
+                        id="first-time-buyer-checkbox"
+                        label="I'm a first-time buyer"
+                        bind:checked={isFirstTimeBuyer}
+                        compact
+                      />
+                    </div>
+
+                    {#if isFirstTimeBuyer && buySectionData.country === "wales"}
+                      <p class="snapshot-status">
+                        First-time buyer relief is not available in Wales.
+                      </p>
+                    {:else if isFirstTimeBuyer && buySectionData.country === "england" && !totalSavingsData.firstTimeBuyerReliefApplied}
+                      <p class="snapshot-status">
+                        First-time buyer relief is not applied above £625,000.
+                      </p>
+                    {/if}
+                  </div>
+                </div>
+              {:else}
+                <p class="snapshot-status">
+                  Select an MSOA or local authority on the map to view total
+                  savings needed.
+                </p>
+              {/if}
+            </Card>
+          </Grid>
+        {/if}
+      </Section>
+    </div>
+  {/if}
 
   <Section width="full">
     <Container width="full">
@@ -2026,93 +2167,22 @@
                       hoverValue={legendHoverIndicatorValue}
                       selectedValue={legendSelectedIndicatorValue}
                     />
-                    {#if selectedBoundary && selectedMsoaForSnapshot}
-                      <Highlight
-                        cls="ons-u-mb-s"
-                        width="full"
-                        bigText={false}
-                        marginBottom={false}
-                        marginTop
-                      >
-                        <div class="ons-u-m-l">
-                          {#if Number.isFinite(selectedMsoaForSnapshot.ratio)}
-                            <p>
-                              An average {getHouseTypeDescription(propertyType)} in
-                              <Em color="#003c57">{selectedBoundary.name}</Em> costs
-                              <strong
-                                >{format(
-                                  selectedMsoaForSnapshot.ratio,
-                                  ",.1f",
-                                )}</strong
-                              > times the annual earnings.
-                            </p>
-                            {#if mapComparison}
-                              <p>
-                                The ratio in
-                                <Em color="#003c57">{selectedBoundary.name}</Em> was
-                                {#if mapComparison.country !== "wales"}
-                                  {compareTo(
-                                    selectedMsoaForSnapshot.ratio,
-                                    mapComparison.regionalRatio,
-                                  )}
-                                  the regional average of
-                                  <strong
-                                    >{format(
-                                      mapComparison.regionalRatio,
-                                      ",.1f",
-                                    )}</strong
-                                  > and
-                                {/if}
-                                {compareTo(
-                                  selectedMsoaForSnapshot.ratio,
-                                  mapComparison.nationalRatio,
-                                )}
-                                the national average of
-                                <strong
-                                  >{format(
-                                    mapComparison.nationalRatio,
-                                    ",.1f",
-                                  )}</strong
-                                >.
-                              </p>
-                            {/if}
-                          {:else}
-                            <p>
-                              House price to earnings data for
-                              {getHouseTypeDescription(propertyType)} at the
-                              {getPriceLevelLabel(priceLevel).toLowerCase()} price
-                              point is unavailable in
-                              <Em color="#003c57">{selectedBoundary.name}</Em>
-                              for the latest period.
-                            </p>
-                          {/if}
-                        </div>
-                      </Highlight>
-                      {#if mapComparisonError}
-                        <p role="alert">{mapComparisonError}</p>
-                      {/if}
-                    {/if}
                   </div>
                 {/if}
               </div>
             </div>
           </Grid>
         </div>
+      </div>
+    </Container>
+  </Section>
 
-        {#if selectedBoundary}
+  {#if selectedBoundary && !beeswarmNoData}
+    <div class="selection-section" use:retainHeight>
+      <Section width="full">
+        <Container width="full">
           <div class="beeswarm-card">
             <Card>
-              <h2 class="beeswarm-card__title">
-                {#if beeswarmError || (!beeswarmLoading && (!beeswarmData || beeswarmData.length === 0))}
-                  No data available for <Em color="#003c57"
-                    >{selectedBoundary.name}</Em
-                  >
-                  for the latest period.
-                {:else}
-                  Compare <Em color="#003c57">{selectedBoundary.name}</Em> with other
-                  areas
-                {/if}
-              </h2>
               {#if beeswarmLoading}
                 <p class="snapshot-status">Loading beeswarm data...</p>
               {:else if beeswarmError && !beeswarmNoData}
@@ -2120,7 +2190,12 @@
                   {beeswarmError}
                 </p>
               {:else if beeswarmData && beeswarmData.length > 0}
-                <div class="beeswarm-chart">
+                <p class="snapshot-status beeswarm-card__title">
+                  Compare <Em color="#003c57" nowrap={false}
+                    >{selectedBoundary.name}</Em
+                  > with other areas
+                </p>
+                <div class="beeswarm-chart ons-u-mt-l">
                   <ScatterChart
                     data={beeswarmData}
                     xKey="x"
@@ -2210,138 +2285,17 @@
               {/if}
             </Card>
           </div>
-        {/if}
-      </div>
-    </Container>
-  </Section>
-
-  {#if selectedBoundary && (buySectionLoading || buySectionData)}
-    <Section title="What would I need to buy?" width="full">
-      <Grid width="full" cls="three-column-grid">
-        <Card cls="buy-summary-card">
-          {#if buySectionLoading}
-            <p class="snapshot-status">Loading property costs...</p>
-          {:else if buySectionError}
-            <p class="snapshot-status snapshot-status--error">
-              {buySectionError}
-            </p>
-          {:else if buySectionData}
-            <div class="buy-summary-content">
-              <div class="buy-icon-box">
-                <img src={`${base}/img/house.svg`} alt="" />
-              </div>
-              <div class="buy-summary-details">
-                <p class="buy-sentence">
-                  In <Em color="#003c57" nowrap={false}
-                    >{buySectionData.areaName}</Em
-                  >,
-                  {getPropertyDescription(propertyType, priceLevel)} costs:
-                  <strong>{formatCurrency(buySectionData.propertyPrice)}</strong
-                  >
-                </p>
-              </div>
-            </div>
-          {:else}
-            <p class="snapshot-status">
-              Select an MSOA or local authority on the map to view property
-              costs.
-            </p>
-          {/if}
-        </Card>
-        <Card cls="buy-summary-card">
-          {#if buySectionLoading}
-            <p class="snapshot-status">Loading income requirement...</p>
-          {:else if buySectionError}
-            <p class="snapshot-status snapshot-status--error">
-              {buySectionError}
-            </p>
-          {:else if buySectionData}
-            <div class="buy-summary-content">
-              <div class="buy-icon-box">
-                <img src={`${base}/img/poundhouse.svg`} alt="" />
-              </div>
-              <div class="buy-summary-details">
-                <p class="buy-sentence">
-                  Given a mortgage lender gives you 4.5x your income, to buy
-                  with a mortgage your household would need to earn at least
-                  <strong
-                    >{formatCurrency(buySectionData.incomeRequired)}</strong
-                  > per year.
-                </p>
-              </div>
-            </div>
-          {:else}
-            <p class="snapshot-status">
-              Select an MSOA or local authority on the map to view income
-              required.
-            </p>
-          {/if}
-        </Card>
-        <Card cls="buy-summary-card">
-          {#if buySectionLoading}
-            <p class="snapshot-status">Loading total savings...</p>
-          {:else if buySectionError}
-            <p class="snapshot-status snapshot-status--error">
-              {buySectionError}
-            </p>
-          {:else if buySectionData && totalSavingsData}
-            <div class="buy-summary-content">
-              <div class="buy-icon-box">
-                <img src={`${base}/img/piggybank.svg`} alt="" />
-              </div>
-              <div class="buy-summary-details buy-summary-details--savings">
-                <p class="buy-sentence">
-                  For a typical mortgage, you would need at least
-                  <strong>{formatCurrency(totalSavingsData.deposit)}</strong>
-                  for a deposit.
-                </p>
-                <div class="buy-checkbox">
-                  <Checkbox
-                    id="first-time-buyer-checkbox"
-                    label="I'm a first-time buyer"
-                    bind:checked={isFirstTimeBuyer}
-                    compact
-                  />
-                </div>
-                <p class="buy-sentence">
-                  You will also need
-                  <strong
-                    >{formatCurrency(totalSavingsData.transactionTax)}</strong
-                  >
-                  for {totalSavingsData.transactionTaxLabel}.
-                </p>
-                <p class="ons-u-mt-xs">
-                  This makes a total of
-                  <strong
-                    >{formatCurrency(
-                      roundUp(totalSavingsData.total, 10),
-                    )}</strong
-                  >.
-                </p>
-                {#if isFirstTimeBuyer && buySectionData.country === "wales"}
-                  <p class="snapshot-status">
-                    First-time buyer relief is not available in Wales.
-                  </p>
-                {:else if isFirstTimeBuyer && buySectionData.country === "england" && !totalSavingsData.firstTimeBuyerReliefApplied}
-                  <p class="snapshot-status">
-                    First-time buyer relief is not applied above £625,000.
-                  </p>
-                {/if}
-              </div>
-            </div>
-          {:else}
-            <p class="snapshot-status">
-              Select an MSOA or local authority on the map to view total savings
-              needed.
-            </p>
-          {/if}
-        </Card>
-      </Grid>
-    </Section>
+        </Container>
+      </Section>
+    </div>
   {/if}
 </div>
 
 <style>
+  .selection-section {
+    display: flow-root;
+  }
+
   .page-container {
     box-sizing: border-box;
     width: 100%;
@@ -2404,12 +2358,6 @@
     overflow: hidden;
   }
 
-  .beeswarm-card__title {
-    margin: 0 0 16px;
-    font-size: 1.25rem;
-    line-height: 1.4;
-  }
-
   .beeswarm-chart {
     width: 100%;
     max-width: 100%;
@@ -2453,6 +2401,13 @@
 
   .snapshot-status--error {
     color: #7f1d1d;
+  }
+
+  .beeswarm-card__title {
+    margin: 0 0 16px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.4;
   }
 
   .snapshot-area-name {
@@ -2580,6 +2535,10 @@
     color: #414042;
   }
 
+  .buy-sentence + .buy-sentence {
+    margin-top: 1rem;
+  }
+
   .buy-sentence strong {
     color: #222222;
     font-weight: 700;
@@ -2671,10 +2630,6 @@
     font-size: 14px;
     color: #333;
     margin: 0;
-  }
-
-  .map-footer {
-    margin-top: 12px;
   }
 
   .legend-container {

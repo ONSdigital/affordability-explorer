@@ -162,7 +162,16 @@
 </script>
 
 <div class="keycontainer">
-  <div class="key-title">House price to earnings ratio</div>
+  <div class="key-header">
+    <div class="key-title">House price to earnings ratio</div>
+    <div class="legend-unavailable">
+      <span
+        class="legend-unavailable__swatch"
+        style="background-color: {unavailableColor};"
+      ></span>
+      <span>Data unavailable</span>
+    </div>
+  </div>
 
   {#if legendRanges.length > 0}
     <div class="keyscale">
@@ -220,14 +229,6 @@
       </div>
     </div>
   {/if}
-
-  <div class="legend-unavailable">
-    <span
-      class="legend-unavailable__swatch"
-      style="background-color: {unavailableColor};"
-    ></span>
-    <span>Data unavailable</span>
-  </div>
 </div>
 
 <style>
@@ -236,8 +237,15 @@
     box-sizing: border-box;
   }
 
+  .key-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
   .key-title {
-    margin: 0 0 8px;
+    margin: 0;
     font-weight: 600;
     color: #333;
   }
@@ -280,10 +288,10 @@
   .keyscale-bar {
     position: relative;
     width: 100%;
-    height: 22px;
+    height: 20px;
     overflow: hidden;
     border-radius: 2px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    /* border: 1px solid rgba(0, 0, 0, 0.1); */
   }
 
   .keyscale-rect {
@@ -298,7 +306,7 @@
   .keyscale-ticks {
     position: relative;
     margin-top: 7px;
-    min-height: 28px;
+    min-height: 18px;
   }
 
   .keyscale-tick {
@@ -324,7 +332,7 @@
     align-items: center;
     gap: 8px;
     color: #666;
-    margin-top: 6px;
+    flex-shrink: 0;
   }
 
   .legend-unavailable__swatch {

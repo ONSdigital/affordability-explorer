@@ -130,7 +130,7 @@
     { upTo: 1500000, rate: 0.1 },
     { upTo: Infinity, rate: 0.12 },
   ];
-  const CITY_LABEL_LAYER_ID = "place_city_large";
+  const PLACE_LABEL_LAYER_ID = "place_other";
   const LA_OUTLINE_SOURCE_ID = "la-outline-source";
   const LA_OUTLINE_LAYER_ID = "la-outline-layer";
   const MSOA_OUTLINE_BASE_LAYER_ID = "msoa-outline-base";
@@ -440,7 +440,7 @@
               "line-opacity": 1,
             },
           },
-          CITY_LABEL_LAYER_ID,
+          PLACE_LABEL_LAYER_ID,
         );
         return;
       }
@@ -451,7 +451,7 @@
       );
 
       if (msoaOutlineBaseExists) {
-        map.moveLayer(LA_OUTLINE_LAYER_ID, CITY_LABEL_LAYER_ID);
+        map.moveLayer(LA_OUTLINE_LAYER_ID, PLACE_LABEL_LAYER_ID);
       }
     } catch (e) {
       console.error("Could not sync local authority outline:", e.message);
@@ -1403,9 +1403,10 @@
       const msoaData = isMsoaSelection
         ? laData?.msoas?.find((msoa) => msoa.code === selection.code)
         : null;
-      const affordabilityPrice = isMsoaSelection
-        ? msoaData?.affordability?.[priceLevelValue]?.price
-        : laData?.affordability?.[priceLevelValue]?.price;
+      const affordability = isMsoaSelection
+        ? msoaData?.affordability?.[priceLevelValue]
+        : laData?.affordability?.[priceLevelValue];
+      const affordabilityPrice = affordability?.price;
       const selectedPrice = Number.isFinite(affordabilityPrice)
         ? affordabilityPrice
         : null;
@@ -1426,6 +1427,7 @@
           laData?.region_code ?? selection?.region_code,
         ),
         propertyPrice: selectedPrice,
+        ratio: affordability?.ratio,
         incomeRequired: roundUp(selectedPrice / INCOME_MULTIPLIER, 100),
       };
     } catch (e) {
@@ -1841,7 +1843,9 @@
           </div>
         </div>
         <div class="ons-u-mt-s">
-          <Details title="Adjust property type and price level">
+          <Details
+            title={`Property type: ${propertyTypeLabels[propertyType]} · Price: ${priceLevel === "lq" ? "Entry level" : "Average"}`}
+          >
             <ButtonGroup
               name="property-type"
               legend="Property type"
@@ -1870,423 +1874,421 @@
 
   {#if selectedBoundary}
     <div class="selection-section" use:retainHeight={!buySectionNoData}>
-      <Section title="" width="full">
-        {#if !buySectionLoading && buySectionNoData}
-          <p>
-            No data available for <Em color="#003c57" nowrap={false}
-              >{selectedBoundary.name}</Em
-            > for the latest period.
-          </p>
-        {:else if !buySectionLoading && buySectionError}
-          <p class="snapshot-status snapshot-status--error" role="alert">
-            {buySectionError}
-          </p>
-        {:else}
-          <Grid width="full" cls="three-column-grid">
-            <Card cls="buy-summary-card">
-              {#if buySectionLoading}
-                <p class="snapshot-status">Loading property costs...</p>
-              {:else if buySectionError}
-                <p class="snapshot-status snapshot-status--error">
-                  {buySectionError}
-                </p>
-              {:else if buySectionData}
-                <div class="buy-summary-content">
-                  <div class="buy-icon-box">
-                    <img src={`${base}/img/house.svg`} alt="" />
-                  </div>
-                  <div class="buy-summary-details">
-                    <p class="buy-sentence">
-                      In <Em color="#003c57" nowrap={false}
-                        >{buySectionData.areaName}</Em
-                      >,
-                      {getPropertyDescription(propertyType, priceLevel)} costs:
-                      <strong
-                        >{formatCurrency(buySectionData.propertyPrice)}</strong
-                      >.
-                    </p>
+      {#if !buySectionLoading && buySectionNoData}
+        <p>
+          No data available for <Em color="#003c57" nowrap={false}
+            >{selectedBoundary.name}</Em
+          > for the latest period.
+        </p>
+      {:else if !buySectionLoading && buySectionError}
+        <p class="snapshot-status snapshot-status--error" role="alert">
+          {buySectionError}
+        </p>
+      {:else}
+        <Grid width="full" cls="three-column-grid">
+          <Card cls="buy-summary-card">
+            {#if buySectionLoading}
+              <p class="snapshot-status">Loading property costs...</p>
+            {:else if buySectionError}
+              <p class="snapshot-status snapshot-status--error">
+                {buySectionError}
+              </p>
+            {:else if buySectionData}
+              <div class="buy-summary-content">
+                <div class="buy-icon-box">
+                  <img src={`${base}/img/house.svg`} alt="" />
+                </div>
+                <div class="buy-summary-details">
+                  <p class="buy-sentence">
+                    In <Em color="#003c57" nowrap={false}
+                      >{buySectionData.areaName}</Em
+                    >,
+                    {getPropertyDescription(propertyType, priceLevel)} costs:
+                    <strong
+                      >{formatCurrency(buySectionData.propertyPrice)}</strong
+                    >.
+                  </p>
+                  {#if Number.isFinite(buySectionData.ratio)}
                     <p class="buy-sentence">
                       This is <strong
-                        >{format(selectedMsoaForSnapshot.ratio, ",.1f")}</strong
-                      > times the annual earnings.
+                        >{format(buySectionData.ratio, ",.1f")}</strong
+                      > times the annual local authority median earnings.
                     </p>
-                  </div>
-                </div>
-              {:else}
-                <p class="snapshot-status">
-                  Select an MSOA or local authority on the map to view property
-                  costs.
-                </p>
-              {/if}
-            </Card>
-            <Card cls="buy-summary-card">
-              {#if buySectionLoading}
-                <p class="snapshot-status">Loading income requirement...</p>
-              {:else if buySectionError}
-                <p class="snapshot-status snapshot-status--error">
-                  {buySectionError}
-                </p>
-              {:else if buySectionData}
-                <div class="buy-summary-content">
-                  <div class="buy-icon-box">
-                    <img src={`${base}/img/poundhouse.svg`} alt="" />
-                  </div>
-                  <div class="buy-summary-details">
+                  {:else}
                     <p class="buy-sentence">
-                      Given a mortgage lender gives you 4.5x your income, to buy
-                      with a mortgage your household would need to earn at least
-                      <strong
-                        >{formatCurrency(buySectionData.incomeRequired)}</strong
-                      > per year.
+                      House price to earnings ratio unavailable for the latest
+                      period.
                     </p>
-                  </div>
+                  {/if}
                 </div>
-              {:else}
-                <p class="snapshot-status">
-                  Select an MSOA or local authority on the map to view income
-                  required.
-                </p>
-              {/if}
-            </Card>
-            <Card cls="buy-summary-card">
-              {#if buySectionLoading}
-                <p class="snapshot-status">Loading total savings...</p>
-              {:else if buySectionError}
-                <p class="snapshot-status snapshot-status--error">
-                  {buySectionError}
-                </p>
-              {:else if buySectionData && totalSavingsData}
-                <div class="buy-summary-content">
-                  <div class="buy-icon-box">
-                    <img src={`${base}/img/piggybank.svg`} alt="" />
+              </div>
+            {:else}
+              <p class="snapshot-status">
+                Select an MSOA or local authority on the map to view property
+                costs.
+              </p>
+            {/if}
+          </Card>
+          <Card cls="buy-summary-card">
+            {#if buySectionLoading}
+              <p class="snapshot-status">Loading income requirement...</p>
+            {:else if buySectionError}
+              <p class="snapshot-status snapshot-status--error">
+                {buySectionError}
+              </p>
+            {:else if buySectionData}
+              <div class="buy-summary-content">
+                <div class="buy-icon-box">
+                  <img src={`${base}/img/poundhouse.svg`} alt="" />
+                </div>
+                <div class="buy-summary-details">
+                  <p class="buy-sentence">
+                    If a mortgage provider offers you 4.5 times your household
+                    income, your household would need to earn at least
+                    <strong
+                      >{formatCurrency(buySectionData.incomeRequired)}</strong
+                    > per year to buy with a mortgage.
+                  </p>
+                </div>
+              </div>
+            {:else}
+              <p class="snapshot-status">
+                Select an MSOA or local authority on the map to view income
+                required.
+              </p>
+            {/if}
+          </Card>
+          <Card cls="buy-summary-card">
+            {#if buySectionLoading}
+              <p class="snapshot-status">Loading total savings...</p>
+            {:else if buySectionError}
+              <p class="snapshot-status snapshot-status--error">
+                {buySectionError}
+              </p>
+            {:else if buySectionData && totalSavingsData}
+              <div class="buy-summary-content">
+                <div class="buy-icon-box">
+                  <img src={`${base}/img/piggybank.svg`} alt="" />
+                </div>
+                <div class="buy-summary-details buy-summary-details--savings">
+                  <p class="buy-sentence">
+                    For a typical mortgage, you would need at least <strong
+                      >{formatCurrency(
+                        roundUp(totalSavingsData.total, 10),
+                      )}</strong
+                    >
+                    up front, made up of a
+                    <strong>{formatCurrency(totalSavingsData.deposit)}</strong>
+                    deposit plus
+                    <strong
+                      >{formatCurrency(totalSavingsData.transactionTax)}</strong
+                    >
+                    for {totalSavingsData.transactionTaxLabel}.
+                  </p>
+                  <div class="buy-checkbox">
+                    <Checkbox
+                      id="first-time-buyer-checkbox"
+                      label="I'm a first-time buyer"
+                      bind:checked={isFirstTimeBuyer}
+                      compact
+                    />
                   </div>
-                  <div class="buy-summary-details buy-summary-details--savings">
-                    <p class="buy-sentence">
-                      For a typical mortgage, you would need at least <strong
-                        >{formatCurrency(
-                          roundUp(totalSavingsData.total, 10),
-                        )}</strong
-                      >
-                      up front, made up of a
-                      <strong>{formatCurrency(totalSavingsData.deposit)}</strong
-                      >
-                      deposit plus
-                      <strong
-                        >{formatCurrency(
-                          totalSavingsData.transactionTax,
-                        )}</strong
-                      >
-                      for {totalSavingsData.transactionTaxLabel}.
-                    </p>
-                    <div class="buy-checkbox">
-                      <Checkbox
-                        id="first-time-buyer-checkbox"
-                        label="I'm a first-time buyer"
-                        bind:checked={isFirstTimeBuyer}
-                        compact
-                      />
-                    </div>
 
-                    {#if isFirstTimeBuyer && buySectionData.country === "wales"}
-                      <p class="snapshot-status">
-                        First-time buyer relief is not available in Wales.
-                      </p>
-                    {:else if isFirstTimeBuyer && buySectionData.country === "england" && !totalSavingsData.firstTimeBuyerReliefApplied}
-                      <p class="snapshot-status">
-                        First-time buyer relief is not applied above £625,000.
-                      </p>
-                    {/if}
-                  </div>
+                  {#if isFirstTimeBuyer && buySectionData.country === "wales"}
+                    <p class="snapshot-status">
+                      First-time buyer relief is not available in Wales.
+                    </p>
+                  {:else if isFirstTimeBuyer && buySectionData.country === "england" && !totalSavingsData.firstTimeBuyerReliefApplied}
+                    <p class="snapshot-status">
+                      First-time buyer relief is not applied above £625,000.
+                    </p>
+                  {/if}
                 </div>
-              {:else}
-                <p class="snapshot-status">
-                  Select an MSOA or local authority on the map to view total
-                  savings needed.
-                </p>
-              {/if}
-            </Card>
-          </Grid>
-        {/if}
-      </Section>
+              </div>
+            {:else}
+              <p class="snapshot-status">
+                Select an MSOA or local authority on the map to view total
+                savings needed.
+              </p>
+            {/if}
+          </Card>
+        </Grid>
+      {/if}
     </div>
   {/if}
 
-  <Section width="full">
-    <Container width="full">
-      <div class="map-beeswarm-container">
-        <div class="map-grid">
-          <Grid width="full">
-            <div class="map-column">
-              <div class="map-wrapper">
-                {#if mapStyle}
-                  {#if mapLoading}
-                    <div class="map-loading-overlay">
-                      <p>Loading affordability data...</p>
-                    </div>
-                  {/if}
-                  <Map
-                    id="mapsearch-map"
-                    style={mapStyle}
-                    location={defaultMapView}
-                    bind:map
-                    bind:zoom
-                    bind:center
-                    minzoom={6}
-                    maxzoom={14}
-                    controls={true}
-                    attribution={true}
-                    scrollZoomGuard={true}
-                  >
-                    <!-- Vector tile source for MSOA boundaries with affordability coloring -->
-                    <MapSource
-                      id="msoa-source"
-                      type="vector"
-                      url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{'{z}/{x}/{y}'}.pbf"
-                      layer="msoa"
-                      promoteId="areacd"
-                      maxzoom={12}
-                    >
-                      <MapLayer
-                        id="msoa-fill"
-                        type="fill"
-                        order="mask-raster"
-                        hover={true}
-                        bind:hovered
-                        select={true}
-                        bind:selected
-                        on:select={({ detail }) => {
-                          const msoaCode = String(detail?.id ?? "");
-                          if (
-                            msoaCode &&
-                            affordabilityData &&
-                            affordabilityData[msoaCode]
-                          ) {
-                            selectMsoa(msoaCode, affordabilityData[msoaCode], {
-                              zoomToParentLA: true,
-                            });
-                          }
-                        }}
-                        paint={{
-                          "fill-color": [
-                            "case",
-                            ["!=", ["feature-state", "color"], null],
-                            ["feature-state", "color"],
-                            "#ccc",
-                          ],
-                          "fill-opacity": 0.8,
-                        }}
-                      />
-                      <MapLayer
-                        id="msoa-outline-base"
-                        type="line"
-                        order={CITY_LABEL_LAYER_ID}
-                        paint={{
-                          "line-color": ONS_GREY_75,
-                          "line-width": [
-                            "interpolate",
-                            ["linear"],
-                            ["zoom"],
-                            6,
-                            0.2,
-                            11,
-                            1,
-                          ],
-                          "line-opacity": 1,
-                        }}
-                      />
-                      <MapLayer
-                        id="msoa-hover-white"
-                        type="line"
-                        order={CITY_LABEL_LAYER_ID}
-                        paint={{
-                          "line-color": "#ffffff",
-                          "line-width": 3,
-                          "line-opacity": [
-                            "case",
-                            ["==", ["feature-state", "hovered"], true],
-                            0.8,
-                            0,
-                          ],
-                        }}
-                      />
-                      <MapLayer
-                        id="msoa-hover-outline"
-                        type="line"
-                        order={CITY_LABEL_LAYER_ID}
-                        paint={{
-                          "line-color": ONS_GREY_100,
-                          "line-width": 2,
-                          "line-opacity": [
-                            "case",
-                            ["==", ["feature-state", "hovered"], true],
-                            1,
-                            0,
-                          ],
-                        }}
-                      />
-                      <MapLayer
-                        id="msoa-selected-white"
-                        type="line"
-                        order={CITY_LABEL_LAYER_ID}
-                        paint={{
-                          "line-color": "#ffffff",
-                          "line-width": 5,
-                          "line-opacity": [
-                            "case",
-                            ["==", ["feature-state", "selected"], true],
-                            0.8,
-                            0,
-                          ],
-                        }}
-                      />
-                      <MapLayer
-                        id="msoa-selected-outline"
-                        type="line"
-                        order={CITY_LABEL_LAYER_ID}
-                        paint={{
-                          "line-color": ONS_GREY_100,
-                          "line-width": 3,
-                          "line-opacity": [
-                            "case",
-                            ["==", ["feature-state", "selected"], true],
-                            1,
-                            0,
-                          ],
-                        }}
-                      />
-                    </MapSource>
-                  </Map>
-                {/if}
-              </div>
-
-              <div class="map-footer">
-                {#if affordabilityData && colorBounds.length > 0}
-                  <div class="legend-container">
-                    <ColorLegend
-                      bounds={colorBounds}
-                      hoverValue={legendHoverIndicatorValue}
-                      selectedValue={legendSelectedIndicatorValue}
-                    />
+  <Container width="full">
+    <div class="map-beeswarm-container">
+      <div class="map-grid">
+        <Grid width="full">
+          <div class="map-column">
+            <div class="map-wrapper">
+              {#if mapStyle}
+                {#if mapLoading}
+                  <div class="map-loading-overlay">
+                    <p>Loading affordability data...</p>
                   </div>
                 {/if}
-              </div>
+                <Map
+                  id="mapsearch-map"
+                  style={mapStyle}
+                  location={defaultMapView}
+                  bind:map
+                  bind:zoom
+                  bind:center
+                  minzoom={6}
+                  maxzoom={14}
+                  controls={true}
+                  attribution={true}
+                  scrollZoomGuard={true}
+                >
+                  <!-- Vector tile source for MSOA boundaries with affordability coloring -->
+                  <MapSource
+                    id="msoa-source"
+                    type="vector"
+                    url="https://cdn.ons.gov.uk/maptiles/administrative/2021/msoa/v2/boundaries/{'{z}/{x}/{y}'}.pbf"
+                    layer="msoa"
+                    promoteId="areacd"
+                    maxzoom={12}
+                  >
+                    <MapLayer
+                      id="msoa-fill"
+                      type="fill"
+                      order="mask-raster"
+                      hover={true}
+                      bind:hovered
+                      select={true}
+                      bind:selected
+                      on:select={({ detail }) => {
+                        const msoaCode = String(detail?.id ?? "");
+                        if (
+                          msoaCode &&
+                          affordabilityData &&
+                          affordabilityData[msoaCode]
+                        ) {
+                          selectMsoa(msoaCode, affordabilityData[msoaCode], {
+                            zoomToParentLA: true,
+                          });
+                        }
+                      }}
+                      paint={{
+                        "fill-color": [
+                          "case",
+                          ["!=", ["feature-state", "color"], null],
+                          ["feature-state", "color"],
+                          "#ccc",
+                        ],
+                        "fill-opacity": 0.8,
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-outline-base"
+                      type="line"
+                      order={PLACE_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": ONS_GREY_75,
+                        "line-width": [
+                          "interpolate",
+                          ["linear"],
+                          ["zoom"],
+                          6,
+                          0.2,
+                          11,
+                          1,
+                        ],
+                        "line-opacity": 1,
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-hover-white"
+                      type="line"
+                      order={PLACE_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": "#ffffff",
+                        "line-width": 3,
+                        "line-opacity": [
+                          "case",
+                          ["==", ["feature-state", "hovered"], true],
+                          0.8,
+                          0,
+                        ],
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-hover-outline"
+                      type="line"
+                      order={PLACE_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": ONS_GREY_100,
+                        "line-width": 2,
+                        "line-opacity": [
+                          "case",
+                          ["==", ["feature-state", "hovered"], true],
+                          1,
+                          0,
+                        ],
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-selected-white"
+                      type="line"
+                      order={PLACE_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": "#ffffff",
+                        "line-width": 5,
+                        "line-opacity": [
+                          "case",
+                          ["==", ["feature-state", "selected"], true],
+                          0.8,
+                          0,
+                        ],
+                      }}
+                    />
+                    <MapLayer
+                      id="msoa-selected-outline"
+                      type="line"
+                      order={PLACE_LABEL_LAYER_ID}
+                      paint={{
+                        "line-color": ONS_GREY_100,
+                        "line-width": 3,
+                        "line-opacity": [
+                          "case",
+                          ["==", ["feature-state", "selected"], true],
+                          1,
+                          0,
+                        ],
+                      }}
+                    />
+                  </MapSource>
+                </Map>
+              {/if}
             </div>
-          </Grid>
-        </div>
+
+            <div class="map-footer">
+              {#if affordabilityData && colorBounds.length > 0}
+                <div class="legend-container">
+                  <ColorLegend
+                    bounds={colorBounds}
+                    hoverValue={legendHoverIndicatorValue}
+                    selectedValue={legendSelectedIndicatorValue}
+                  />
+                </div>
+              {/if}
+            </div>
+          </div>
+        </Grid>
       </div>
-    </Container>
-  </Section>
+    </div>
+  </Container>
 
   {#if selectedBoundary && !beeswarmNoData}
     <div class="selection-section" use:retainHeight>
-      <Section width="full">
-        <Container width="full">
-          <div class="beeswarm-card">
-            <Card>
-              {#if beeswarmLoading}
-                <p class="snapshot-status">Loading beeswarm data...</p>
-              {:else if beeswarmError && !beeswarmNoData}
-                <p class="snapshot-status snapshot-status--error">
-                  {beeswarmError}
-                </p>
-              {:else if beeswarmData && beeswarmData.length > 0}
-                <p class="snapshot-status beeswarm-card__title">
-                  Compare <Em color="#003c57" nowrap={false}
-                    >{selectedBoundary.name}</Em
-                  > with other areas
-                </p>
-                <div class="beeswarm-chart ons-u-mt-l">
-                  <ScatterChart
-                    data={beeswarmData}
-                    xKey="x"
-                    yKey={null}
-                    zKey="type"
-                    zDomain={beeswarmLegendDomain}
-                    xMin={beeswarmXMin}
-                    xMax={beeswarmXMax}
-                    xAxisLabel="House price to earnings ratio"
-                    yAxis={false}
-                    yFitBeeswarm={true}
-                    legend={false}
-                    rKey="radius"
-                    buffer={2}
-                    height={220}
-                    padding={{ top: 130, right: 15, bottom: 50, left: 15 }}
-                    colors={beeswarmLegendDomain.map(() => "transparent")}
-                  >
-                    <BeeswarmMarkers
-                      slot="svg"
-                      on:select={({ detail }) => {
-                        const msoaData = affordabilityData[detail.code];
-                        if (msoaData) {
-                          selectMsoa(detail.code, msoaData);
-                        }
-                      }}
-                    />
-                  </ScatterChart>
-                  <div class="beeswarm-key" aria-label="Beeswarm marker key">
-                    {#each beeswarmLegendDomain as type}
-                      <span class="beeswarm-key__item">
-                        <svg
-                          class="beeswarm-key__marker"
-                          viewBox="0 0 20 20"
-                          aria-hidden="true"
-                        >
-                          {#if type === "Selected area"}
-                            <circle cx="10" cy="10" r="7.5" fill="#003c57" />
-                          {:else if type === "Other neighbourhoods in local authority"}
-                            <circle
-                              cx="10"
-                              cy="10"
-                              r="5.5"
-                              fill="#d9d9d9"
-                              stroke="#bcbec0"
-                              stroke-width="1.5"
-                            />
-                          {:else if type === "Local authority average"}
-                            <rect
-                              x="4.7"
-                              y="4.7"
-                              width="10.6"
-                              height="10.6"
-                              fill={selectedAreaForData?.type === "la"
-                                ? "#206095"
-                                : "#ffffff"}
-                              stroke="#206095"
-                              stroke-width="2.5"
-                              transform="rotate(45 10 10)"
-                            />
-                          {:else if type === "Regional average"}
-                            <rect
-                              x="4"
-                              y="4"
-                              width="12"
-                              height="12"
-                              fill="#ffffff"
-                              stroke="#a8c61e"
-                              stroke-width="2.5"
-                            />
-                          {:else if type === "National average"}
-                            <circle
-                              cx="10"
-                              cy="10"
-                              r="7.5"
-                              fill="#ffffff"
-                              stroke="#e8528a"
-                              stroke-width="2.5"
-                            />
-                          {/if}
-                        </svg>
-                        {type}
-                      </span>
-                    {/each}
-                  </div>
+      <Container width="full">
+        <div class="beeswarm-card">
+          <Card>
+            {#if beeswarmLoading}
+              <p class="snapshot-status">Loading beeswarm data...</p>
+            {:else if beeswarmError && !beeswarmNoData}
+              <p class="snapshot-status snapshot-status--error">
+                {beeswarmError}
+              </p>
+            {:else if beeswarmData && beeswarmData.length > 0}
+              <p class="snapshot-status beeswarm-card__title">
+                Compare <Em color="#003c57" nowrap={false}
+                  >{selectedBoundary.name}</Em
+                > with other areas
+              </p>
+              <div class="beeswarm-chart ons-u-mt-l">
+                <ScatterChart
+                  data={beeswarmData}
+                  xKey="x"
+                  yKey={null}
+                  zKey="type"
+                  zDomain={beeswarmLegendDomain}
+                  xMin={beeswarmXMin}
+                  xMax={beeswarmXMax}
+                  xAxisLabel="House price to earnings ratio"
+                  yAxis={false}
+                  yFitBeeswarm={true}
+                  legend={false}
+                  rKey="radius"
+                  buffer={2}
+                  height={220}
+                  padding={{ top: 130, right: 15, bottom: 50, left: 15 }}
+                  colors={beeswarmLegendDomain.map(() => "transparent")}
+                >
+                  <BeeswarmMarkers
+                    slot="svg"
+                    on:select={({ detail }) => {
+                      const msoaData = affordabilityData[detail.code];
+                      if (msoaData) {
+                        selectMsoa(detail.code, msoaData);
+                      }
+                    }}
+                  />
+                </ScatterChart>
+                <div class="beeswarm-key" aria-label="Beeswarm marker key">
+                  {#each beeswarmLegendDomain as type}
+                    <span class="beeswarm-key__item">
+                      <svg
+                        class="beeswarm-key__marker"
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        {#if type === "Selected area"}
+                          <circle cx="10" cy="10" r="7.5" fill="#003c57" />
+                        {:else if type === "Other neighbourhoods in local authority"}
+                          <circle
+                            cx="10"
+                            cy="10"
+                            r="5.5"
+                            fill="#d9d9d9"
+                            stroke="#bcbec0"
+                            stroke-width="1.5"
+                          />
+                        {:else if type === "Local authority average"}
+                          <rect
+                            x="4.7"
+                            y="4.7"
+                            width="10.6"
+                            height="10.6"
+                            fill={selectedAreaForData?.type === "la"
+                              ? "#206095"
+                              : "#ffffff"}
+                            stroke="#206095"
+                            stroke-width="2.5"
+                            transform="rotate(45 10 10)"
+                          />
+                        {:else if type === "Regional average"}
+                          <rect
+                            x="4"
+                            y="4"
+                            width="12"
+                            height="12"
+                            fill="#ffffff"
+                            stroke="#a8c61e"
+                            stroke-width="2.5"
+                          />
+                        {:else if type === "National average"}
+                          <circle
+                            cx="10"
+                            cy="10"
+                            r="7.5"
+                            fill="#ffffff"
+                            stroke="#e8528a"
+                            stroke-width="2.5"
+                          />
+                        {/if}
+                      </svg>
+                      {type}
+                    </span>
+                  {/each}
                 </div>
-              {/if}
-            </Card>
-          </div>
-        </Container>
-      </Section>
+              </div>
+            {/if}
+          </Card>
+        </div>
+      </Container>
     </div>
   {/if}
 </div>

@@ -257,6 +257,8 @@ const AFFORDABILITY_COLOR_PALETTE = [
   "#002D7D",
   "#000D54",
 ];
+
+
 const AFFORDABILITY_COLOR_BREAKS = [0, 5, 10, 15, 20, Infinity];
 
 function roundToTwoDecimals(value) {
@@ -668,13 +670,8 @@ export function updateMapFeatureStates(
           const lowerBound = colorBounds[i];
           const upperBound = colorBounds[i + 1];
 
-          if (i === 0 && ratio < upperBound) {
-            color = activePalette[i];
-            break;
-          } else if (i === intervalCount - 1 && ratio >= lowerBound) {
-            color = activePalette[i];
-            break;
-          } else if (ratio >= lowerBound && ratio < upperBound) {
+          // Check if ratio falls within this interval
+          if (ratio >= lowerBound && ratio < upperBound) {
             color = activePalette[i];
             break;
           }

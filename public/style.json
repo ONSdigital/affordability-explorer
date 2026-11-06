@@ -15,6 +15,16 @@
       ],
       "tileSize": 256,
       "attribution": "&copy; OpenStreetMap contributors"
+    },
+    "mask-raster": {
+      "type": "raster",
+      "tiles": [
+        "https://cdn.ons.gov.uk/maptiles/buildingmask/{z}/{x}/{y}.png"
+      ],
+      "tileSize": 256,
+      "maxzoom": 12,
+      "bounds": [-12.836, 49.441, 7.604, 55.945],
+      "attribution": "&copy; Ordnance Survey"
     }
   },
   "layers": [
@@ -22,7 +32,35 @@
       "id": "osm-background",
       "type": "raster",
       "source": "osm",
-      "paint": {}
+      "paint": {
+        "raster-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          6,
+          1,
+          11,
+          0.3
+        ]
+      }
+    },
+    {
+      "id": "mask-raster",
+      "type": "raster",
+      "source": "mask-raster",
+      "maxzoom": 12,
+      "paint": {
+        "raster-brightness-max": 0.95,
+        "raster-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          11,
+          1,
+          12,
+          0.3
+        ]
+      }
     }
   ],
   "glyphs": "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf"

@@ -143,6 +143,11 @@
   let selectElement;
   let detachMapHandlers = null;
 
+  // Log zoom level when zoom finishes (zoom changes)
+  $: if (zoom !== undefined) {
+    console.log(`Zoom level: ${zoom.toFixed(2)}`);
+  }
+
   onMount(async () => {
     try {
       await loadTopoJSON();
@@ -436,7 +441,15 @@
             },
             paint: {
               "line-color": ONS_GREY_15,
-              "line-width": 3,
+              "line-width": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                8.9,
+                0,
+                9,
+                3,
+              ],
               "line-opacity": 1,
             },
           },
@@ -1551,6 +1564,7 @@
     selectedLAForSnapshot = null;
     selected = msoaCode;
     selectedFeatureId = msoaCode;
+    isFirstTimeBuyer = false;
 
     if (map) {
       try {
@@ -1651,6 +1665,7 @@
     clearSelectedMsoaFeatureState();
     selected = null;
     selectedAreaType = "la";
+    isFirstTimeBuyer = false;
     selectedLAForSnapshot = {
       code: boundary.id,
       name: boundary.name,
@@ -1985,20 +2000,18 @@
                     >
                     for {totalSavingsData.transactionTaxLabel}.
                   </p>
-                  <div class="buy-checkbox">
-                    <Checkbox
-                      id="first-time-buyer-checkbox"
-                      label="I'm a first-time buyer"
-                      bind:checked={isFirstTimeBuyer}
-                      compact
-                    />
-                  </div>
+                  {#if buySectionData.country !== "wales"}
+                    <div class="buy-checkbox">
+                      <Checkbox
+                        id="first-time-buyer-checkbox"
+                        label="I'm a first-time buyer"
+                        bind:checked={isFirstTimeBuyer}
+                        compact
+                      />
+                    </div>
+                  {/if}
 
-                  {#if isFirstTimeBuyer && buySectionData.country === "wales"}
-                    <p class="snapshot-status">
-                      First-time buyer relief is not available in Wales.
-                    </p>
-                  {:else if isFirstTimeBuyer && buySectionData.country === "england" && !totalSavingsData.firstTimeBuyerReliefApplied}
+                  {#if isFirstTimeBuyer && buySectionData.country === "england" && !totalSavingsData.firstTimeBuyerReliefApplied}
                     <p class="snapshot-status">
                       First-time buyer relief is not applied above £625,000.
                     </p>
@@ -2037,7 +2050,7 @@
                   bind:zoom
                   bind:center
                   minzoom={6}
-                  maxzoom={14}
+                  maxzoom={12}
                   controls={true}
                   attribution={true}
                   scrollZoomGuard={true}
@@ -2078,7 +2091,7 @@
                           ["feature-state", "color"],
                           "#ccc",
                         ],
-                        "fill-opacity": 0.8,
+                        "fill-opacity": 1,
                       }}
                     />
                     <MapLayer
@@ -2091,7 +2104,9 @@
                           "interpolate",
                           ["linear"],
                           ["zoom"],
-                          6,
+                          8.9,
+                          0,
+                          9,
                           0.2,
                           11,
                           1,

@@ -10,6 +10,7 @@
     "#002D7D",
     "#000D54",
   ];
+  
   export let unavailableColor = "#ccc";
   export let hoverValue = null;
   export let selectedValue = null;

@@ -34,6 +34,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Verify static directory
+        run: |
+          echo "Checking static/data:"
+          ls -la static/data/ | head || echo "static/data/ does not exist"
+          echo "---"
+          echo "Checking build after vite:"
+          ls -la build/
+
       - name: Build for GitHub Pages
         run: npm run build:preview
 

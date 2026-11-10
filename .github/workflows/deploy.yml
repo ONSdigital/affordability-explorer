@@ -37,6 +37,17 @@ jobs:
       - name: Build for GitHub Pages
         run: npm run build:preview
 
+      - name: Verify build contents
+        run: |
+          echo "Build directory size:"
+          du -sh build/
+          echo "Build data directory:"
+          ls -la build/data/ | head
+          echo "Total files in build:"
+          find build -type f | wc -l
+          echo "Checking for symlinks:"
+          find build -type l
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 

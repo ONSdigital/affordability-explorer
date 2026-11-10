@@ -111,14 +111,16 @@
   const INCOME_MULTIPLIER = 4.5;
   const DEPOSIT_RATE = 0.1;
   const ENGLAND_STAMP_DUTY_BANDS = [
-    { upTo: 250000, rate: 0 },
+    { upTo: 125000, rate: 0 },
+    { upTo: 250000, rate: 0.02 },
     { upTo: 925000, rate: 0.05 },
     { upTo: 1500000, rate: 0.1 },
     { upTo: Infinity, rate: 0.12 },
   ];
+  const ENGLAND_FIRST_TIME_BUYER_PRICE_LIMIT = 500000;
   const ENGLAND_FIRST_TIME_BUYER_BANDS = [
-    { upTo: 425000, rate: 0 },
-    { upTo: 625000, rate: 0.05 },
+    { upTo: 300000, rate: 0 },
+    { upTo: ENGLAND_FIRST_TIME_BUYER_PRICE_LIMIT, rate: 0.05 },
   ];
   const ONS_GREY_15 = "#e2e2e3";
   const ONS_GREY_100 = "#414042";
@@ -1278,7 +1280,7 @@
 
   function calculateEnglandStampDuty(price, isFirstTimeBuyerValue) {
     const firstTimeBuyerReliefApplied =
-      isFirstTimeBuyerValue && price <= 625000;
+      isFirstTimeBuyerValue && price <= ENGLAND_FIRST_TIME_BUYER_PRICE_LIMIT;
     const bands = firstTimeBuyerReliefApplied
       ? ENGLAND_FIRST_TIME_BUYER_BANDS
       : ENGLAND_STAMP_DUTY_BANDS;
@@ -1985,7 +1987,9 @@
 
                   {#if isFirstTimeBuyer && buySectionData.country === "england" && !totalSavingsData.firstTimeBuyerReliefApplied}
                     <p class="snapshot-status">
-                      First-time buyer relief is not applied above £625,000.
+                      First-time buyer relief is not applied above {formatCurrency(
+                        ENGLAND_FIRST_TIME_BUYER_PRICE_LIMIT,
+                      )}.
                     </p>
                   {/if}
                 </div>

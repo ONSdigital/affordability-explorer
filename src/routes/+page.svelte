@@ -1559,7 +1559,6 @@
     selectedLAForSnapshot = null;
     selected = msoaCode;
     selectedFeatureId = msoaCode;
-    isFirstTimeBuyer = false;
 
     if (map) {
       try {
@@ -1660,7 +1659,6 @@
     clearSelectedMsoaFeatureState();
     selected = null;
     selectedAreaType = "la";
-    isFirstTimeBuyer = false;
     selectedLAForSnapshot = {
       code: boundary.id,
       name: boundary.name,

@@ -1,14 +1,12 @@
 export function retainHeight(node, enabled = true) {
-  let height = 0;
+  let lastHeight = 0;
   const originalMinHeight = node.style.minHeight;
 
   function measure() {
     if (!enabled) return;
     const nextHeight = node.getBoundingClientRect().height;
-    if (nextHeight > height) {
-      height = nextHeight;
-      node.style.minHeight = `${height}px`;
-    }
+    node.style.minHeight = `${nextHeight}px`;
+    lastHeight = nextHeight;
   }
 
   measure();
@@ -19,7 +17,6 @@ export function retainHeight(node, enabled = true) {
     update(nextEnabled) {
       enabled = nextEnabled;
       if (!enabled) {
-        height = 0;
         node.style.minHeight = originalMinHeight;
       } else {
         measure();

@@ -2,17 +2,7 @@
   import { getLegendDisplayBounds } from "../map-data.js";
 
   export let bounds = [];
-  export let colorPalette = ['#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026']
-  
-  // [
-  //   "#EAECB1",
-  //   "#A9D891",
-  //   "#00A7BA",
-  //   "#004EA6",
-  //   "#002D7D",
-  //   "#000D54",
-  // ];
-  
+  export let colorPalette = ['#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026'];
   export let unavailableColor = "#ccc";
   export let hoverValue = null;
   export let selectedValue = null;
@@ -223,7 +213,7 @@
           <span
             class="keyscale-tick"
             class:keyscale-tick--start={index === 0}
-            class:keyscale-tick--end={index === tickMarks.length - 1}
+            class:keyscale-tick--end={index === tickMarks.length - 1 && !tick.label.includes("+")}
             style="left: {tick.left}%;"
           >
             {tick.label}

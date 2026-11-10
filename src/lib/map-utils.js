@@ -117,7 +117,7 @@ function calculateBounds(geometry) {
  * @param {string} input - Raw postcode input
  * @returns {string} Normalized postcode
  */
-export function normalizePostcode(input) {
+function normalizePostcode(input) {
   if (input === null || typeof input === "undefined") return "";
   return String(input).trim().toUpperCase().replace(/\s+/g, " ");
 }
@@ -127,7 +127,7 @@ export function normalizePostcode(input) {
  * @param {string} input - Input to validate
  * @returns {boolean} True if matches UK postcode pattern
  */
-export function isLikelyUkPostcode(input) {
+function isLikelyUkPostcode(input) {
   const normalized = normalizePostcode(input);
   return UK_POSTCODE_RE.test(normalized);
 }
@@ -137,7 +137,7 @@ export function isLikelyUkPostcode(input) {
  * @param {string} query - Partial or full postcode
  * @returns {array} Array of postcode suggestions
  */
-export async function fetchPostcodes(query) {
+async function fetchPostcodes(query) {
   const q =
     query === null || typeof query === "undefined" ? "" : String(query).trim();
   if (!q) return [];
@@ -501,45 +501,6 @@ export async function loadCountryAffordability(
  * @param {string} regionCode - Region code
  * @returns {object|null} Region summary with median affordability
  */
-export async function loadRegionMedianAffordability(
-  propertyType = "all",
-  regionCode = "",
-) {
-  if (!regionCode) return null;
-
-  const cacheKey = `${propertyType}:${regionCode}`;
-  if (regionalMedianAffordabilityCache[cacheKey]) {
-    return regionalMedianAffordabilityCache[cacheKey];
-  }
-
-  const authorities = await loadGeographyAuthorities();
-  const regionAuthorities = authorities.filter(
-    (authority) => authority.region_code === regionCode,
-  );
-
-  if (regionAuthorities.length === 0) {
-    return null;
-  }
-
-  const laDataArray = await Promise.all(
-    regionAuthorities.map((authority) =>
-      loadLocalAuthorityData(propertyType, authority.code),
-    ),
-  );
-  const median = aggregateMedianAffordability(laDataArray);
-  if (!median) {
-    return null;
-  }
-
-  const summary = {
-    code: regionCode,
-    name: regionAuthorities[0]?.region_name ?? null,
-    median,
-  };
-  regionalMedianAffordabilityCache[cacheKey] = summary;
-  return summary;
-}
-
 function calculateEqualIntervalBreaks(ratios = [], numClasses = 7) {
   if (!Array.isArray(ratios) || ratios.length === 0) {
     return [];

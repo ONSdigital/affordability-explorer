@@ -1,8 +1,9 @@
 <script>
   import { onMount } from "svelte";
   import { base } from "$app/paths";
+  import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
   import { ScatterChart } from "@onsvisual/svelte-charts";
-  import { compareTo, format } from "@onsvisual/robo-utils";
+  import { format } from "@onsvisual/robo-utils";
   import { Map, MapSource, MapLayer } from "@onsvisual/svelte-maps";
   import {
     AccessibleSelect,
@@ -24,7 +25,6 @@
     getBoundaryById,
     getBoundaryByName,
     getAreaNames,
-    fetchPostcodes,
     findBoundaryAtPoint,
     loadAffordabilityData,
     loadLocalAuthorityData,
@@ -142,11 +142,6 @@
   let clearInput;
   let selectElement;
   let detachMapHandlers = null;
-
-  // Log zoom level when zoom finishes (zoom changes)
-  $: if (zoom !== undefined) {
-    console.log(`Zoom level: ${zoom.toFixed(2)}`);
-  }
 
   onMount(async () => {
     try {
@@ -1688,26 +1683,8 @@
     // Highlight selected LA
     highlightLA(boundary.id);
 
-    if (map && boundary?.bounds?.[0] && boundary?.bounds?.[1]) {
-      // Zoom to the selected boundary
-      const [minLng, minLat, maxLng, maxLat] = [
-        boundary.bounds[0][0],
-        boundary.bounds[0][1],
-        boundary.bounds[1][0],
-        boundary.bounds[1][1],
-      ];
-
-      map.fitBounds(
-        [
-          [minLng, minLat],
-          [maxLng, maxLat],
-        ],
-        {
-          padding: 50,
-          duration: 1000,
-        },
-      );
-    }
+    // Zoom to the selected boundary
+    zoomToLocalAuthority(boundary.id);
   }
 
   async function selectAreaByPostcode(code) {
@@ -1732,47 +1709,54 @@
         return;
       }
 
-      // Try to find MSOA from vector tiles using map querySourceFeatures
       let msoaCode = null;
+
+      // First, try to find MSOA from vector tiles
       if (map) {
         try {
+          // Temporarily zoom to ensure tiles are loaded
+          const originalZoom = map.getZoom();
+          const targetZoom = Math.max(9, originalZoom);
+          
+          // Fly to the location first to load tiles
+          await new Promise((resolve) => {
+            map.once("idle", resolve);
+            map.flyTo({
+              center: [lon, lat],
+              zoom: targetZoom,
+              duration: 500,
+            });
+          });
+
+          // Now query features
           const features = map.querySourceFeatures("msoa-source", {
             sourceLayer: "msoa",
           });
 
-          // Find the feature containing this point
+          // Find the feature containing this point using proper point-in-polygon
+          const point = [lon, lat];
           for (const feature of features) {
-            if (feature.geometry && feature.geometry.type === "Polygon") {
-              // Check if point is in polygon (simple bounding box check first)
-              const bounds = feature.geometry.coordinates[0];
-              let minX = Infinity,
-                maxX = -Infinity,
-                minY = Infinity,
-                maxY = -Infinity;
-
-              bounds.forEach((coord) => {
-                minX = Math.min(minX, coord[0]);
-                maxX = Math.max(maxX, coord[0]);
-                minY = Math.min(minY, coord[1]);
-                maxY = Math.max(maxY, coord[1]);
-              });
-
-              if (lon >= minX && lon <= maxX && lat >= minY && lat <= maxY) {
-                msoaCode = feature.id || feature.properties?.areacd;
-                if (msoaCode) break;
+            if (feature.geometry) {
+              try {
+                if (booleanPointInPolygon(point, feature.geometry)) {
+                  msoaCode = feature.id || feature.properties?.areacd;
+                  if (msoaCode) break;
+                }
+              } catch (e) {
+                // Continue to next feature
               }
             }
           }
         } catch (e) {
-          console.error("Could not query MSOA from vector tiles:", e.message);
+          // If zoom/query fails, continue to fallback
         }
       }
 
       // If we found an MSOA, select it
       if (msoaCode && affordabilityData && affordabilityData[msoaCode]) {
         selectMsoa(msoaCode, affordabilityData[msoaCode], {
-          zoomToParentLA: false,
-          flyToPoint: [lon, lat],
+          zoomToParentLA: true,
+          flyToPoint: null,
         });
       } else {
         // Fallback: find the LTLA boundary containing this postcode
@@ -2091,15 +2075,7 @@
                           ["feature-state", "color"],
                           "#ccc",
                         ],
-                        "fill-opacity": [
-                          "interpolate",
-                          ["linear"],
-                          ["zoom"],
-                          9,
-                          1,
-                          12,
-                          0,
-                        ],
+                        "fill-opacity": 1,
                       }}
                     />
                     <MapLayer

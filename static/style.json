@@ -299,7 +299,16 @@
       "paint": {
         "fill-color": "rgb(234, 234, 229)",
         "fill-outline-color": "rgb(219, 219, 218)",
-        "fill-antialias": true
+        "fill-antialias": true,
+        "fill-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          9,
+          0,
+          12,
+          1
+        ]
       }
     },
     {

@@ -2091,7 +2091,15 @@
                           ["feature-state", "color"],
                           "#ccc",
                         ],
-                        "fill-opacity": 1,
+                        "fill-opacity": [
+                          "interpolate",
+                          ["linear"],
+                          ["zoom"],
+                          9,
+                          1,
+                          12,
+                          0,
+                        ],
                       }}
                     />
                     <MapLayer

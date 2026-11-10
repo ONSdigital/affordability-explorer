@@ -85,24 +85,6 @@
       }
     },
     {
-      "id": "water",
-      "type": "fill",
-      "source": "openmaptiles",
-      "source-layer": "water",
-      "filter": [
-        "==",
-        "$type",
-        "Polygon"
-      ],
-      "layout": {
-        "visibility": "visible"
-      },
-      "paint": {
-        "fill-color": "rgb(255, 255, 255)",
-        "fill-antialias": true
-      }
-    },
-    {
       "id": "landcover_ice_shelf",
       "type": "fill",
       "source": "openmaptiles",
@@ -247,6 +229,45 @@
       }
     },
     {
+      "id": "building",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "building",
+      "minzoom": 12,
+      "paint": {
+        "fill-color": "rgb(234, 234, 229)",
+        "fill-outline-color": "rgb(219, 219, 218)",
+        "fill-antialias": true,
+        "fill-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          9,
+          0,
+          12,
+          1
+        ]
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "water",
+      "filter": [
+        "==",
+        "$type",
+        "Polygon"
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-color": "rgb(255, 255, 255)",
+        "fill-antialias": true
+      }
+    },
+    {
       "id": "waterway",
       "type": "line",
       "source": "openmaptiles",
@@ -288,27 +309,6 @@
         "text-halo-color": "rgb(255,255,255)",
         "text-halo-width": 1,
         "text-halo-blur": 1
-      }
-    },
-    {
-      "id": "building",
-      "type": "fill",
-      "source": "openmaptiles",
-      "source-layer": "building",
-      "minzoom": 12,
-      "paint": {
-        "fill-color": "rgb(234, 234, 229)",
-        "fill-outline-color": "rgb(219, 219, 218)",
-        "fill-antialias": true,
-        "fill-opacity": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          9,
-          0,
-          12,
-          1
-        ]
       }
     },
     {

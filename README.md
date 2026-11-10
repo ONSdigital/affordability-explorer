@@ -110,6 +110,7 @@ Uses equal-interval method to divide affordability ratios into 7 color ranges:
 Breaks are calculated dynamically based on the minimum and maximum affordability ratios in the selected property type and price level.
 
 ### Map Features
+- Layer order: `msoa-fill` is inserted before `water` in `static/style.json`, above the raster mask and land/building fills so city colours are not obscured. Water, roads and labels remain above the affordability fill.
 - Zoom: 6 (centered on England and Wales) with minzoom constraint
 - Vector tile layer: `msoa` with feature IDs from `areacd` (MSOA codes)
 - Feature state: Each MSOA has a `color` property set based on affordability ratio

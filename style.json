@@ -51,23 +51,6 @@
       }
     },
     {
-      "id": "mask-raster",
-      "type": "raster",
-      "source": "mask-raster",
-      "paint": {
-        "raster-brightness-max": 0.95,
-        "raster-opacity": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          9,
-          0.1,
-          10,
-          0.9
-        ]
-      }
-    },
-    {
       "id": "park",
       "type": "fill",
       "source": "openmaptiles",
@@ -82,24 +65,6 @@
       },
       "paint": {
         "fill-color": "rgb(230, 233, 229)"
-      }
-    },
-    {
-      "id": "water",
-      "type": "fill",
-      "source": "openmaptiles",
-      "source-layer": "water",
-      "filter": [
-        "==",
-        "$type",
-        "Polygon"
-      ],
-      "layout": {
-        "visibility": "visible"
-      },
-      "paint": {
-        "fill-color": "rgb(255, 255, 255)",
-        "fill-antialias": true
       }
     },
     {
@@ -247,6 +212,64 @@
       }
     },
     {
+      "id": "building",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "building",
+      "minzoom": 12,
+      "paint": {
+        "fill-color": "rgb(234, 234, 229)",
+        "fill-outline-color": "rgb(219, 219, 218)",
+        "fill-antialias": true,
+        "fill-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          9,
+          0,
+          12,
+          1
+        ]
+      }
+    },
+    {
+      "id": "mask-raster",
+      "type": "raster",
+      "source": "mask-raster",
+      "paint": {
+        "raster-brightness-max": 0.95,
+        "raster-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          9,
+          0,
+          10,
+          0.5,
+          12,
+          0.85
+        ]
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "water",
+      "filter": [
+        "==",
+        "$type",
+        "Polygon"
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-color": "rgb(255, 255, 255)",
+        "fill-antialias": true
+      }
+    },
+    {
       "id": "waterway",
       "type": "line",
       "source": "openmaptiles",
@@ -288,18 +311,6 @@
         "text-halo-color": "rgb(255,255,255)",
         "text-halo-width": 1,
         "text-halo-blur": 1
-      }
-    },
-    {
-      "id": "building",
-      "type": "fill",
-      "source": "openmaptiles",
-      "source-layer": "building",
-      "minzoom": 12,
-      "paint": {
-        "fill-color": "rgb(234, 234, 229)",
-        "fill-outline-color": "rgb(219, 219, 218)",
-        "fill-antialias": true
       }
     },
     {

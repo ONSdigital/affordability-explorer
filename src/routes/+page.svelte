@@ -2067,7 +2067,7 @@
                     <MapLayer
                       id="msoa-fill"
                       type="fill"
-                      order="water"
+                      order="mask-raster"
                       hover={true}
                       bind:hovered
                       select={true}

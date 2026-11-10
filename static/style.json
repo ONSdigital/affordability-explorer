@@ -51,23 +51,6 @@
       }
     },
     {
-      "id": "mask-raster",
-      "type": "raster",
-      "source": "mask-raster",
-      "paint": {
-        "raster-brightness-max": 0.95,
-        "raster-opacity": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          9,
-          0.1,
-          10,
-          0.9
-        ]
-      }
-    },
-    {
       "id": "park",
       "type": "fill",
       "source": "openmaptiles",
@@ -246,6 +229,25 @@
           0,
           12,
           1
+        ]
+      }
+    },
+    {
+      "id": "mask-raster",
+      "type": "raster",
+      "source": "mask-raster",
+      "paint": {
+        "raster-brightness-max": 0.95,
+        "raster-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          9,
+          0,
+          10,
+          0.5,
+          12,
+          0.85
         ]
       }
     },

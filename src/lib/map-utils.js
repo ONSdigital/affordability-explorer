@@ -249,14 +249,16 @@ const regionalMedianAffordabilityCache = {};
 const geographyAuthoritiesCache = {
   authorities: null,
 };
-const AFFORDABILITY_COLOR_PALETTE = [
-  "#EAECB1",
-  "#A9D891",
-  "#00A7BA",
-  "#004EA6",
-  "#002D7D",
-  "#000D54",
-];
+const AFFORDABILITY_COLOR_PALETTE = ['#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026']
+
+// [
+//   "#EAECB1",
+//   "#A9D891",
+//   "#00A7BA",
+//   "#004EA6",
+//   "#002D7D",
+//   "#000D54",
+// ];
 
 
 const AFFORDABILITY_COLOR_BREAKS = [0, 5, 10, 15, 20, Infinity];

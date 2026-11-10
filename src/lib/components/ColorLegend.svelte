@@ -2,14 +2,16 @@
   import { getLegendDisplayBounds } from "../map-data.js";
 
   export let bounds = [];
-  export let colorPalette = [
-    "#EAECB1",
-    "#A9D891",
-    "#00A7BA",
-    "#004EA6",
-    "#002D7D",
-    "#000D54",
-  ];
+  export let colorPalette = ['#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026']
+  
+  // [
+  //   "#EAECB1",
+  //   "#A9D891",
+  //   "#00A7BA",
+  //   "#004EA6",
+  //   "#002D7D",
+  //   "#000D54",
+  // ];
   
   export let unavailableColor = "#ccc";
   export let hoverValue = null;

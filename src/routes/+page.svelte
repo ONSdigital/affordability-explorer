@@ -1790,16 +1790,6 @@
     if (clearInput) {
       clearInput();
     }
-
-    // Reset map back to the default England and Wales framing.
-    if (map) {
-      map.stop?.();
-      map.flyTo({
-        center: [defaultMapView.lng, defaultMapView.lat],
-        zoom: defaultMapView.zoom,
-        duration: 1000,
-      });
-    }
   }
 </script>
 

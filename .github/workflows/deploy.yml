@@ -29,32 +29,29 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install dependencies
         run: npm install
 
-      - name: Verify static directory
-        run: |
-          echo "Checking static/data:"
-          ls -la static/data/ | head || echo "static/data/ does not exist"
-          echo "---"
-          echo "Checking build after vite:"
-          ls -la build/
+      - name: Generate affordability data
+        run: npm run generate-data
 
       - name: Build for GitHub Pages
         run: npm run build:preview
 
       - name: Verify build contents
         run: |
-          echo "Build directory size:"
-          du -sh build/
-          echo "Build data directory:"
-          ls -la build/data/ | head
-          echo "Total files in build:"
-          find build -type f | wc -l
-          echo "Checking for symlinks:"
-          find build -type l
+          set -euo pipefail
+          for type in all detached semi-detached terraced flats; do
+            test -s "build/data/$type/msoas-map.json"
+            test -s "build/data/$type/msoas-latest.json"
+            test -s "build/data/$type/authorities.json"
+            test -s "build/data/$type/national/england.json"
+            test -s "build/data/$type/national/wales.json"
+          done
+          test -s build/data/geography/authorities.json
+          test -s build/data/geography/regions.json
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

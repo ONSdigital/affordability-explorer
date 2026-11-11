@@ -3,6 +3,17 @@
   "name": "Boston",
   "region_code": "E12000004",
   "region_name": "East Midlands",
+  "earnings": 29400,
+  "affordability": {
+    "median": {
+      "price": 173000,
+      "ratio": 5.88
+    },
+    "lq": {
+      "price": 150000,
+      "ratio": 5.1
+    }
+  },
   "msoas": [
     {
       "code": "E02005417",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 183750,
-          "earnings": 29805,
-          "ratio": 6.17
+          "ratio": 6.25
         },
         "lq": {
           "price": 164500,
-          "earnings": 25723,
-          "ratio": 6.4
+          "ratio": 5.6
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 142000,
-          "earnings": 29805,
-          "ratio": 4.76
+          "ratio": 4.83
         },
         "lq": {
           "price": 117500,
-          "earnings": 25723,
-          "ratio": 4.57
+          "ratio": 4
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 152500,
-          "earnings": 29805,
-          "ratio": 5.12
+          "ratio": 5.19
         },
         "lq": {
           "price": 122500,
-          "earnings": 25723,
-          "ratio": 4.76
+          "ratio": 4.17
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 161000,
-          "earnings": 29805,
-          "ratio": 5.4
+          "ratio": 5.48
         },
         "lq": {
           "price": 149998,
-          "earnings": 25723,
-          "ratio": 5.83
+          "ratio": 5.1
         }
       }
     },
@@ -74,13 +77,11 @@
       "affordability": {
         "median": {
           "price": 190000,
-          "earnings": 29805,
-          "ratio": 6.37
+          "ratio": 6.46
         },
         "lq": {
           "price": 170000,
-          "earnings": 25723,
-          "ratio": 6.61
+          "ratio": 5.78
         }
       }
     },
@@ -90,13 +91,11 @@
       "affordability": {
         "median": {
           "price": 175000,
-          "earnings": 29805,
-          "ratio": 5.87
+          "ratio": 5.95
         },
         "lq": {
           "price": 160862,
-          "earnings": 25723,
-          "ratio": 6.25
+          "ratio": 5.47
         }
       }
     },
@@ -106,13 +105,11 @@
       "affordability": {
         "median": {
           "price": 181000,
-          "earnings": 29805,
-          "ratio": 6.07
+          "ratio": 6.16
         },
         "lq": {
           "price": 151250,
-          "earnings": 25723,
-          "ratio": 5.88
+          "ratio": 5.14
         }
       }
     },
@@ -122,29 +119,13 @@
       "affordability": {
         "median": {
           "price": 180975,
-          "earnings": 29805,
-          "ratio": 6.07
+          "ratio": 6.16
         },
         "lq": {
           "price": 161875,
-          "earnings": 25723,
-          "ratio": 6.29
+          "ratio": 5.51
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 165000,
-      "earnings": 29805,
-      "ratio": 5.54,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 142250,
-      "earnings": 25723,
-      "ratio": 5.53,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

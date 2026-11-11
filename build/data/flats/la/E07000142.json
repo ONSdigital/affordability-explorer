@@ -3,6 +3,17 @@
   "name": "West Lindsey",
   "region_code": "E12000004",
   "region_name": "East Midlands",
+  "earnings": 35556,
+  "affordability": {
+    "median": {
+      "price": 95500,
+      "ratio": 2.69
+    },
+    "lq": {
+      "price": 67250,
+      "ratio": 1.89
+    }
+  },
   "msoas": [
     {
       "code": "E02005494",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 111500,
-          "earnings": 38377,
-          "ratio": 2.91
+          "ratio": 3.14
         },
         "lq": {
           "price": 67500,
-          "earnings": 29621,
-          "ratio": 2.28
+          "ratio": 1.9
         }
       }
     },
@@ -26,29 +35,13 @@
       "affordability": {
         "median": {
           "price": 68000,
-          "earnings": 38377,
-          "ratio": 1.77
+          "ratio": 1.91
         },
         "lq": {
           "price": 60000,
-          "earnings": 29621,
-          "ratio": 2.03
+          "ratio": 1.69
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 83000,
-      "earnings": 38377,
-      "ratio": 2.16,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 67000,
-      "earnings": 29621,
-      "ratio": 2.26,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

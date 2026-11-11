@@ -3,6 +3,17 @@
   "name": "Great Yarmouth",
   "region_code": "E12000006",
   "region_name": "East of England",
+  "earnings": 33363,
+  "affordability": {
+    "median": {
+      "price": 103000,
+      "ratio": 3.09
+    },
+    "lq": {
+      "price": 86500,
+      "ratio": 2.59
+    }
+  },
   "msoas": [
     {
       "code": "E02005542",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 113750,
-          "earnings": 34794,
-          "ratio": 3.27
+          "ratio": 3.41
         },
         "lq": {
           "price": 101250,
-          "earnings": 27564,
-          "ratio": 3.67
+          "ratio": 3.03
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 91000,
-          "earnings": 34794,
-          "ratio": 2.62
+          "ratio": 2.73
         },
         "lq": {
           "price": 72500,
-          "earnings": 27564,
-          "ratio": 2.63
+          "ratio": 2.17
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 83750,
-          "earnings": 34794,
-          "ratio": 2.41
+          "ratio": 2.51
         },
         "lq": {
           "price": 58125,
-          "earnings": 27564,
-          "ratio": 2.11
+          "ratio": 1.74
         }
       }
     },
@@ -58,29 +63,13 @@
       "affordability": {
         "median": {
           "price": 120000,
-          "earnings": 34794,
-          "ratio": 3.45
+          "ratio": 3.6
         },
         "lq": {
           "price": 90000,
-          "earnings": 27564,
-          "ratio": 3.27
+          "ratio": 2.7
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 100750,
-      "earnings": 34794,
-      "ratio": 2.9,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 89625,
-      "earnings": 27564,
-      "ratio": 3.25,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

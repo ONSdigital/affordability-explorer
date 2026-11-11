@@ -3,6 +3,17 @@
   "name": "West Devon",
   "region_code": "E12000009",
   "region_name": "South West",
+  "earnings": 40064,
+  "affordability": {
+    "median": {
+      "price": 147000,
+      "ratio": 3.67
+    },
+    "lq": {
+      "price": 120000,
+      "ratio": 3
+    }
+  },
   "msoas": [
     {
       "code": "E02004230",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 148500,
-          "earnings": 38638,
-          "ratio": 3.84
+          "ratio": 3.71
         },
         "lq": {
           "price": 110000,
-          "earnings": 26500,
-          "ratio": 4.15
+          "ratio": 2.75
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 151500,
-          "earnings": 38638,
-          "ratio": 3.92
+          "ratio": 3.78
         },
         "lq": {
           "price": 130000,
-          "earnings": 26500,
-          "ratio": 4.91
+          "ratio": 3.24
         }
       }
     },
@@ -42,29 +49,13 @@
       "affordability": {
         "median": {
           "price": 127000,
-          "earnings": 38638,
-          "ratio": 3.29
+          "ratio": 3.17
         },
         "lq": {
           "price": 111000,
-          "earnings": 26500,
-          "ratio": 4.19
+          "ratio": 2.77
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 150000,
-      "earnings": 38638,
-      "ratio": 3.88,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 124750,
-      "earnings": 26500,
-      "ratio": 4.71,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

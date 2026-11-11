@@ -3,6 +3,17 @@
   "name": "Islington",
   "region_code": "E12000007",
   "region_name": "London",
+  "earnings": 52666,
+  "affordability": {
+    "median": {
+      "price": 1847500,
+      "ratio": 35.08
+    },
+    "lq": {
+      "price": 1341250,
+      "ratio": 25.47
+    }
+  },
   "msoas": [
     {
       "code": "E02000566",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 2200000,
-          "earnings": 50692,
-          "ratio": 43.4
+          "ratio": 41.77
         },
         "lq": {
           "price": 2185000,
-          "earnings": 35361,
-          "ratio": 61.79
+          "ratio": 41.49
         }
       }
     },
@@ -26,29 +35,13 @@
       "affordability": {
         "median": {
           "price": 2225000,
-          "earnings": 50692,
-          "ratio": 43.89
+          "ratio": 42.25
         },
         "lq": {
           "price": 2100500,
-          "earnings": 35361,
-          "ratio": 59.4
+          "ratio": 39.88
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 2077500,
-      "earnings": 50692,
-      "ratio": 40.98,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 1365600,
-      "earnings": 35361,
-      "ratio": 38.62,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

@@ -3,6 +3,17 @@
   "name": "Derbyshire Dales",
   "region_code": "E12000004",
   "region_name": "East Midlands",
+  "earnings": 35805,
+  "affordability": {
+    "median": {
+      "price": 215000,
+      "ratio": 6
+    },
+    "lq": {
+      "price": 135000,
+      "ratio": 3.77
+    }
+  },
   "msoas": [
     {
       "code": "E02004069",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 260000,
-          "earnings": 43071,
-          "ratio": 6.04
+          "ratio": 7.26
         },
         "lq": {
           "price": 215000,
-          "earnings": 28667,
-          "ratio": 7.5
+          "ratio": 6
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 265000,
-          "earnings": 43071,
-          "ratio": 6.15
+          "ratio": 7.4
         },
         "lq": {
           "price": 179750,
-          "earnings": 28667,
-          "ratio": 6.27
+          "ratio": 5.02
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 152500,
-          "earnings": 43071,
-          "ratio": 3.54
+          "ratio": 4.26
         },
         "lq": {
           "price": 115250,
-          "earnings": 28667,
-          "ratio": 4.02
+          "ratio": 3.22
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 169125,
-          "earnings": 43071,
-          "ratio": 3.93
+          "ratio": 4.72
         },
         "lq": {
           "price": 132750,
-          "earnings": 28667,
-          "ratio": 4.63
+          "ratio": 3.71
         }
       }
     },
@@ -74,29 +77,13 @@
       "affordability": {
         "median": {
           "price": 152500,
-          "earnings": 43071,
-          "ratio": 3.54
+          "ratio": 4.26
         },
         "lq": {
           "price": 135000,
-          "earnings": 28667,
-          "ratio": 4.71
+          "ratio": 3.77
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 180000,
-      "earnings": 43071,
-      "ratio": 4.18,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 130000,
-      "earnings": 28667,
-      "ratio": 4.53,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

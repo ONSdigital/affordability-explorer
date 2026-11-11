@@ -3,6 +3,17 @@
   "name": "Chorley",
   "region_code": "E12000002",
   "region_name": "North West",
+  "earnings": 34987,
+  "affordability": {
+    "median": {
+      "price": 110000,
+      "ratio": 3.14
+    },
+    "lq": {
+      "price": 93000,
+      "ratio": 2.66
+    }
+  },
   "msoas": [
     {
       "code": "E02005189",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 110000,
-          "earnings": 39350,
-          "ratio": 2.8
+          "ratio": 3.14
         },
         "lq": {
           "price": 109975,
-          "earnings": 29805,
-          "ratio": 3.69
+          "ratio": 3.14
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 110000,
-          "earnings": 39350,
-          "ratio": 2.8
+          "ratio": 3.14
         },
         "lq": {
           "price": 97375,
-          "earnings": 29805,
-          "ratio": 3.27
+          "ratio": 2.78
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 117250,
-          "earnings": 39350,
-          "ratio": 2.98
+          "ratio": 3.35
         },
         "lq": {
           "price": 90000,
-          "earnings": 29805,
-          "ratio": 3.02
+          "ratio": 2.57
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 105000,
-          "earnings": 39350,
-          "ratio": 2.67
+          "ratio": 3
         },
         "lq": {
           "price": 67500,
-          "earnings": 29805,
-          "ratio": 2.26
+          "ratio": 1.93
         }
       }
     },
@@ -74,29 +77,13 @@
       "affordability": {
         "median": {
           "price": 107250,
-          "earnings": 39350,
-          "ratio": 2.73
+          "ratio": 3.07
         },
         "lq": {
           "price": 99987,
-          "earnings": 29805,
-          "ratio": 3.35
+          "ratio": 2.86
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 120000,
-      "earnings": 39350,
-      "ratio": 3.05,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 103250,
-      "earnings": 29805,
-      "ratio": 3.46,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

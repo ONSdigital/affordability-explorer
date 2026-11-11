@@ -1,22 +1,35 @@
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 
-function throughDirectory(dir) {
-    fs.readdirSync(dir).forEach(file => {
-        const abs = path.join(dir, file);
-        if (fs.statSync(abs).isDirectory()) return throughDirectory(abs);
-        else return files.push(abs.replaceAll("\\", "/"));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function fixJSMimeTypes(dir) {
+  const files = [];
+
+  function walkDir(currentPath) {
+    const entries = fs.readdirSync(currentPath);
+    entries.forEach((file) => {
+      const fullPath = path.join(currentPath, file);
+      if (fs.statSync(fullPath).isDirectory()) {
+        walkDir(fullPath);
+      } else if (fullPath.endsWith(".js")) {
+        files.push(fullPath);
+      }
     });
+  }
+
+  walkDir(dir);
+
+  files.forEach((file) => {
+    let content = fs.readFileSync(file, "utf8");
+    if (!content.startsWith("//js\n")) {
+      content = "//js\n" + content;
+      fs.writeFileSync(file, content);
+    }
+  });
+
+  console.log(`Fixed ${files.length} JS files to avoid mimetype errors...`);
 }
 
-// Find all files in build/app folder
-let files  = [];
-throughDirectory("./build/_app/");
-files = files.filter(file => file.slice(-3) == ".js");
-
-files.forEach(file => {
-    let str = fs.readFileSync(file);
-    str = "//js\n" + str;
-    fs.writeFileSync(file, str);
-});
-console.log(`Fixed ${files.length} JS files to avoid mimetype errors...`);
+fixJSMimeTypes(path.join(__dirname, "../build/_app"));

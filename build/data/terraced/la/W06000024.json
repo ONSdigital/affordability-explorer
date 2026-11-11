@@ -3,6 +3,17 @@
   "name": "Merthyr Tydfil",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "earnings": 30730,
+  "affordability": {
+    "median": {
+      "price": 125000,
+      "ratio": 4.07
+    },
+    "lq": {
+      "price": 102000,
+      "ratio": 3.32
+    }
+  },
   "msoas": [
     {
       "code": "W02000284",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 121250,
-          "earnings": 35152,
-          "ratio": 3.45
+          "ratio": 3.95
         },
         "lq": {
           "price": 102250,
-          "earnings": 27451,
-          "ratio": 3.72
+          "ratio": 3.33
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 135000,
-          "earnings": 35152,
-          "ratio": 3.84
+          "ratio": 4.39
         },
         "lq": {
           "price": 121250,
-          "earnings": 27451,
-          "ratio": 4.42
+          "ratio": 3.95
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 129750,
-          "earnings": 35152,
-          "ratio": 3.69
+          "ratio": 4.22
         },
         "lq": {
           "price": 106750,
-          "earnings": 27451,
-          "ratio": 3.89
+          "ratio": 3.47
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 147500,
-          "earnings": 35152,
-          "ratio": 4.2
+          "ratio": 4.8
         },
         "lq": {
           "price": 115000,
-          "earnings": 27451,
-          "ratio": 4.19
+          "ratio": 3.74
         }
       }
     },
@@ -74,13 +77,11 @@
       "affordability": {
         "median": {
           "price": 115000,
-          "earnings": 35152,
-          "ratio": 3.27
+          "ratio": 3.74
         },
         "lq": {
           "price": 95000,
-          "earnings": 27451,
-          "ratio": 3.46
+          "ratio": 3.09
         }
       }
     },
@@ -90,13 +91,11 @@
       "affordability": {
         "median": {
           "price": 120000,
-          "earnings": 35152,
-          "ratio": 3.41
+          "ratio": 3.9
         },
         "lq": {
           "price": 95750,
-          "earnings": 27451,
-          "ratio": 3.49
+          "ratio": 3.12
         }
       }
     },
@@ -106,29 +105,13 @@
       "affordability": {
         "median": {
           "price": 110000,
-          "earnings": 35152,
-          "ratio": 3.13
+          "ratio": 3.58
         },
         "lq": {
           "price": 93500,
-          "earnings": 27451,
-          "ratio": 3.41
+          "ratio": 3.04
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 125000,
-      "earnings": 35152,
-      "ratio": 3.56,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 102000,
-      "earnings": 27451,
-      "ratio": 3.72,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

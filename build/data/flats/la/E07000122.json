@@ -3,6 +3,17 @@
   "name": "Pendle",
   "region_code": "E12000002",
   "region_name": "North West",
+  "earnings": 31083,
+  "affordability": {
+    "median": {
+      "price": 107500,
+      "ratio": 3.46
+    },
+    "lq": {
+      "price": 80750,
+      "ratio": 2.6
+    }
+  },
   "msoas": [
     {
       "code": "E02005246",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 95000,
-          "earnings": 30327,
-          "ratio": 3.13
+          "ratio": 3.06
         },
         "lq": {
           "price": 90000,
-          "earnings": 25411,
-          "ratio": 3.54
+          "ratio": 2.9
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 106250,
-          "earnings": 30327,
-          "ratio": 3.5
+          "ratio": 3.42
         },
         "lq": {
           "price": 80562,
-          "earnings": 25411,
-          "ratio": 3.17
+          "ratio": 2.59
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 134950,
-          "earnings": 30327,
-          "ratio": 4.45
+          "ratio": 4.34
         },
         "lq": {
           "price": 131950,
-          "earnings": 25411,
-          "ratio": 5.19
+          "ratio": 4.25
         }
       }
     },
@@ -58,29 +63,13 @@
       "affordability": {
         "median": {
           "price": 111500,
-          "earnings": 30327,
-          "ratio": 3.68
+          "ratio": 3.59
         },
         "lq": {
           "price": 82500,
-          "earnings": 25411,
-          "ratio": 3.25
+          "ratio": 2.65
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 95500,
-      "earnings": 30327,
-      "ratio": 3.15,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 79562,
-      "earnings": 25411,
-      "ratio": 3.13,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

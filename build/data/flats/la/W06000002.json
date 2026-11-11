@@ -3,6 +3,17 @@
   "name": "Gwynedd",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "earnings": 34466,
+  "affordability": {
+    "median": {
+      "price": 104750,
+      "ratio": 3.04
+    },
+    "lq": {
+      "price": 75000,
+      "ratio": 2.18
+    }
+  },
   "msoas": [
     {
       "code": "W02000010",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 89000,
-          "earnings": 32868,
-          "ratio": 2.71
+          "ratio": 2.58
         },
         "lq": {
           "price": 69750,
-          "earnings": 25189,
-          "ratio": 2.77
+          "ratio": 2.02
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 105000,
-          "earnings": 32868,
-          "ratio": 3.19
+          "ratio": 3.05
         },
         "lq": {
           "price": 105000,
-          "earnings": 25189,
-          "ratio": 4.17
+          "ratio": 3.05
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 156250,
-          "earnings": 32868,
-          "ratio": 4.75
+          "ratio": 4.53
         },
         "lq": {
           "price": 120000,
-          "earnings": 25189,
-          "ratio": 4.76
+          "ratio": 3.48
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 139000,
-          "earnings": 32868,
-          "ratio": 4.23
+          "ratio": 4.03
         },
         "lq": {
           "price": 109000,
-          "earnings": 25189,
-          "ratio": 4.33
+          "ratio": 3.16
         }
       }
     },
@@ -74,13 +77,11 @@
       "affordability": {
         "median": {
           "price": 73500,
-          "earnings": 32868,
-          "ratio": 2.24
+          "ratio": 2.13
         },
         "lq": {
           "price": 67250,
-          "earnings": 25189,
-          "ratio": 2.67
+          "ratio": 1.95
         }
       }
     },
@@ -90,13 +91,11 @@
       "affordability": {
         "median": {
           "price": 170000,
-          "earnings": 32868,
-          "ratio": 5.17
+          "ratio": 4.93
         },
         "lq": {
           "price": 99750,
-          "earnings": 25189,
-          "ratio": 3.96
+          "ratio": 2.89
         }
       }
     },
@@ -106,29 +105,13 @@
       "affordability": {
         "median": {
           "price": 135000,
-          "earnings": 32868,
-          "ratio": 4.11
+          "ratio": 3.92
         },
         "lq": {
           "price": 117500,
-          "earnings": 25189,
-          "ratio": 4.66
+          "ratio": 3.41
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 105000,
-      "earnings": 32868,
-      "ratio": 3.19,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 75000,
-      "earnings": 25189,
-      "ratio": 2.98,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

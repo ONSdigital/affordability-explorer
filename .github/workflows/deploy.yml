@@ -45,10 +45,8 @@ jobs:
           set -euo pipefail
           for type in all detached semi-detached terraced flats; do
             test -s "build/data/$type/msoas-map.json"
-            test -s "build/data/$type/msoas-latest.json"
-            test -s "build/data/$type/authorities.json"
-            test -s "build/data/$type/national/england.json"
-            test -s "build/data/$type/national/wales.json"
+            test -s "build/data/$type/geographic-summary.json"
+            test -s "build/data/$type/la/E06000001.json"
           done
           test -s build/data/geography/authorities.json
           test -s build/data/geography/regions.json

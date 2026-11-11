@@ -3,6 +3,17 @@
   "name": "Brent",
   "region_code": "E12000007",
   "region_name": "London",
+  "earnings": 37688,
+  "affordability": {
+    "median": {
+      "price": 915000,
+      "ratio": 24.28
+    },
+    "lq": {
+      "price": 742500,
+      "ratio": 19.7
+    }
+  },
   "msoas": [
     {
       "code": "E02000096",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 832000,
-          "earnings": 39944,
-          "ratio": 20.83
+          "ratio": 22.08
         },
         "lq": {
           "price": 760000,
-          "earnings": 29728,
-          "ratio": 25.57
+          "ratio": 20.17
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 772500,
-          "earnings": 39944,
-          "ratio": 19.34
+          "ratio": 20.5
         },
         "lq": {
           "price": 750000,
-          "earnings": 29728,
-          "ratio": 25.23
+          "ratio": 19.9
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 3100000,
-          "earnings": 39944,
-          "ratio": 77.61
+          "ratio": 82.25
         },
         "lq": {
           "price": 2202500,
-          "earnings": 29728,
-          "ratio": 74.09
+          "ratio": 58.44
         }
       }
     },
@@ -58,29 +63,13 @@
       "affordability": {
         "median": {
           "price": 2550000,
-          "earnings": 39944,
-          "ratio": 63.84
+          "ratio": 67.66
         },
         "lq": {
           "price": 1813750,
-          "earnings": 29728,
-          "ratio": 61.01
+          "ratio": 48.13
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 1052500,
-      "earnings": 39944,
-      "ratio": 26.35,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 750000,
-      "earnings": 29728,
-      "ratio": 25.23,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

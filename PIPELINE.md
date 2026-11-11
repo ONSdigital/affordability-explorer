@@ -2,11 +2,21 @@
 
 ## Overview
 
-Complete data processing pipeline for ONS Housing Affordability data, transforming raw Excel files into static JSON organized by property type, local authority, and MSOA.
+Complete data processing pipeline for ONS Housing Affordability data, transforming a single CSV source (SAA Machine Readable.csv) into static JSON organized by property type, local authority, and MSOA.
 
 ## Status: ✅ COMPLETE
 
-All 7,264 MSOAs across 318 Local Authorities in England and Wales have been processed with latest-period affordability ratios.
+All 7,264 MSOAs across 318 Local Authorities in England and Wales have been processed with affordability ratios.
+
+## Single Source of Truth
+
+**`data/raw/SAA Machine Readable.csv`** - Comprehensive ONS data file containing:
+- House prices (median and lower quartile) at MSOA and LA levels
+- House prices for all 5 property types (all, detached, semi-detached, terraced, flats/maisonettes)
+- LA-level median earnings
+- Pre-calculated affordability ratios for all geographies and property types
+
+This CSV replaces the previous multi-file Excel-based pipeline and serves as the definitive data source.
 
 ## Data Structure
 
@@ -15,83 +25,110 @@ All 7,264 MSOAs across 318 Local Authorities in England and Wales have been proc
 ```
 static/data/
 ├── geography/                       (Shared across all property types)
-│   ├── authorities.json             (318 LAs with region codes/names)
 │   └── regions.json                 (10 regions: 9 England + Wales)
 ├── all/
 │   ├── la/                          (318 LA files with latest affordability data)
-│   ├── msoas-latest.json            (7,264 MSOAs with latest affordability)
-│   ├── region/                      (10 regional summaries)
-│   └── national/
-│       ├── england.json
-│       └── wales.json
+│   ├── geographic-summary.json      (10 regions + 2 countries, median + LQ)
+│   └── msoas-map.json               (Lightweight for mapping: 7,264 MSOAs, ratios only)
 ├── detached/
 │   ├── la/                          (318 LA files)
-│   ├── msoas-latest.json
-│   └── national/
-│       ├── england.json
-│       └── wales.json
+│   ├── geographic-summary.json      (10 regions + 2 countries, median + LQ)
+│   └── msoas-map.json
 ├── semi-detached/
 │   ├── la/
-│   ├── msoas-latest.json
-│   └── national/
+│   ├── geographic-summary.json      (10 regions + 2 countries, median + LQ)
+│   └── msoas-map.json
 ├── terraced/
 │   ├── la/
-│   ├── msoas-latest.json
-│   └── national/
+│   ├── geographic-summary.json      (10 regions + 2 countries, median + LQ)
+│   └── msoas-map.json
 └── flats/
     ├── la/
-    ├── msoas-latest.json
-    └── national/
+    ├── geographic-summary.json      (10 regions + 2 countries, median + LQ)
+    └── msoas-map.json
 ```
 
 ### Total Data
 
-- **Shared geography**: 2 files (authorities.json with 318 LAs + region codes, regions.json with 10 regions)
-- - **1,590 LA files** (318 LAs × 5 property types)
-- **5 msoas-latest.json** (7,264 MSOAs each)
-- **50 regional summaries** (10 regions × 5 property types)
-- **10 national files** (england.json + wales.json per property type)
-- **1,662 JSON files total** in `static/data/` (also copied into the committed `build/data/`)
+- **Shared geography**: 1 file (regions.json with 10 regions)
+- **1,590 LA files** (318 LAs × 5 property types)
+- **5 geographic-summary.json files** (consolidated regions + national data per property type)
+- **5 msoas-map.json files** (lightweight, ratios only)
+- **1,601 JSON files total** in `static/data/`
 
 ## Processing Pipeline
 
-### 1. Data Parsing
+### 1. Parse SAA Machine Readable.csv
 
-**Script**: `scripts/process-by-property-type.js`
+**Script**: `scripts/process-saa-data.js`
 
-Reads the latest quarter from 2 Excel files in `data/raw/`:
+Reads the CSV from `data/raw/SAA Machine Readable.csv` and:
 
-- `medianpricepaidmsoa.xlsx` - Median house prices by MSOA (sheets 1a-1e for property types)
-- `lowerquartilepricepaidmsoa.xlsx` - Lower quartile prices by MSOA (sheets 1a-1e)
+- Parses all 7,264 MSOA rows
+- Extracts house prices for all 5 property types (median + lower quartile)
+- Extracts LA-level earnings for affordability calculation
+- Groups MSOAs by Local Authority
+- Pre-calculated affordability ratios from the CSV
 
-**Output**: LA files with latest median and lower-quartile prices for each MSOA. Historical price and sales observations are not exported.
+**Output**: LA JSON files with:
+- LA-level affordability data (median and LQ prices + ratios)
+- All MSOAs in that LA with their affordability data
+- Region and earnings information
 
-### 2. Affordability Calculation
+Example LA file structure (`static/data/all/la/E06000001.json`):
+```json
+{
+  "code": "E06000001",
+  "name": "Hartlepool",
+  "region_code": "E12000001",
+  "region_name": "North East",
+  "earnings": 32600,
+  "affordability": {
+    "median": { "price": 158822, "ratio": 4.87 },
+    "lq": { "price": 100000, "ratio": 3.07 }
+  },
+  "msoas": [
+    {
+      "code": "E02002483",
+      "name": "Clavering",
+      "affordability": {
+        "median": { "price": 165000, "ratio": 5.06 },
+        "lq": { "price": 122750, "ratio": 3.77 }
+      }
+    }
+  ]
+}
+```
 
-**Script**: `scripts/calculate-affordability-by-type.js`
-
-Computes affordability ratios for each property type:
-
-- **Median ratio** = Median house price ÷ Median earnings
-- **LQ ratio** = Lower quartile price ÷ LQ earnings
-- **LA average** = Mean of all MSOAs in LA
-- LA-level earnings from Excel (1 year per LA)
-- **Region info enrichment** - Adds region_code and region_name to each LA
-- Reads `aff2ratioofhousepricetoresidencebasedearnings.xlsx` (sheets 5b, 6b)
-
-**Output**: Enhanced LA files with affordability{median, lq} objects and region info added to each MSOA
-
-### 3. Map & National Files
+### 2. Generate Map & Aggregation Files
 
 **Script**: `scripts/generate-final-files.js`
 
-- **msoas-latest.json** - Extract data for the dataset's latest period for all MSOAs
-- **england.json** - Aggregate affordability for all England LAs
-- **wales.json** - Aggregate affordability for all Wales LAs
-- **region/\*.json** - Regional affordability based on administrative prices and earnings
+Processes LA files to create:
+
+- **msoas-latest.json** - All 7,264 MSOAs with full affordability data for map visualization
+- **msoas-map.json** - Lightweight version with only ratio data (faster loading)
 - **Shared geography files** - Creates single authorities.json and regions.json in geography/ folder
 
-**Output**: Map-ready files with all 7,264 MSOAs + national comparisons
+### 3. Generate Geographic Summary Data
+
+**Script**: `scripts/generate-aggregated-data.js`
+
+Extracts pre-calculated regional and national affordability data from CSV and consolidates into efficient single files:
+
+- **geographic-summary.json** (1 file per property type) - Contains:
+  - All 10 regions (E12000001-E12000009 + W92000004)
+  - 2 countries (England, Wales)
+  - Both median and LQ affordability ratios
+  - Organized for efficient UI loading by property type
+
+Structure: `/data/{propertyType}/geographic-summary.json`
+
+This approach is efficient because:
+- ✓ 1 HTTP request per property type (instead of 10-50)
+- ✓ Aligned with UI controls (users select property type, then filter by price level)
+- ✓ Single file in browser cache per property type
+- ✓ Negligible payload (2 KB per file)
 
 ## Geographic Data
 
@@ -109,6 +146,7 @@ Located in `static/data/geography/` (shared across all property types):
       "name": "Hartlepool",
       "region_code": "E12000001",
       "region_name": "North East",
+      "earnings": 32600,
       "msoa_count": 11
     }
   ]
@@ -141,16 +179,54 @@ Located in `static/data/geography/` (shared across all property types):
 - `E12000001-E12000009` - English regions
 - `W92000004` - Wales
 
-## Latest Period Data
+## CSV Column Mappings
 
-The rightmost quarterly price column in each MSOA workbook defines the current period. Median and lower-quartile sources must agree. Missing prices in that quarter remain missing, even if an earlier price exists.
+The SAA Machine Readable.csv contains these key columns:
+
+```
+Local authority code
+Local authority name
+Region code
+Region name
+MSOA code
+MSOA name
+median_earnings_la
+
+Property type prices (LA level):
+- all_median_la_hp, all_lq_la_hp
+- detached_median_la_hp, detached_lq_la_hp
+- semi-detached_median_la_hp, semi-detached_lq_la_hp
+- terraced_median_la_hp, terraced_lq_la_hp
+- flats/maisonettes_median_la_hp, flats/maisonettes_lq_la_hp
+
+Property type prices (MSOA level):
+- all_median_msoa_hp, all_lq_msoa_hp
+- detached_median_msoa_hp, detached_lq_msoa_hp
+- semi-detached_median_msoa_hp, semi-detached_lq_msoa_hp
+- terraced_median_msoa_hp, terraced_lq_msoa_hp
+- flats/maisonettes_median_msoa_hp, flats/maisonettes_lq_msoa_hp
+
+Affordability ratios (pre-calculated):
+- all_median_la_ratio, all_lq_la_ratio
+- detached_median_la_ratio, detached_lq_la_ratio
+- semi-detached_median_la_ratio, semi-detached_lq_la_ratio
+- terraced_median_la_ratio, terraced_lq_la_ratio
+- flats/maisonettes_median_la_ratio, flats/maisonettes_lq_la_ratio
+- all_median_msoa_ratio, all_lq_msoa_ratio
+- detached_median_msoa_ratio, detached_lq_msoa_ratio
+- semi-detached_median_msoa_ratio, semi-detached_lq_msoa_ratio
+- terraced_median_msoa_ratio, terraced_lq_msoa_ratio
+- flats/maisonettes_median_msoa_ratio, flats/maisonettes_lq_msoa_ratio
+```
+
+Missing values are marked as `[x]` in the CSV and converted to `null` in JSON.
 
 ## Affordability Ratios
 
 ### Geographic Levels
 
 1. **MSOA level** - Individual affordability ratios (7,264 locations)
-2. **LA average** - Mean of all MSOAs in that LA (318 locations)
+2. **LA level** - LA affordability data (318 locations)
 3. **Regional** - Derived from LA data (10 regions)
 4. **National** - England and Wales aggregates
 
@@ -192,11 +268,6 @@ const msoasLatest = await fetch(
 const laData = await fetch(`/static/data/${propType}/la/{laCode}.json`).then(
   (r) => r.json(),
 );
-
-// For national comparison
-const national = await fetch(
-  `/static/data/${propType}/national/england.json`,
-).then((r) => r.json());
 ```
 
 ### Filter & Display
@@ -205,7 +276,7 @@ const national = await fetch(
 - Use ButtonGroup to select price level (median/lower quartile)
 - Load only the selected property type's data
 - Display beeswarm of affordability ratios for all MSOAs in LA
-- Show selected MSOA, LA average, regional, and national ratios
+- Show selected MSOA, LA average, and regional/national ratios
 - Display the selected area's latest price and affordability ratio
 
 ## Generation Instructions
@@ -213,22 +284,25 @@ const national = await fetch(
 ### Prerequisites
 
 ```bash
-npm install  # Installs xlsx dependency
+npm install  # Installs dependencies
 ```
 
 ### Generate All Data
 
 ```bash
-node scripts/process-by-property-type.js
-node scripts/calculate-affordability-by-type.js
-node scripts/generate-final-files.js
+npm run generate-data
 ```
 
-Run `npm run build:preview` afterward to refresh the committed deployment artifact in `build/`.
+This runs in sequence:
+1. `scripts/process-saa-data.js` - Parse CSV and generate LA files with median and LQ affordability
+2. `scripts/generate-final-files.js` - Generate msoas-latest.json and geography files
+3. `scripts/generate-aggregated-data.js` - Generate consolidated geographic-summary.json files
+
+Data is organized by property type to match UI controls for efficient loading.
 
 ### Regenerate After Raw Data Update
 
-If `data/raw/` files are updated:
+If `data/raw/SAA Machine Readable.csv` is updated:
 
 ```bash
 npm run generate-data
@@ -240,17 +314,35 @@ npm run build:preview
 ### Earnings Data
 
 - LA-level only (not MSOA-level)
-- Uses latest available year from Excel
+- From `median_earnings_la` column in CSV
 - Same earnings applied to all MSOAs in LA
-- Used for affordability ratio calculation
+- Used for affordability ratio verification (ratios are pre-calculated in CSV)
 
 ### Missing Data
 
-- Small LAs may have limited MSOA data
-- Earnings data is annual (the latest available year is used)
-- A missing value in the latest source period remains missing. The pipeline does not substitute an older observation in `msoas-latest.json`, affordability summaries, maps, or selected-area charts.
+- Marked as `[x]` in CSV, converted to `null` in JSON
+- MSOAs with no price data for a property type are excluded
+- Missing values are preserved (not filled with estimates)
+
+### Affordability Ratios
+
+All affordability ratios are pre-calculated in the CSV source:
+- Ratio = House price ÷ LA median earnings
+- Both median and lower-quartile ratios are provided
 
 ## Architecture Decisions
+
+### Single CSV Source
+
+- **Reason**: Eliminates complexity of managing multiple Excel files and synchronization
+- **Benefit**: Faster processing, simpler maintenance, single point of truth
+- **Trade-off**: CSV must be kept up-to-date by data provider
+
+### CSV Parsing
+
+- **Implementation**: Manual CSV parsing (no external dependencies required)
+- **Reason**: Handles quoted fields and edge cases; `xlsx` library no longer needed
+- **Benefit**: Lightweight, fast, no binary file format complexity
 
 ### Property-Type-Specific Directories
 
@@ -268,30 +360,6 @@ Data organized at LA level (318 files) rather than MSOA level (7,264 files):
 - **Benefit**: Fewer files to manage, better aggregation performance
 - **Trade-off**: Must deserialize entire LA for single MSOA lookup
 
-### Latest Data File (msoas-latest.json)
-
-Separate file with all 7,264 MSOAs + latest affordability:
-
-- **Reason**: Fast map layer initialization
-- **Benefit**: No need to read 318 LA files to populate map
-- **Trade-off**: Data duplication (~2% of total size)
-
-### Lightweight Map Data (msoas-map.json)
-
-Each property type also has a minified `msoas-map.json` containing area names,
-geographic codes and median/lower-quartile ratios only. The map loads this file
-once per property type, sharing pending and completed requests across price-level
-switches. Full prices and earnings remain in the LA and latest-data files.
-
-## Next Steps for UI Integration
-
-1. **Map Layer** - Use `msoas-latest.json` to display all MSOAs colored by affordability ratio
-2. **PropertyType Filter** - ButtonGroup switches between directories (all/detached/etc)
-3. **PriceLevel Filter** - ButtonGroup switches between ratio.median and ratio.lq
-4. **LA Selection** - Load `la/{laCode}.json` to show all MSOAs + beeswarm
-5. **MSOA Selection** - Extract specific MSOA from LA file, display with comparisons
-6. **National Comparison** - Load `national/{england|wales}.json` for comparison ratios
-
 ## Troubleshooting
 
 ### Data Files Not Found
@@ -301,36 +369,37 @@ switches. Full prices and earnings remain in the LA and latest-data files.
 ls -la static/data/all/la/ | wc -l  # Should show 318 LA files
 
 # If not, regenerate
-node scripts/process-by-property-type.js
-node scripts/calculate-affordability-by-type.js
-node scripts/generate-final-files.js
+npm run generate-data
 ```
 
-### Incorrect Affordability Ratios
+### Incorrect Data Values
+
+Verify the CSV file is present and correctly formatted:
 
 ```bash
-# Verify earnings loaded correctly
-jq '.affordability | keys' static/data/all/la/E06000001.json
+# Check CSV exists
+ls -la data/raw/SAA\ Machine\ Readable.csv
 
-# Check a specific MSOA
-jq '.msoas[0].affordability' static/data/all/la/E06000001.json
+# View first few rows
+head -10 data/raw/SAA\ Machine\ Readable.csv
 ```
 
 ### Missing Property Types
 
-All 5 property types should have 318 LA files each:
+All 5 property types should have LA files:
 
 ```bash
 for type in all detached semi-detached terraced flats; do
-  count=$(ls static/data/$type/la/ | wc -l)
+  count=$(ls static/data/$type/la/ 2>/dev/null | wc -l)
   echo "$type: $count LA files"
 done
 ```
 
 ---
 
-**Last Updated**: August 2026
-**Data Version**: Read from the source workbook's latest quarter
-**Property Types**: 5 (all, detached, semi-detached, terraced, flats)
+**Last Updated**: November 2026
+**Data Source**: `data/raw/SAA Machine Readable.csv`
+**Processing Scripts**: `scripts/process-saa-data.js`, `scripts/generate-final-files.js`
+**Property Types**: 5 (all, detached, semi-detached, terraced, flats/maisonettes)
 **MSOAs**: 7,264 (England: 6,791, Wales: 473)
 **Local Authorities**: 318 (England: 296, Wales: 22)

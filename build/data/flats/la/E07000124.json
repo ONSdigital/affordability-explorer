@@ -3,6 +3,17 @@
   "name": "Ribble Valley",
   "region_code": "E12000002",
   "region_name": "North West",
+  "earnings": 49271,
+  "affordability": {
+    "median": {
+      "price": 143250,
+      "ratio": 2.91
+    },
+    "lq": {
+      "price": 115302,
+      "ratio": 2.34
+    }
+  },
   "msoas": [
     {
       "code": "E02005271",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 139250,
-          "earnings": 40870,
-          "ratio": 3.41
+          "ratio": 2.83
         },
         "lq": {
           "price": 113750,
-          "earnings": 31174,
-          "ratio": 3.65
+          "ratio": 2.31
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 121000,
-          "earnings": 40870,
-          "ratio": 2.96
+          "ratio": 2.46
         },
         "lq": {
           "price": 117202,
-          "earnings": 31174,
-          "ratio": 3.76
+          "ratio": 2.38
         }
       }
     },
@@ -42,29 +49,13 @@
       "affordability": {
         "median": {
           "price": 184250,
-          "earnings": 40870,
-          "ratio": 4.51
+          "ratio": 3.74
         },
         "lq": {
           "price": 162950,
-          "earnings": 31174,
-          "ratio": 5.23
+          "ratio": 3.31
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 135000,
-      "earnings": 40870,
-      "ratio": 3.3,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 116802,
-      "earnings": 31174,
-      "ratio": 3.75,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

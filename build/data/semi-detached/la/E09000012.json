@@ -3,6 +3,17 @@
   "name": "Hackney",
   "region_code": "E12000007",
   "region_name": "London",
+  "earnings": 48839,
+  "affordability": {
+    "median": {
+      "price": 1475000,
+      "ratio": 30.2
+    },
+    "lq": {
+      "price": 1100000,
+      "ratio": 22.52
+    }
+  },
   "msoas": [
     {
       "code": "E02000364",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 2130500,
-          "earnings": 49482,
-          "ratio": 43.06
+          "ratio": 43.62
         },
         "lq": {
           "price": 1722500,
-          "earnings": 34871,
-          "ratio": 49.4
+          "ratio": 35.27
         }
       }
     },
@@ -26,29 +35,13 @@
       "affordability": {
         "median": {
           "price": 2325000,
-          "earnings": 49482,
-          "ratio": 46.99
+          "ratio": 47.61
         },
         "lq": {
           "price": 1900000,
-          "earnings": 34871,
-          "ratio": 54.49
+          "ratio": 38.9
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 1507500,
-      "earnings": 49482,
-      "ratio": 30.47,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 1279134,
-      "earnings": 34871,
-      "ratio": 36.68,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

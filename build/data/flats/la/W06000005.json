@@ -3,6 +3,17 @@
   "name": "Flintshire",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "earnings": 39408,
+  "affordability": {
+    "median": {
+      "price": 127500,
+      "ratio": 3.24
+    },
+    "lq": {
+      "price": 94500,
+      "ratio": 2.4
+    }
+  },
   "msoas": [
     {
       "code": "W02000059",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 155000,
-          "earnings": 37505,
-          "ratio": 4.13
+          "ratio": 3.93
         },
         "lq": {
           "price": 145000,
-          "earnings": 28617,
-          "ratio": 5.07
+          "ratio": 3.68
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 110000,
-          "earnings": 37505,
-          "ratio": 2.93
+          "ratio": 2.79
         },
         "lq": {
           "price": 90000,
-          "earnings": 28617,
-          "ratio": 3.14
+          "ratio": 2.28
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 152500,
-          "earnings": 37505,
-          "ratio": 4.07
+          "ratio": 3.87
         },
         "lq": {
           "price": 147000,
-          "earnings": 28617,
-          "ratio": 5.14
+          "ratio": 3.73
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 130000,
-          "earnings": 37505,
-          "ratio": 3.47
+          "ratio": 3.3
         },
         "lq": {
           "price": 98000,
-          "earnings": 28617,
-          "ratio": 3.42
+          "ratio": 2.49
         }
       }
     },
@@ -74,37 +77,13 @@
       "affordability": {
         "median": {
           "price": 111250,
-          "earnings": 37505,
-          "ratio": 2.97
+          "ratio": 2.82
         },
         "lq": {
           "price": 97500,
-          "earnings": 28617,
-          "ratio": 3.41
+          "ratio": 2.47
         }
       }
-    },
-    {
-      "code": "W02000076",
-      "name": "Leeswood, Treuddyn & Gwernaffield",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 125250,
-      "earnings": 37505,
-      "ratio": 3.34,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 98000,
-      "earnings": 28617,
-      "ratio": 3.42,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

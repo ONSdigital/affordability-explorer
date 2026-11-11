@@ -3,6 +3,17 @@
   "name": "Hartlepool",
   "region_code": "E12000001",
   "region_name": "North East",
+  "earnings": 32600,
+  "affordability": {
+    "median": {
+      "price": 84529,
+      "ratio": 2.59
+    },
+    "lq": {
+      "price": 59750,
+      "ratio": 1.83
+    }
+  },
   "msoas": [
     {
       "code": "E02002483",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 90000,
-          "earnings": 31871,
-          "ratio": 2.82
+          "ratio": 2.76
         },
         "lq": {
           "price": 78000,
-          "earnings": 27706,
-          "ratio": 2.82
+          "ratio": 2.39
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 54000,
-          "earnings": 31871,
-          "ratio": 1.69
+          "ratio": 1.66
         },
         "lq": {
           "price": 47250,
-          "earnings": 27706,
-          "ratio": 1.71
+          "ratio": 1.45
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 59875,
-          "earnings": 31871,
-          "ratio": 1.88
+          "ratio": 1.84
         },
         "lq": {
           "price": 40150,
-          "earnings": 27706,
-          "ratio": 1.45
+          "ratio": 1.23
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 75475,
-          "earnings": 31871,
-          "ratio": 2.37
+          "ratio": 2.32
         },
         "lq": {
           "price": 67500,
-          "earnings": 27706,
-          "ratio": 2.44
+          "ratio": 2.07
         }
       }
     },
@@ -74,29 +77,13 @@
       "affordability": {
         "median": {
           "price": 84764,
-          "earnings": 31871,
-          "ratio": 2.66
+          "ratio": 2.6
         },
         "lq": {
           "price": 84529,
-          "earnings": 27706,
-          "ratio": 3.05
+          "ratio": 2.59
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 84529,
-      "earnings": 31871,
-      "ratio": 2.65,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 75000,
-      "earnings": 27706,
-      "ratio": 2.71,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

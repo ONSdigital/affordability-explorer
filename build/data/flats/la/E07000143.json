@@ -3,6 +3,17 @@
   "name": "Breckland",
   "region_code": "E12000006",
   "region_name": "East of England",
+  "earnings": 33400,
+  "affordability": {
+    "median": {
+      "price": 121000,
+      "ratio": 3.62
+    },
+    "lq": {
+      "price": 100000,
+      "ratio": 2.99
+    }
+  },
   "msoas": [
     {
       "code": "E02005507",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 116250,
-          "earnings": 34399,
-          "ratio": 3.38
+          "ratio": 3.48
         },
         "lq": {
           "price": 100000,
-          "earnings": 26896,
-          "ratio": 3.72
+          "ratio": 2.99
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 123750,
-          "earnings": 34399,
-          "ratio": 3.6
+          "ratio": 3.71
         },
         "lq": {
           "price": 101875,
-          "earnings": 26896,
-          "ratio": 3.79
+          "ratio": 3.05
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 102500,
-          "earnings": 34399,
-          "ratio": 2.98
+          "ratio": 3.07
         },
         "lq": {
           "price": 81375,
-          "earnings": 26896,
-          "ratio": 3.03
+          "ratio": 2.44
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 113500,
-          "earnings": 34399,
-          "ratio": 3.3
+          "ratio": 3.4
         },
         "lq": {
           "price": 102450,
-          "earnings": 26896,
-          "ratio": 3.81
+          "ratio": 3.07
         }
       }
     },
@@ -74,13 +77,11 @@
       "affordability": {
         "median": {
           "price": 97000,
-          "earnings": 34399,
-          "ratio": 2.82
+          "ratio": 2.9
         },
         "lq": {
           "price": 92001,
-          "earnings": 26896,
-          "ratio": 3.42
+          "ratio": 2.75
         }
       }
     },
@@ -90,13 +91,11 @@
       "affordability": {
         "median": {
           "price": 137500,
-          "earnings": 34399,
-          "ratio": 4
+          "ratio": 4.12
         },
         "lq": {
           "price": 120000,
-          "earnings": 26896,
-          "ratio": 4.46
+          "ratio": 3.59
         }
       }
     },
@@ -106,29 +105,13 @@
       "affordability": {
         "median": {
           "price": 120000,
-          "earnings": 34399,
-          "ratio": 3.49
+          "ratio": 3.59
         },
         "lq": {
           "price": 112500,
-          "earnings": 26896,
-          "ratio": 4.18
+          "ratio": 3.37
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 115000,
-      "earnings": 34399,
-      "ratio": 3.34,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 90000,
-      "earnings": 26896,
-      "ratio": 3.35,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

@@ -3,6 +3,17 @@
   "name": "Southwark",
   "region_code": "E12000007",
   "region_name": "London",
+  "earnings": 50689,
+  "affordability": {
+    "median": {
+      "price": 1700000,
+      "ratio": 33.54
+    },
+    "lq": {
+      "price": 967725,
+      "ratio": 19.09
+    }
+  },
   "msoas": [
     {
       "code": "E02000830",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 2025000,
-          "earnings": 48681,
-          "ratio": 41.6
+          "ratio": 39.95
         },
         "lq": {
           "price": 1342556,
-          "earnings": 33070,
-          "ratio": 40.6
+          "ratio": 26.49
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 2750000,
-          "earnings": 48681,
-          "ratio": 56.49
+          "ratio": 54.25
         },
         "lq": {
           "price": 2301909,
-          "earnings": 33070,
-          "ratio": 69.61
+          "ratio": 45.41
         }
       }
     },
@@ -42,29 +49,13 @@
       "affordability": {
         "median": {
           "price": 1000000,
-          "earnings": 48681,
-          "ratio": 20.54
+          "ratio": 19.73
         },
         "lq": {
           "price": 990500,
-          "earnings": 33070,
-          "ratio": 29.95
+          "ratio": 19.54
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 1787500,
-      "earnings": 48681,
-      "ratio": 36.72,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 1040750,
-      "earnings": 33070,
-      "ratio": 31.47,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

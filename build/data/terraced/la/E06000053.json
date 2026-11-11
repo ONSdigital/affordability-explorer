@@ -3,6 +3,17 @@
   "name": "Isles of Scilly",
   "region_code": "E12000009",
   "region_name": "South West",
+  "earnings": null,
+  "affordability": {
+    "median": {
+      "price": 650000,
+      "ratio": null
+    },
+    "lq": {
+      "price": 445000,
+      "ratio": null
+    }
+  },
   "msoas": [
     {
       "code": "E02006781",
@@ -10,15 +21,13 @@
       "affordability": {
         "median": {
           "price": 650000,
-          "earnings": 22034,
-          "ratio": 29.5
+          "ratio": null
         },
-        "lq": {}
+        "lq": {
+          "price": 445000,
+          "ratio": null
+        }
       }
     }
-  ],
-  "affordability": {
-    "median": {},
-    "lq": {}
-  }
+  ]
 }

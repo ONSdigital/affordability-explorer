@@ -108,8 +108,9 @@
     terraced: "Terraced",
     flats: "Flats and maisonettes",
   };
-  const INCOME_MULTIPLIER = 4.5;
+  const MORTGAGE_MULTIPLIER = 4.5;
   const DEPOSIT_RATE = 0.1;
+  const INCOME_MULTIPLIER = MORTGAGE_MULTIPLIER / (1 - DEPOSIT_RATE);
   const ENGLAND_STAMP_DUTY_BANDS = [
     { upTo: 125000, rate: 0 },
     { upTo: 250000, rate: 0.02 },

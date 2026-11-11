@@ -244,11 +244,7 @@ const affordabilityCache = {};
 const appliedMapStates = new WeakMap();
 const localAuthorityAffordabilityCache = {};
 const localAuthorityDataCache = {};
-const nationalAffordabilityCache = {};
-const regionalMedianAffordabilityCache = {};
-const geographyAuthoritiesCache = {
-  authorities: null,
-};
+const geographicSummaryRequests = new Map();
 const AFFORDABILITY_COLOR_PALETTE = ['#ffffb2','#fecc5c','#fd8d3c','#f03b20','#bd0026']
 
 // [
@@ -414,25 +410,6 @@ export async function getMsoaAffordabilityFromLocalAuthority(
   return msoas[msoaCode] || null;
 }
 
-export async function loadGeographyAuthorities() {
-  if (geographyAuthoritiesCache.authorities) {
-    return geographyAuthoritiesCache.authorities;
-  }
-
-  try {
-    const response = await fetch(withBase("/data/geography/authorities.json"));
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    geographyAuthoritiesCache.authorities = Array.isArray(data?.authorities)
-      ? data.authorities
-      : [];
-    return geographyAuthoritiesCache.authorities;
-  } catch (error) {
-    console.error("Failed to load geography authorities:", error.message);
-    return [];
-  }
-}
-
 function aggregateMedianAffordability(laDataArray = []) {
   let totalMedianPrice = 0;
   let totalMedianEarnings = 0;
@@ -460,7 +437,7 @@ function aggregateMedianAffordability(laDataArray = []) {
 }
 
 /**
- * Load country affordability summary from national files
+ * Load country affordability summary from the consolidated geographic summary
  * @param {string} propertyType - Property type
  * @param {string} country - 'england' or 'wales'
  * @returns {object|null} Affordability object with median/lq, or null
@@ -471,21 +448,16 @@ export async function loadCountryAffordability(
 ) {
   const normalizedCountry =
     String(country).toLowerCase() === "wales" ? "wales" : "england";
-  const cacheKey = `${propertyType}:${normalizedCountry}`;
-
-  if (nationalAffordabilityCache[cacheKey]) {
-    return nationalAffordabilityCache[cacheKey];
-  }
-
   try {
-    const response = await fetch(
-      withBase(`/data/${propertyType}/national/${normalizedCountry}.json`),
+    const data = await loadGeographicSummary(propertyType);
+    const national = data.national.find(
+      (entry) => entry.name?.toLowerCase() === normalizedCountry,
     );
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    const affordability = data?.affordability ?? null;
-    nationalAffordabilityCache[cacheKey] = affordability;
-    return affordability;
+    if (!national) throw new Error(`Missing country ${normalizedCountry}`);
+    return {
+      median: toAffordability(national.affordability?.median),
+      lq: toAffordability(national.affordability?.lq),
+    };
   } catch (error) {
     console.error(
       `Failed to load country affordability for ${propertyType}/${normalizedCountry}:`,
@@ -656,35 +628,6 @@ export function updateMapFeatureStates(
 }
 
 /**
- * Get MSOA by postcode using the postcodes.io API
- * @param {string} postcode - Postcode to search
- * @returns {object|null} MSOA data or null if not found
- */
-export async function getMSOAByPostcode(postcode, msoas) {
-  try {
-    const normalized = normalizePostcode(postcode);
-    const response = await fetch(
-      `https://api.postcodes.io/postcodes/${encodeURIComponent(normalized)}`,
-    );
-    if (!response.ok) return null;
-
-    const json = await response.json();
-    if (!json.result || !json.result.longitude || !json.result.latitude)
-      return null;
-
-    const lon = json.result.longitude;
-    const lat = json.result.latitude;
-
-    // Find MSOA containing this point
-    // For now, return the nearest MSOA or use bulk lookup
-    // TODO: Implement spatial lookup if needed
-    return null;
-  } catch (e) {
-    return null;
-  }
-}
-
-/**
  * Search for places including LTLAs and MSOAs
  * @param {string} query - Search query
  * @param {array} allAreaNames - LTLA names from the local authority TopoJSON
@@ -791,6 +734,31 @@ export function getLocalAuthorityGeoJSON() {
 
 // ========== BEESWARM DATA ==========
 
+function loadGeographicSummary(propertyType) {
+  const url = withBase(`/data/${propertyType}/geographic-summary.json`);
+  if (!geographicSummaryRequests.has(url)) {
+    const request = fetch(url)
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (!Array.isArray(data.regions) || !Array.isArray(data.national)) {
+          throw new Error(`Invalid geographic summary from ${url}`);
+        }
+        return data;
+      })
+      .catch((error) => {
+        geographicSummaryRequests.delete(url);
+        throw error;
+      });
+    geographicSummaryRequests.set(url, request);
+  }
+  return geographicSummaryRequests.get(url);
+}
+
+function toAffordability(ratio) {
+  return Number.isFinite(ratio) ? { ratio } : null;
+}
+
 /**
  * Load national affordability for a property type
  * @param {string} propertyType - Property type (all, detached, semi-detached, terraced, flats)
@@ -803,31 +771,12 @@ export async function loadNationalAffordability(
   country = "england",
   priceLevel = "median",
 ) {
-  const cacheKey = `${propertyType}:national:${country}:${priceLevel}`;
-  if (nationalAffordabilityCache[cacheKey]) {
-    return nationalAffordabilityCache[cacheKey];
-  }
-
-  try {
-    const response = await fetch(
-      withBase(`/data/${propertyType}/national/${country}.json`),
-    );
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    nationalAffordabilityCache[cacheKey] =
-      data.affordability?.[priceLevel] || null;
-    return nationalAffordabilityCache[cacheKey];
-  } catch (error) {
-    console.error(
-      `Failed to load national affordability for ${propertyType}/${country}:`,
-      error.message,
-    );
-    return null;
-  }
+  const affordability = await loadCountryAffordability(propertyType, country);
+  return affordability?.[priceLevel] ?? null;
 }
 
 /**
- * Load regional affordability from generated region files
+ * Load regional affordability from the consolidated geographic summary
  * @param {string} propertyType - Property type (all, detached, semi-detached, terraced, flats)
  * @param {string} regionCode - Region code
  * @param {string} regionName - Region name (unused, kept for call-site compatibility)
@@ -840,26 +789,13 @@ export async function loadRegionalAffordability(
   regionName = "",
   priceLevel = "median",
 ) {
-  if (!regionCode && !regionName) return null;
-
-  const cacheKey = `${propertyType}:region:${regionCode || regionName}:${priceLevel}`;
-  if (regionalMedianAffordabilityCache[cacheKey]) {
-    return regionalMedianAffordabilityCache[cacheKey];
-  }
+  if (!regionCode) return null;
 
   try {
-    const response = await fetch(
-      withBase(`/data/${propertyType}/region/${regionCode}.json`),
-    );
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    const regional = data?.affordability?.[priceLevel] || null;
-    if (!regional) {
-      return null;
-    }
-
-    regionalMedianAffordabilityCache[cacheKey] = regional;
-    return regional;
+    const data = await loadGeographicSummary(propertyType);
+    const region = data.regions.find((entry) => entry.code === regionCode);
+    if (!region) throw new Error(`Missing region ${regionCode}`);
+    return toAffordability(region.affordability?.[priceLevel]);
   } catch (error) {
     console.error(
       `Failed to load regional affordability for ${regionCode}:`,
@@ -897,7 +833,7 @@ export function transformMsoaDataForBeeswarm(
     }
   });
 
-  if (regionAffordability?.ratio) {
+  if (Number.isFinite(regionAffordability?.ratio)) {
     data.push({
       x: regionAffordability.ratio,
       label: "Region Average",
@@ -905,7 +841,7 @@ export function transformMsoaDataForBeeswarm(
     });
   }
 
-  if (nationalAffordability?.ratio) {
+  if (Number.isFinite(nationalAffordability?.ratio)) {
     data.push({
       x: nationalAffordability.ratio,
       label: "Nation Average",

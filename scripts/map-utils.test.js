@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import { createServer } from "vite";
 import { createExpression } from "@maplibre/maplibre-gl-style-spec";
+import { readFileSync } from "node:fs";
 
 let server;
 let mapUtils;
@@ -114,7 +115,20 @@ test("beeswarm uses the chosen price level for neighbourhoods and comparisons", 
   };
   const fetchMock = t.mock.method(globalThis, "fetch", async () => ({
     ok: true,
-    json: async () => ({ affordability }),
+    json: async () => ({
+      regions: [
+        {
+          code: "E12000001",
+          affordability: { median: 5.18, lq: 4.43 },
+        },
+      ],
+      national: [
+        {
+          name: "England",
+          affordability: { median: 5.18, lq: 4.43 },
+        },
+      ],
+    }),
   }));
   const msoas = [
     { code: "E02002483", name: "Clavering", affordability },
@@ -156,7 +170,11 @@ test("beeswarm uses the chosen price level for neighbourhoods and comparisons", 
       priceLevel === "median",
     );
   }
-  assert.equal(fetchMock.mock.callCount(), 4);
+  assert.equal(fetchMock.mock.callCount(), 1);
+  assert.match(
+    fetchMock.mock.calls[0].arguments[0],
+    /\/all\/geographic-summary\.json$/,
+  );
   assert.equal(
     (await mapUtils.loadNationalAffordability()).ratio,
     affordability.median.ratio,
@@ -165,6 +183,104 @@ test("beeswarm uses the chosen price level for neighbourhoods and comparisons", 
     mapUtils.transformMsoaDataForBeeswarm(msoas)[0].x,
     affordability.median.ratio,
   );
+});
+
+test("generated property summaries produce regional and country beeswarm markers for both price levels", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async (url) => ({
+    ok: true,
+    json: async () =>
+      JSON.parse(
+        readFileSync(
+          new URL(
+            `../static${url.slice(url.indexOf("/data/"))}`,
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      ),
+  }));
+  for (const propertyType of [
+    "terraced",
+    "detached",
+    "semi-detached",
+    "flats",
+  ]) {
+    const summary = JSON.parse(
+      readFileSync(
+        new URL(
+          `../static/data/${propertyType}/geographic-summary.json`,
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+    for (const priceLevel of ["median", "lq"]) {
+      const [region, england, wales, country] = await Promise.all([
+        mapUtils.loadRegionalAffordability(
+          propertyType,
+          "E12000001",
+          "North East",
+          priceLevel,
+        ),
+        mapUtils.loadNationalAffordability(propertyType, "england", priceLevel),
+        mapUtils.loadNationalAffordability(propertyType, "wales", priceLevel),
+        mapUtils.loadCountryAffordability(propertyType, "england"),
+      ]);
+      const points = mapUtils.transformMsoaDataForBeeswarm(
+        [],
+        region,
+        england,
+        priceLevel,
+      );
+      assert.equal(
+        points.find((point) => point.type === "region")?.x,
+        summary.regions[0].affordability[priceLevel],
+      );
+      assert.equal(
+        points.find((point) => point.type === "nation")?.x,
+        summary.national[0].affordability[priceLevel],
+      );
+      assert.equal(country[priceLevel].ratio, england.ratio);
+      assert.equal(wales.ratio, summary.national[1].affordability[priceLevel]);
+    }
+  }
+  assert.equal(fetchMock.mock.callCount(), 4);
+});
+
+test("missing comparison ratios are omitted while zero ratios remain valid", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => ({
+    ok: true,
+    json: async () => ({
+      regions: [
+        { code: "zero-region", affordability: { median: 0, lq: null } },
+      ],
+      national: [{ name: "England", affordability: { median: 0, lq: null } }],
+    }),
+  }));
+  for (const priceLevel of ["median", "lq"]) {
+    const [region, nation] = await Promise.all([
+      mapUtils.loadRegionalAffordability(
+        "missing-comparisons",
+        "zero-region",
+        "",
+        priceLevel,
+      ),
+      mapUtils.loadNationalAffordability(
+        "missing-comparisons",
+        "england",
+        priceLevel,
+      ),
+    ]);
+    const points = mapUtils.transformMsoaDataForBeeswarm(
+      [],
+      region,
+      nation,
+      priceLevel,
+    );
+    assert.equal(points.length, priceLevel === "median" ? 2 : 0);
+    if (priceLevel === "median")
+      assert.ok(points.every((point) => point.x === 0));
+  }
 });
 
 test("switching to a sparse property dataset clears omitted areas and restores them on return", (t) => {

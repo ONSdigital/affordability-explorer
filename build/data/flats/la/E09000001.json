@@ -3,6 +3,17 @@
   "name": "City of London",
   "region_code": "E12000007",
   "region_name": "London",
+  "earnings": 69106,
+  "affordability": {
+    "median": {
+      "price": 775000,
+      "ratio": 11.21
+    },
+    "lq": {
+      "price": 600000,
+      "ratio": 8.68
+    }
+  },
   "msoas": [
     {
       "code": "E02000001",
@@ -10,29 +21,13 @@
       "affordability": {
         "median": {
           "price": 775000,
-          "earnings": 52892,
-          "ratio": 14.65
+          "ratio": 11.21
         },
         "lq": {
           "price": 600000,
-          "earnings": 38027,
-          "ratio": 15.78
+          "ratio": 8.68
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 757500,
-      "earnings": 52892,
-      "ratio": 14.32,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 556250,
-      "earnings": 38027,
-      "ratio": 14.63,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

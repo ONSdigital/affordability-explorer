@@ -1,19 +1,17 @@
 #!/usr/bin/env node
 
 /**
- * Generate msoas-latest.json and national files for each property type
+ * Generate msoas-latest.json, msoas-map.json, and geography files
+ * Uses data already processed from SAA Machine Readable.csv
  */
 
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import XLSX from "xlsx";
-import { readLatestAreaValues } from "./latest-area-values.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = path.join(__dirname, "../static/data");
 const GEOGRAPHY_DIR = path.join(OUTPUT_DIR, "geography");
-const DATA_DIR = path.join(__dirname, "../data/raw");
 
 const PROPERTY_TYPES = [
   "all",
@@ -22,44 +20,6 @@ const PROPERTY_TYPES = [
   "terraced",
   "flats",
 ];
-const PROPERTY_TYPE_SHEET_LETTERS = {
-  all: "a",
-  detached: "b",
-  "semi-detached": "c",
-  terraced: "d",
-  flats: "e",
-};
-
-const REGIONS = [
-  { cd: "E12000001", nm: "North East" },
-  { cd: "E12000002", nm: "North West" },
-  { cd: "E12000003", nm: "Yorkshire and The Humber" },
-  { cd: "E12000004", nm: "East Midlands" },
-  { cd: "E12000005", nm: "West Midlands" },
-  { cd: "E12000006", nm: "East of England" },
-  { cd: "E12000007", nm: "London" },
-  { cd: "E12000008", nm: "South East" },
-  { cd: "E12000009", nm: "South West" },
-  { cd: "W92000004", nm: "Wales" },
-];
-
-const COUNTRIES = [
-  { code: "E92000001", slug: "england", name: "England" },
-  { code: "W92000004", slug: "wales", name: "Wales" },
-];
-
-const medianAdministrativeWorkbook = XLSX.readFile(
-  path.join(DATA_DIR, "medianpricepaidforadministrativegeographies.xlsx"),
-);
-const lowerQuartileAdministrativeWorkbook = XLSX.readFile(
-  path.join(
-    DATA_DIR,
-    "lowerquartilepricepaidforadministrativegeographies.xlsx",
-  ),
-);
-const affordabilityWorkbook = XLSX.readFile(
-  path.join(DATA_DIR, "aff2ratioofhousepricetoresidencebasedearnings.xlsx"),
-);
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) {
@@ -67,165 +27,35 @@ function ensureDir(dir) {
   }
 }
 
-function createAffordabilityEntry(price, earnings, period) {
-  if (!Number.isFinite(price) || !Number.isFinite(earnings) || earnings === 0) {
-    return null;
-  }
-
-  return {
-    price,
-    earnings,
-    ratio: Math.round((price / earnings) * 100) / 100,
-    period,
-  };
-}
-
-function buildAreaAffordabilitySummary(
-  code,
-  name,
-  medianPrices,
-  lowerQuartilePrices,
-  medianEarnings,
-  lowerQuartileEarnings,
-) {
-  const median = createAffordabilityEntry(
-    medianPrices.values[code]?.value ?? null,
-    medianEarnings.values[code]?.value ?? null,
-    medianPrices.period,
-  );
-  const lq = createAffordabilityEntry(
-    lowerQuartilePrices.values[code]?.value ?? null,
-    lowerQuartileEarnings.values[code]?.value ?? null,
-    lowerQuartilePrices.period,
-  );
-
-  return {
-    code,
-    name:
-      name ??
-      medianPrices.values[code]?.name ??
-      lowerQuartilePrices.values[code]?.name ??
-      null,
-    latest_period: medianPrices.period,
-    affordability: {
-      ...(median ? { median } : {}),
-      ...(lq ? { lq } : {}),
-    },
-  };
-}
-
-function writeRegionFiles(typeDir, propType) {
-  const regionDir = path.join(typeDir, "region");
-  ensureDir(regionDir);
-
-  const sheetLetter = PROPERTY_TYPE_SHEET_LETTERS[propType];
-  const medianPrices = readLatestAreaValues(
-    medianAdministrativeWorkbook,
-    `1${sheetLetter}`,
-  );
-  const lowerQuartilePrices = readLatestAreaValues(
-    lowerQuartileAdministrativeWorkbook,
-    `1${sheetLetter}`,
-  );
-  const medianEarnings = readLatestAreaValues(affordabilityWorkbook, "1b");
-  const lowerQuartileEarnings = readLatestAreaValues(
-    affordabilityWorkbook,
-    "2b",
-  );
-
-  for (const region of REGIONS) {
-    const summary = buildAreaAffordabilitySummary(
-      region.cd,
-      region.nm,
-      medianPrices,
-      lowerQuartilePrices,
-      medianEarnings,
-      lowerQuartileEarnings,
-    );
-
-    fs.writeFileSync(
-      path.join(regionDir, `${region.cd}.json`),
-      JSON.stringify(summary, null, 2),
-    );
-  }
-
-  console.log(`  ✓ region/*.json (${REGIONS.length} region files)`);
-
-  return {
-    medianPrices,
-    lowerQuartilePrices,
-    medianEarnings,
-    lowerQuartileEarnings,
-  };
-}
-
-function writeNationalFiles(nationalDir, areaData) {
-  ensureDir(nationalDir);
-
-  for (const country of COUNTRIES) {
-    const summary = buildAreaAffordabilitySummary(
-      country.code,
-      country.name,
-      areaData.medianPrices,
-      areaData.lowerQuartilePrices,
-      areaData.medianEarnings,
-      areaData.lowerQuartileEarnings,
-    );
-
-    fs.writeFileSync(
-      path.join(nationalDir, `${country.slug}.json`),
-      JSON.stringify(
-        {
-          region: country.name,
-          latest_period: summary.latest_period,
-          affordability: summary.affordability,
-        },
-        null,
-        2,
-      ),
-    );
-  }
-
-  console.log(`  ✓ national/*.json (${COUNTRIES.length} country files)`);
-}
-
 function generateForPropertyType(propType) {
   console.log(`\nProcessing: ${propType}`);
 
   const typeDir = path.join(OUTPUT_DIR, propType);
   const laDir = path.join(typeDir, "la");
-  const nationalDir = path.join(typeDir, "national");
 
   if (!fs.existsSync(laDir)) {
     console.log("  Skipped (directory not found)");
     return;
   }
 
-  if (!fs.existsSync(nationalDir)) {
-    fs.mkdirSync(nationalDir, { recursive: true });
-  }
-
-  // Read all LA files and build authorities list + aggregate data
+  // Read all LA files and build MSOA list + aggregate data
   const laFiles = fs.readdirSync(laDir).filter((f) => f.endsWith(".json"));
-  const authorities = [];
   const msoas = [];
-  const latestPeriods = new Set();
+  const regionMap = new Map();
 
   for (const filename of laFiles) {
     const filePath = path.join(laDir, filename);
     const laData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    if (laData.latest_period) {
-      latestPeriods.add(laData.latest_period);
-    }
 
-    // Add to authorities list with region info
-    authorities.push({
-      code: laData.code,
-      name: laData.name,
-      region_code: laData.region_code,
-      region_name: laData.region_name,
-      msoa_count: laData.msoas.length,
-    });
+    // Track regions
+    if (!regionMap.has(laData.region_code)) {
+      regionMap.set(laData.region_code, {
+        code: laData.region_code,
+        name: laData.region_name,
+        country_code: laData.region_code.startsWith("E") ? "E92000001" : "W92000004",
+        country_name: laData.region_code.startsWith("E") ? "England" : "Wales",
+      });
+    }
 
     // Collect MSOAs for msoas-latest.json
     for (const msoa of laData.msoas) {
@@ -241,9 +71,7 @@ function generateForPropertyType(propType) {
     }
   }
 
-  // Note: authorities.json is now generated once in geography/ folder (see main function)
-
-  // Generate msoas-latest.json
+  // Sort MSOAs
   msoas.sort((a, b) => {
     if (a.region_code !== b.region_code)
       return a.region_code.localeCompare(b.region_code);
@@ -251,57 +79,38 @@ function generateForPropertyType(propType) {
     return a.code.localeCompare(b.code);
   });
 
+  // Generate msoas-map.json (only file needed for mapping)
   const now = new Date();
   const quarter = Math.ceil((now.getMonth() + 1) / 3);
   const generatedDate = `${now.getFullYear()}-Q${quarter}`;
-  if (latestPeriods.size > 1) {
-    throw new Error(
-      `Local authority files have inconsistent latest periods for ${propType}: ${[...latestPeriods].join(", ")}`,
-    );
-  }
-
-  const msoasLatest = {
-    generated_date: generatedDate,
-    latest_period: [...latestPeriods][0] ?? null,
-    msoa_count: msoas.length,
-    msoas,
-  };
-
-  fs.writeFileSync(
-    path.join(typeDir, "msoas-latest.json"),
-    JSON.stringify(msoasLatest, null, 2),
-  );
 
   fs.writeFileSync(
     path.join(typeDir, "msoas-map.json"),
     JSON.stringify({
       generated_date: generatedDate,
-      latest_period: msoasLatest.latest_period,
       msoa_count: msoas.length,
       msoas: msoas.map(({ affordability, ...area }) => ({
         ...area,
         median: affordability?.median?.ratio ?? null,
         lq: affordability?.lq?.ratio ?? null,
       })),
-    }),
+    }, null, 2)
   );
 
-  console.log(`  ✓ msoas-latest.json (${msoas.length} MSOAs)`);
+  console.log(`  ✓ msoas-map.json (${msoas.length} MSOAs)`);
 
-  const areaData = writeRegionFiles(typeDir, propType);
-  writeNationalFiles(nationalDir, areaData);
+  return regionMap;
 }
 
 async function main() {
-  console.log("Generating msoas-latest and national files\n");
+  console.log(
+    "Generating msoas-map.json and geography files from processed LA data\n"
+  );
   console.log("=".repeat(60));
 
-  // Ensure geography directory exists
-  if (!fs.existsSync(GEOGRAPHY_DIR)) {
-    fs.mkdirSync(GEOGRAPHY_DIR, { recursive: true });
-  }
+  ensureDir(GEOGRAPHY_DIR);
 
-  // Generate shared geography files (only once from 'all' property type)
+  // Generate shared geography files from 'all' property type
   const allLADir = path.join(OUTPUT_DIR, "all", "la");
   if (fs.existsSync(allLADir)) {
     const laFiles = fs.readdirSync(allLADir).filter((f) => f.endsWith(".json"));
@@ -321,16 +130,13 @@ async function main() {
       });
 
       if (!regionSet.has(laData.region_code)) {
-        const countryCode = laData.region_code.startsWith("E")
-          ? "E92000001"
-          : "W92000004";
-        const countryName = laData.region_code.startsWith("E")
-          ? "England"
-          : "Wales";
         regionSet.set(laData.region_code, {
+          code: laData.region_code,
           name: laData.region_name,
-          country_code: countryCode,
-          country_name: countryName,
+          country_code: laData.region_code.startsWith("E")
+            ? "E92000001"
+            : "W92000004",
+          country_name: laData.region_code.startsWith("E") ? "England" : "Wales",
         });
       }
     }
@@ -338,30 +144,27 @@ async function main() {
     // Write authorities.json
     fs.writeFileSync(
       path.join(GEOGRAPHY_DIR, "authorities.json"),
-      JSON.stringify({ authorities }, null, 2),
+      JSON.stringify({ authorities }, null, 2)
     );
 
     // Write regions.json with country hierarchy
-    const regions = Array.from(regionSet.entries())
-      .map(([code, data]) => ({
-        code,
-        name: data.name,
-        country_code: data.country_code,
-        country_name: data.country_name,
-      }))
-      .sort((a, b) => a.code.localeCompare(b.code));
+    const regions = Array.from(regionSet.values()).sort((a, b) =>
+      a.code.localeCompare(b.code)
+    );
 
     fs.writeFileSync(
       path.join(GEOGRAPHY_DIR, "regions.json"),
-      JSON.stringify({ regions }, null, 2),
+      JSON.stringify({ regions }, null, 2)
     );
 
-    console.log(`\nShared Geography Files:`);
     console.log(
-      `  ✓ geography/authorities.json (${authorities.length} LAs with region info)`,
+      `\nShared Geography Files (from 'all' property type):`
     );
     console.log(
-      `  ✓ geography/regions.json (${regions.length} regions with country hierarchy)`,
+      `  ✓ geography/authorities.json (${authorities.length} local authorities)`
+    );
+    console.log(
+      `  ✓ geography/regions.json (${regions.length} regions with country hierarchy)`
     );
   }
 
@@ -372,6 +175,7 @@ async function main() {
 
   console.log("\n" + "=".repeat(60));
   console.log("✓ Generation complete!");
+  console.log("=".repeat(60));
 }
 
 main().catch((err) => {

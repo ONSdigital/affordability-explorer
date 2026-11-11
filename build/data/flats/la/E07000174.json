@@ -3,6 +3,17 @@
   "name": "Mansfield",
   "region_code": "E12000004",
   "region_name": "East Midlands",
+  "earnings": 34038,
+  "affordability": {
+    "median": {
+      "price": 100875,
+      "ratio": 2.96
+    },
+    "lq": {
+      "price": 80625,
+      "ratio": 2.37
+    }
+  },
   "msoas": [
     {
       "code": "E02005883",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 93500,
-          "earnings": 32525,
-          "ratio": 2.87
+          "ratio": 2.75
         },
         "lq": {
           "price": 92000,
-          "earnings": 25834,
-          "ratio": 3.56
+          "ratio": 2.7
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 85500,
-          "earnings": 32525,
-          "ratio": 2.63
+          "ratio": 2.51
         },
         "lq": {
           "price": 68500,
-          "earnings": 25834,
-          "ratio": 2.65
+          "ratio": 2.01
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 97375,
-          "earnings": 32525,
-          "ratio": 2.99
+          "ratio": 2.86
         },
         "lq": {
           "price": 80000,
-          "earnings": 25834,
-          "ratio": 3.1
+          "ratio": 2.35
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 90000,
-          "earnings": 32525,
-          "ratio": 2.77
+          "ratio": 2.64
         },
         "lq": {
           "price": 81000,
-          "earnings": 25834,
-          "ratio": 3.14
+          "ratio": 2.38
         }
       }
     },
@@ -74,29 +77,13 @@
       "affordability": {
         "median": {
           "price": 118500,
-          "earnings": 32525,
-          "ratio": 3.64
+          "ratio": 3.48
         },
         "lq": {
           "price": 110000,
-          "earnings": 25834,
-          "ratio": 4.26
+          "ratio": 3.23
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 105000,
-      "earnings": 32525,
-      "ratio": 3.23,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 85000,
-      "earnings": 25834,
-      "ratio": 3.29,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

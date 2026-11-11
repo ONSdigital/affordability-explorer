@@ -3,6 +3,17 @@
   "name": "North East Derbyshire",
   "region_code": "E12000004",
   "region_name": "East Midlands",
+  "earnings": 34780,
+  "affordability": {
+    "median": {
+      "price": 125000,
+      "ratio": 3.59
+    },
+    "lq": {
+      "price": 107750,
+      "ratio": 3.1
+    }
+  },
   "msoas": [
     {
       "code": "E02004108",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 148500,
-          "earnings": 36422,
-          "ratio": 4.08
+          "ratio": 4.27
         },
         "lq": {
           "price": 133750,
-          "earnings": 27472,
-          "ratio": 4.87
+          "ratio": 3.85
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 137500,
-          "earnings": 36422,
-          "ratio": 3.78
+          "ratio": 3.95
         },
         "lq": {
           "price": 125000,
-          "earnings": 27472,
-          "ratio": 4.55
+          "ratio": 3.59
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 85000,
-          "earnings": 36422,
-          "ratio": 2.33
+          "ratio": 2.44
         },
         "lq": {
           "price": 82500,
-          "earnings": 27472,
-          "ratio": 3
+          "ratio": 2.37
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 105000,
-          "earnings": 36422,
-          "ratio": 2.88
+          "ratio": 3.02
         },
         "lq": {
           "price": 100000,
-          "earnings": 27472,
-          "ratio": 3.64
+          "ratio": 2.88
         }
       }
     },
@@ -74,29 +77,13 @@
       "affordability": {
         "median": {
           "price": 116000,
-          "earnings": 36422,
-          "ratio": 3.18
+          "ratio": 3.34
         },
         "lq": {
           "price": 99000,
-          "earnings": 27472,
-          "ratio": 3.6
+          "ratio": 2.85
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 125000,
-      "earnings": 36422,
-      "ratio": 3.43,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 102000,
-      "earnings": 27472,
-      "ratio": 3.71,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

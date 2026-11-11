@@ -3,6 +3,17 @@
   "name": "North Lincolnshire",
   "region_code": "E12000003",
   "region_name": "Yorkshire and The Humber",
+  "earnings": 34041,
+  "affordability": {
+    "median": {
+      "price": 85000,
+      "ratio": 2.5
+    },
+    "lq": {
+      "price": 65000,
+      "ratio": 1.91
+    }
+  },
   "msoas": [
     {
       "code": "E02002749",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 95000,
-          "earnings": 34738,
-          "ratio": 2.73
+          "ratio": 2.79
         },
         "lq": {
           "price": 91000,
-          "earnings": 26563,
-          "ratio": 3.43
+          "ratio": 2.67
         }
       }
     },
@@ -26,29 +35,13 @@
       "affordability": {
         "median": {
           "price": 68000,
-          "earnings": 34738,
-          "ratio": 1.96
+          "ratio": 2
         },
         "lq": {
           "price": 67250,
-          "earnings": 26563,
-          "ratio": 2.53
+          "ratio": 1.98
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 80500,
-      "earnings": 34738,
-      "ratio": 2.32,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 68500,
-      "earnings": 26563,
-      "ratio": 2.58,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

@@ -3,6 +3,17 @@
   "name": "Carmarthenshire",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "earnings": 32923,
+  "affordability": {
+    "median": {
+      "price": 129500,
+      "ratio": 3.93
+    },
+    "lq": {
+      "price": 110000,
+      "ratio": 3.34
+    }
+  },
   "msoas": [
     {
       "code": "W02000149",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 150000,
-          "earnings": 37405,
-          "ratio": 4.01
+          "ratio": 4.56
         },
         "lq": {
           "price": 139750,
-          "earnings": 28434,
-          "ratio": 4.91
+          "ratio": 4.24
         }
       }
     },
@@ -26,29 +35,13 @@
       "affordability": {
         "median": {
           "price": 125000,
-          "earnings": 37405,
-          "ratio": 3.34
+          "ratio": 3.8
         },
         "lq": {
           "price": 107500,
-          "earnings": 28434,
-          "ratio": 3.78
+          "ratio": 3.27
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 150000,
-      "earnings": 37405,
-      "ratio": 4.01,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 99088,
-      "earnings": 28434,
-      "ratio": 3.48,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

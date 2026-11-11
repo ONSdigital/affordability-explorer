@@ -3,6 +3,17 @@
   "name": "Blaby",
   "region_code": "E12000004",
   "region_name": "East Midlands",
+  "earnings": 38785,
+  "affordability": {
+    "median": {
+      "price": 145000,
+      "ratio": 3.74
+    },
+    "lq": {
+      "price": 125000,
+      "ratio": 3.22
+    }
+  },
   "msoas": [
     {
       "code": "E02005338",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 163000,
-          "earnings": 38279,
-          "ratio": 4.26
+          "ratio": 4.2
         },
         "lq": {
           "price": 128750,
-          "earnings": 30223,
-          "ratio": 4.26
+          "ratio": 3.32
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 175000,
-          "earnings": 38279,
-          "ratio": 4.57
+          "ratio": 4.51
         },
         "lq": {
           "price": 132250,
-          "earnings": 30223,
-          "ratio": 4.38
+          "ratio": 3.41
         }
       }
     },
@@ -42,29 +49,13 @@
       "affordability": {
         "median": {
           "price": 130000,
-          "earnings": 38279,
-          "ratio": 3.4
+          "ratio": 3.35
         },
         "lq": {
           "price": 115000,
-          "earnings": 30223,
-          "ratio": 3.81
+          "ratio": 2.97
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 135000,
-      "earnings": 38279,
-      "ratio": 3.53,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 110000,
-      "earnings": 30223,
-      "ratio": 3.64,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

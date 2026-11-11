@@ -3,6 +3,17 @@
   "name": "Portsmouth",
   "region_code": "E12000008",
   "region_name": "South East",
+  "earnings": 38630,
+  "affordability": {
+    "median": {
+      "price": 500000,
+      "ratio": 12.94
+    },
+    "lq": {
+      "price": 387000,
+      "ratio": 10.02
+    }
+  },
   "msoas": [
     {
       "code": "E02003526",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 603750,
-          "earnings": 36022,
-          "ratio": 16.76
+          "ratio": 15.63
         },
         "lq": {
           "price": 556250,
-          "earnings": 27007,
-          "ratio": 20.6
+          "ratio": 14.4
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 362500,
-          "earnings": 36022,
-          "ratio": 10.06
+          "ratio": 9.38
         },
         "lq": {
           "price": 332500,
-          "earnings": 27007,
-          "ratio": 12.31
+          "ratio": 8.61
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 410000,
-          "earnings": 36022,
-          "ratio": 11.38
+          "ratio": 10.61
         },
         "lq": {
           "price": 370000,
-          "earnings": 27007,
-          "ratio": 13.7
+          "ratio": 9.58
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 1150000,
-          "earnings": 36022,
-          "ratio": 31.92
+          "ratio": 29.77
         },
         "lq": {
           "price": 1015000,
-          "earnings": 27007,
-          "ratio": 37.58
+          "ratio": 26.27
         }
       }
     },
@@ -74,29 +77,13 @@
       "affordability": {
         "median": {
           "price": 496500,
-          "earnings": 36022,
-          "ratio": 13.78
+          "ratio": 12.85
         },
         "lq": {
           "price": 443250,
-          "earnings": 27007,
-          "ratio": 16.41
+          "ratio": 11.47
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 530000,
-      "earnings": 36022,
-      "ratio": 14.71,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 370000,
-      "earnings": 27007,
-      "ratio": 13.7,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

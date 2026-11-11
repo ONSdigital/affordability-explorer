@@ -3,6 +3,17 @@
   "name": "Ceredigion",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "earnings": 32658,
+  "affordability": {
+    "median": {
+      "price": 169000,
+      "ratio": 5.17
+    },
+    "lq": {
+      "price": 130000,
+      "ratio": 3.98
+    }
+  },
   "msoas": [
     {
       "code": "W02000117",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 168000,
-          "earnings": 33299,
-          "ratio": 5.05
+          "ratio": 5.14
         },
         "lq": {
           "price": 125000,
-          "earnings": 27201,
-          "ratio": 4.6
+          "ratio": 3.83
         }
       }
     },
@@ -26,29 +35,13 @@
       "affordability": {
         "median": {
           "price": 175250,
-          "earnings": 33299,
-          "ratio": 5.26
+          "ratio": 5.37
         },
         "lq": {
           "price": 161750,
-          "earnings": 27201,
-          "ratio": 5.95
+          "ratio": 4.95
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 168000,
-      "earnings": 33299,
-      "ratio": 5.05,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 129500,
-      "earnings": 27201,
-      "ratio": 4.76,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

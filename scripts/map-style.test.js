@@ -31,6 +31,30 @@ test("basemap remains a valid MapLibre style", () => {
   assert.deepEqual(validateStyleMin(style), []);
 });
 
+test("roads retain thinner widths across zoom levels, including tunnels and bridges", () => {
+  const expectedWidths = {
+    tunnel_motorway_casing: [[5.8, 0], [6, 1.5], [20, 20]],
+    tunnel_motorway_inner: [[4, 1], [6, 0.65], [20, 15]],
+    highway_path: [[13, 0.5], [20, 5]],
+    highway_minor: [[13, 0.9], [20, 10]],
+    highway_major_casing: [[10, 1.5], [20, 11.5]],
+    highway_major_inner: [[10, 1], [20, 10]],
+    highway_major_subtle: 0.5,
+    highway_motorway_casing: [[5.8, 0], [6, 1.5], [20, 20]],
+    highway_motorway_inner: [[4, 1], [6, 0.65], [20, 15]],
+    highway_motorway_subtle: [[4, 0.5], [6, 0.5]],
+    highway_motorway_bridge_casing: [[5.8, 0], [6, 2.5], [20, 22.5]],
+    highway_motorway_bridge_inner: [[4, 1], [6, 0.65], [20, 15]],
+  };
+
+  for (const [id, expected] of Object.entries(expectedWidths)) {
+    const layer = style.layers.find((candidate) => candidate.id === id);
+    assert.ok(layer, `${id} must exist`);
+    const width = layer.paint["line-width"];
+    assert.deepEqual(width.stops ?? width, expected, `${id} road width`);
+  }
+});
+
 test("building footprints retain full colour while the mask fades surrounding land", () => {
   const fill = findMapFill(page.html);
   const paint = fill.attributes.find((attribute) => attribute.name === "paint")

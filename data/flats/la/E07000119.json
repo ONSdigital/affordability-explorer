@@ -3,6 +3,17 @@
   "name": "Fylde",
   "region_code": "E12000002",
   "region_name": "North West",
+  "earnings": 45059,
+  "affordability": {
+    "median": {
+      "price": 140000,
+      "ratio": 3.11
+    },
+    "lq": {
+      "price": 90250,
+      "ratio": 2
+    }
+  },
   "msoas": [
     {
       "code": "E02005204",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 107000,
-          "earnings": 44892,
-          "ratio": 2.38
+          "ratio": 2.37
         },
         "lq": {
           "price": 102250,
-          "earnings": 30266,
-          "ratio": 3.38
+          "ratio": 2.27
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 90000,
-          "earnings": 44892,
           "ratio": 2
         },
         "lq": {
           "price": 75000,
-          "earnings": 30266,
-          "ratio": 2.48
+          "ratio": 1.66
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 88000,
-          "earnings": 44892,
-          "ratio": 1.96
+          "ratio": 1.95
         },
         "lq": {
           "price": 80000,
-          "earnings": 30266,
-          "ratio": 2.64
+          "ratio": 1.78
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 130000,
-          "earnings": 44892,
-          "ratio": 2.9
+          "ratio": 2.89
         },
         "lq": {
           "price": 92000,
-          "earnings": 30266,
-          "ratio": 3.04
+          "ratio": 2.04
         }
       }
     },
@@ -74,13 +77,11 @@
       "affordability": {
         "median": {
           "price": 87000,
-          "earnings": 44892,
-          "ratio": 1.94
+          "ratio": 1.93
         },
         "lq": {
           "price": 83125,
-          "earnings": 30266,
-          "ratio": 2.75
+          "ratio": 1.84
         }
       }
     },
@@ -90,13 +91,11 @@
       "affordability": {
         "median": {
           "price": 158250,
-          "earnings": 44892,
-          "ratio": 3.53
+          "ratio": 3.51
         },
         "lq": {
           "price": 106062,
-          "earnings": 30266,
-          "ratio": 3.5
+          "ratio": 2.35
         }
       }
     },
@@ -106,29 +105,13 @@
       "affordability": {
         "median": {
           "price": 287500,
-          "earnings": 44892,
-          "ratio": 6.4
+          "ratio": 6.38
         },
         "lq": {
           "price": 149712,
-          "earnings": 30266,
-          "ratio": 4.95
+          "ratio": 3.32
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 122000,
-      "earnings": 44892,
-      "ratio": 2.72,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 90000,
-      "earnings": 30266,
-      "ratio": 2.97,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

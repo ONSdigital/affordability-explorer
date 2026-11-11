@@ -3,6 +3,17 @@
   "name": "East Cambridgeshire",
   "region_code": "E12000006",
   "region_name": "East of England",
+  "earnings": 33747,
+  "affordability": {
+    "median": {
+      "price": 167500,
+      "ratio": 4.96
+    },
+    "lq": {
+      "price": 146500,
+      "ratio": 4.34
+    }
+  },
   "msoas": [
     {
       "code": "E02003734",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 163350,
-          "earnings": 41464,
-          "ratio": 3.94
+          "ratio": 4.84
         },
         "lq": {
           "price": 157500,
-          "earnings": 30830,
-          "ratio": 5.11
+          "ratio": 4.67
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 240000,
-          "earnings": 41464,
-          "ratio": 5.79
+          "ratio": 7.11
         },
         "lq": {
           "price": 193000,
-          "earnings": 30830,
-          "ratio": 6.26
+          "ratio": 5.72
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 150000,
-          "earnings": 41464,
-          "ratio": 3.62
+          "ratio": 4.44
         },
         "lq": {
           "price": 132500,
-          "earnings": 30830,
-          "ratio": 4.3
+          "ratio": 3.93
         }
       }
     },
@@ -58,29 +63,13 @@
       "affordability": {
         "median": {
           "price": 90000,
-          "earnings": 41464,
-          "ratio": 2.17
+          "ratio": 2.67
         },
         "lq": {
           "price": 74000,
-          "earnings": 30830,
-          "ratio": 2.4
+          "ratio": 2.19
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 160250,
-      "earnings": 41464,
-      "ratio": 3.86,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 133750,
-      "earnings": 30830,
-      "ratio": 4.34,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

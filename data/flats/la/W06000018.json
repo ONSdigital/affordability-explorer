@@ -3,6 +3,17 @@
   "name": "Caerphilly",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "earnings": 32967,
+  "affordability": {
+    "median": {
+      "price": 118250,
+      "ratio": 3.59
+    },
+    "lq": {
+      "price": 107000,
+      "ratio": 3.25
+    }
+  },
   "msoas": [
     {
       "code": "W02000302",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 110000,
-          "earnings": 35367,
-          "ratio": 3.11
+          "ratio": 3.34
         },
         "lq": {
           "price": 107750,
-          "earnings": 28685,
-          "ratio": 3.76
+          "ratio": 3.27
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 110000,
-          "earnings": 35367,
-          "ratio": 3.11
+          "ratio": 3.34
         },
         "lq": {
           "price": 102000,
-          "earnings": 28685,
-          "ratio": 3.56
+          "ratio": 3.09
         }
       }
     },
@@ -42,29 +49,13 @@
       "affordability": {
         "median": {
           "price": 138000,
-          "earnings": 35367,
-          "ratio": 3.9
+          "ratio": 4.19
         },
         "lq": {
           "price": 120000,
-          "earnings": 28685,
-          "ratio": 4.18
+          "ratio": 3.64
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 118250,
-      "earnings": 35367,
-      "ratio": 3.34,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 107000,
-      "earnings": 28685,
-      "ratio": 3.73,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

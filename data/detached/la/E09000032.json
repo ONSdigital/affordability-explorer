@@ -3,6 +3,17 @@
   "name": "Wandsworth",
   "region_code": "E12000007",
   "region_name": "London",
+  "earnings": 43069,
+  "affordability": {
+    "median": {
+      "price": 2785000,
+      "ratio": 64.66
+    },
+    "lq": {
+      "price": 1782500,
+      "ratio": 41.39
+    }
+  },
   "msoas": [
     {
       "code": "E02000933",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 3940000,
-          "earnings": 54584,
-          "ratio": 72.18
+          "ratio": 91.48
         },
         "lq": {
           "price": 2830000,
-          "earnings": 38734,
-          "ratio": 73.06
+          "ratio": 65.71
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 2568750,
-          "earnings": 54584,
-          "ratio": 47.06
+          "ratio": 59.64
         },
         "lq": {
           "price": 1665000,
-          "earnings": 38734,
-          "ratio": 42.99
+          "ratio": 38.66
         }
       }
     },
@@ -42,29 +49,13 @@
       "affordability": {
         "median": {
           "price": 5000000,
-          "earnings": 54584,
-          "ratio": 91.6
+          "ratio": 116.09
         },
         "lq": {
           "price": 3550000,
-          "earnings": 38734,
-          "ratio": 91.65
+          "ratio": 82.43
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 2650000,
-      "earnings": 54584,
-      "ratio": 48.55,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 1816733,
-      "earnings": 38734,
-      "ratio": 46.9,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

@@ -3,6 +3,17 @@
   "name": "Denbighshire",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "earnings": 32973,
+  "affordability": {
+    "median": {
+      "price": 107000,
+      "ratio": 3.25
+    },
+    "lq": {
+      "price": 85875,
+      "ratio": 2.6
+    }
+  },
   "msoas": [
     {
       "code": "W02000042",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 100000,
-          "earnings": 32691,
-          "ratio": 3.06
+          "ratio": 3.03
         },
         "lq": {
           "price": 85500,
-          "earnings": 26187,
-          "ratio": 3.26
+          "ratio": 2.59
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 103000,
-          "earnings": 32691,
-          "ratio": 3.15
+          "ratio": 3.12
         },
         "lq": {
           "price": 80000,
-          "earnings": 26187,
-          "ratio": 3.05
+          "ratio": 2.43
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 141500,
-          "earnings": 32691,
-          "ratio": 4.33
+          "ratio": 4.29
         },
         "lq": {
           "price": 115466,
-          "earnings": 26187,
-          "ratio": 4.41
+          "ratio": 3.5
         }
       }
     },
@@ -58,29 +63,13 @@
       "affordability": {
         "median": {
           "price": 96500,
-          "earnings": 32691,
-          "ratio": 2.95
+          "ratio": 2.93
         },
         "lq": {
           "price": 72000,
-          "earnings": 26187,
-          "ratio": 2.75
+          "ratio": 2.18
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 107500,
-      "earnings": 32691,
-      "ratio": 3.29,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 80000,
-      "earnings": 26187,
-      "ratio": 3.05,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

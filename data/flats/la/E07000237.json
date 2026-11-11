@@ -3,6 +3,17 @@
   "name": "Worcester",
   "region_code": "E12000005",
   "region_name": "West Midlands",
+  "earnings": 37671,
+  "affordability": {
+    "median": {
+      "price": 145000,
+      "ratio": 3.85
+    },
+    "lq": {
+      "price": 117125,
+      "ratio": 3.11
+    }
+  },
   "msoas": [
     {
       "code": "E02006734",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 145000,
-          "earnings": 38880,
-          "ratio": 3.73
+          "ratio": 3.85
         },
         "lq": {
           "price": 133539,
-          "earnings": 29882,
-          "ratio": 4.47
+          "ratio": 3.54
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 109500,
-          "earnings": 38880,
-          "ratio": 2.82
+          "ratio": 2.91
         },
         "lq": {
           "price": 90000,
-          "earnings": 29882,
-          "ratio": 3.01
+          "ratio": 2.39
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 120000,
-          "earnings": 38880,
-          "ratio": 3.09
+          "ratio": 3.19
         },
         "lq": {
           "price": 103250,
-          "earnings": 29882,
-          "ratio": 3.46
+          "ratio": 2.74
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 72000,
-          "earnings": 38880,
-          "ratio": 1.85
+          "ratio": 1.91
         },
         "lq": {
           "price": 60125,
-          "earnings": 29882,
-          "ratio": 2.01
+          "ratio": 1.6
         }
       }
     },
@@ -74,13 +77,11 @@
       "affordability": {
         "median": {
           "price": 145000,
-          "earnings": 38880,
-          "ratio": 3.73
+          "ratio": 3.85
         },
         "lq": {
           "price": 110000,
-          "earnings": 29882,
-          "ratio": 3.68
+          "ratio": 2.92
         }
       }
     },
@@ -90,13 +91,11 @@
       "affordability": {
         "median": {
           "price": 143250,
-          "earnings": 38880,
-          "ratio": 3.68
+          "ratio": 3.8
         },
         "lq": {
           "price": 136625,
-          "earnings": 29882,
-          "ratio": 4.57
+          "ratio": 3.63
         }
       }
     },
@@ -106,13 +105,11 @@
       "affordability": {
         "median": {
           "price": 135000,
-          "earnings": 38880,
-          "ratio": 3.47
+          "ratio": 3.58
         },
         "lq": {
           "price": 119750,
-          "earnings": 29882,
-          "ratio": 4.01
+          "ratio": 3.18
         }
       }
     },
@@ -122,13 +119,11 @@
       "affordability": {
         "median": {
           "price": 120000,
-          "earnings": 38880,
-          "ratio": 3.09
+          "ratio": 3.19
         },
         "lq": {
           "price": 109000,
-          "earnings": 29882,
-          "ratio": 3.65
+          "ratio": 2.89
         }
       }
     },
@@ -138,13 +133,11 @@
       "affordability": {
         "median": {
           "price": 144000,
-          "earnings": 38880,
-          "ratio": 3.7
+          "ratio": 3.82
         },
         "lq": {
           "price": 113500,
-          "earnings": 29882,
-          "ratio": 3.8
+          "ratio": 3.01
         }
       }
     },
@@ -154,13 +147,11 @@
       "affordability": {
         "median": {
           "price": 163500,
-          "earnings": 38880,
-          "ratio": 4.21
+          "ratio": 4.34
         },
         "lq": {
           "price": 128750,
-          "earnings": 29882,
-          "ratio": 4.31
+          "ratio": 3.42
         }
       }
     },
@@ -170,29 +161,13 @@
       "affordability": {
         "median": {
           "price": 201000,
-          "earnings": 38880,
-          "ratio": 5.17
+          "ratio": 5.34
         },
         "lq": {
           "price": 150750,
-          "earnings": 29882,
-          "ratio": 5.04
+          "ratio": 4
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 140000,
-      "earnings": 38880,
-      "ratio": 3.6,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 115000,
-      "earnings": 29882,
-      "ratio": 3.85,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

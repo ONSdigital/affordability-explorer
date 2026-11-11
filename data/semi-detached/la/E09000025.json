@@ -3,6 +3,17 @@
   "name": "Newham",
   "region_code": "E12000007",
   "region_name": "London",
+  "earnings": 44605,
+  "affordability": {
+    "median": {
+      "price": 487500,
+      "ratio": 10.93
+    },
+    "lq": {
+      "price": 434750,
+      "ratio": 9.75
+    }
+  },
   "msoas": [
     {
       "code": "E02000745",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 600000,
-          "earnings": 42595,
-          "ratio": 14.09
+          "ratio": 13.45
         },
         "lq": {
           "price": 460000,
-          "earnings": 31944,
-          "ratio": 14.4
+          "ratio": 10.31
         }
       }
     },
@@ -26,37 +35,13 @@
       "affordability": {
         "median": {
           "price": 485000,
-          "earnings": 42595,
-          "ratio": 11.39
+          "ratio": 10.87
         },
         "lq": {
           "price": 424000,
-          "earnings": 31944,
-          "ratio": 13.27
+          "ratio": 9.51
         }
       }
-    },
-    {
-      "code": "E02006995",
-      "name": "East Village",
-      "affordability": {
-        "median": {},
-        "lq": {}
-      }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 485000,
-      "earnings": 42595,
-      "ratio": 11.39,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 435750,
-      "earnings": 31944,
-      "ratio": 13.64,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

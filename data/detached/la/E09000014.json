@@ -3,6 +3,17 @@
   "name": "Haringey",
   "region_code": "E12000007",
   "region_name": "London",
+  "earnings": 43536,
+  "affordability": {
+    "median": {
+      "price": 2200000,
+      "ratio": 50.53
+    },
+    "lq": {
+      "price": 1377520,
+      "ratio": 31.64
+    }
+  },
   "msoas": [
     {
       "code": "E02000413",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 2500000,
-          "earnings": 43995,
-          "ratio": 56.82
+          "ratio": 57.42
         },
         "lq": {
           "price": 2300000,
-          "earnings": 33947,
-          "ratio": 67.75
+          "ratio": 52.83
         }
       }
     },
@@ -26,29 +35,13 @@
       "affordability": {
         "median": {
           "price": 3185000,
-          "earnings": 43995,
-          "ratio": 72.39
+          "ratio": 73.16
         },
         "lq": {
           "price": 2175000,
-          "earnings": 33947,
-          "ratio": 64.07
+          "ratio": 49.96
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 2187500,
-      "earnings": 43995,
-      "ratio": 49.72,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 1752500,
-      "earnings": 33947,
-      "ratio": 51.62,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

@@ -3,6 +3,17 @@
   "name": "Merthyr Tydfil",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "earnings": 30730,
+  "affordability": {
+    "median": {
+      "price": 61500,
+      "ratio": 2
+    },
+    "lq": {
+      "price": 60000,
+      "ratio": 1.95
+    }
+  },
   "msoas": [
     {
       "code": "W02000285",
@@ -10,29 +21,13 @@
       "affordability": {
         "median": {
           "price": 60000,
-          "earnings": 35152,
-          "ratio": 1.71
+          "ratio": 1.95
         },
         "lq": {
           "price": 50000,
-          "earnings": 27451,
-          "ratio": 1.82
+          "ratio": 1.63
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 75500,
-      "earnings": 35152,
-      "ratio": 2.15,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 67500,
-      "earnings": 27451,
-      "ratio": 2.46,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

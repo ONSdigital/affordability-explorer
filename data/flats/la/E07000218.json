@@ -3,6 +3,17 @@
   "name": "North Warwickshire",
   "region_code": "E12000005",
   "region_name": "West Midlands",
+  "earnings": 36954,
+  "affordability": {
+    "median": {
+      "price": 148000,
+      "ratio": 4
+    },
+    "lq": {
+      "price": 116000,
+      "ratio": 3.14
+    }
+  },
   "msoas": [
     {
       "code": "E02006470",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 112500,
-          "earnings": 40095,
-          "ratio": 2.81
+          "ratio": 3.04
         },
         "lq": {
           "price": 94550,
-          "earnings": 28787,
-          "ratio": 3.28
+          "ratio": 2.56
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 165000,
-          "earnings": 40095,
-          "ratio": 4.12
+          "ratio": 4.47
         },
         "lq": {
           "price": 147500,
-          "earnings": 28787,
-          "ratio": 5.12
+          "ratio": 3.99
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 120000,
-          "earnings": 40095,
-          "ratio": 2.99
+          "ratio": 3.25
         },
         "lq": {
           "price": 100000,
-          "earnings": 28787,
-          "ratio": 3.47
+          "ratio": 2.71
         }
       }
     },
@@ -58,29 +63,13 @@
       "affordability": {
         "median": {
           "price": 155000,
-          "earnings": 40095,
-          "ratio": 3.87
+          "ratio": 4.19
         },
         "lq": {
           "price": 143550,
-          "earnings": 28787,
-          "ratio": 4.99
+          "ratio": 3.88
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 149950,
-      "earnings": 40095,
-      "ratio": 3.74,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 111250,
-      "earnings": 28787,
-      "ratio": 3.86,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

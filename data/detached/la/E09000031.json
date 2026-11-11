@@ -3,6 +3,17 @@
   "name": "Waltham Forest",
   "region_code": "E12000007",
   "region_name": "London",
+  "earnings": 38107,
+  "affordability": {
+    "median": {
+      "price": 800000,
+      "ratio": 20.99
+    },
+    "lq": {
+      "price": 681249,
+      "ratio": 17.88
+    }
+  },
   "msoas": [
     {
       "code": "E02000896",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 962500,
-          "earnings": 45350,
-          "ratio": 21.22
+          "ratio": 25.26
         },
         "lq": {
           "price": 900000,
-          "earnings": 32546,
-          "ratio": 27.65
+          "ratio": 23.62
         }
       }
     },
@@ -26,29 +35,13 @@
       "affordability": {
         "median": {
           "price": 912500,
-          "earnings": 45350,
-          "ratio": 20.12
+          "ratio": 23.95
         },
         "lq": {
           "price": 737496,
-          "earnings": 32546,
-          "ratio": 22.66
+          "ratio": 19.35
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 800000,
-      "earnings": 45350,
-      "ratio": 17.64,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 635000,
-      "earnings": 32546,
-      "ratio": 19.51,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

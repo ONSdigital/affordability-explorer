@@ -3,6 +3,17 @@
   "name": "Camden",
   "region_code": "E12000007",
   "region_name": "London",
+  "earnings": 54501,
+  "affordability": {
+    "median": {
+      "price": 3775000,
+      "ratio": 69.26
+    },
+    "lq": {
+      "price": 2655500,
+      "ratio": 48.72
+    }
+  },
   "msoas": [
     {
       "code": "E02000166",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 3600000,
-          "earnings": 53133,
-          "ratio": 67.75
+          "ratio": 66.05
         },
         "lq": {
           "price": 2700000,
-          "earnings": 36831,
-          "ratio": 73.31
+          "ratio": 49.54
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 4900000,
-          "earnings": 53133,
-          "ratio": 92.22
+          "ratio": 89.91
         },
         "lq": {
           "price": 3150000,
-          "earnings": 36831,
-          "ratio": 85.53
+          "ratio": 57.8
         }
       }
     },
@@ -42,29 +49,13 @@
       "affordability": {
         "median": {
           "price": 2460000,
-          "earnings": 53133,
-          "ratio": 46.3
+          "ratio": 45.14
         },
         "lq": {
           "price": 2447600,
-          "earnings": 36831,
-          "ratio": 66.45
+          "ratio": 44.91
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 4047500,
-      "earnings": 53133,
-      "ratio": 76.18,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 2655500,
-      "earnings": 36831,
-      "ratio": 72.1,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

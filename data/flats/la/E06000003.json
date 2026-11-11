@@ -3,6 +3,17 @@
   "name": "Redcar and Cleveland",
   "region_code": "E12000001",
   "region_name": "North East",
+  "earnings": 35477,
+  "affordability": {
+    "median": {
+      "price": 114500,
+      "ratio": 3.23
+    },
+    "lq": {
+      "price": 79950,
+      "ratio": 2.25
+    }
+  },
   "msoas": [
     {
       "code": "E02002515",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 61250,
-          "earnings": 35111,
-          "ratio": 1.74
+          "ratio": 1.73
         },
         "lq": {
           "price": 55000,
-          "earnings": 27285,
-          "ratio": 2.02
+          "ratio": 1.55
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 162000,
-          "earnings": 35111,
-          "ratio": 4.61
+          "ratio": 4.57
         },
         "lq": {
           "price": 130000,
-          "earnings": 27285,
-          "ratio": 4.76
+          "ratio": 3.66
         }
       }
     },
@@ -42,29 +49,13 @@
       "affordability": {
         "median": {
           "price": 75000,
-          "earnings": 35111,
-          "ratio": 2.14
+          "ratio": 2.11
         },
         "lq": {
           "price": 66000,
-          "earnings": 27285,
-          "ratio": 2.42
+          "ratio": 1.86
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 110000,
-      "earnings": 35111,
-      "ratio": 3.13,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 69950,
-      "earnings": 27285,
-      "ratio": 2.56,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

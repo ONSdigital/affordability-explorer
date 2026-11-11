@@ -3,6 +3,17 @@
   "name": "Newark and Sherwood",
   "region_code": "E12000004",
   "region_name": "East Midlands",
+  "earnings": 33754,
+  "affordability": {
+    "median": {
+      "price": 123000,
+      "ratio": 3.64
+    },
+    "lq": {
+      "price": 100000,
+      "ratio": 2.96
+    }
+  },
   "msoas": [
     {
       "code": "E02005893",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 122250,
-          "earnings": 37118,
-          "ratio": 3.29
+          "ratio": 3.62
         },
         "lq": {
           "price": 115375,
-          "earnings": 27597,
-          "ratio": 4.18
+          "ratio": 3.42
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 116000,
-          "earnings": 37118,
-          "ratio": 3.13
+          "ratio": 3.44
         },
         "lq": {
           "price": 102000,
-          "earnings": 27597,
-          "ratio": 3.7
+          "ratio": 3.02
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 185000,
-          "earnings": 37118,
-          "ratio": 4.98
+          "ratio": 5.48
         },
         "lq": {
           "price": 156750,
-          "earnings": 27597,
-          "ratio": 5.68
+          "ratio": 4.64
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 147000,
-          "earnings": 37118,
-          "ratio": 3.96
+          "ratio": 4.36
         },
         "lq": {
           "price": 97500,
-          "earnings": 27597,
-          "ratio": 3.53
+          "ratio": 2.89
         }
       }
     },
@@ -74,13 +77,11 @@
       "affordability": {
         "median": {
           "price": 108500,
-          "earnings": 37118,
-          "ratio": 2.92
+          "ratio": 3.21
         },
         "lq": {
           "price": 93250,
-          "earnings": 27597,
-          "ratio": 3.38
+          "ratio": 2.76
         }
       }
     },
@@ -90,29 +91,13 @@
       "affordability": {
         "median": {
           "price": 113500,
-          "earnings": 37118,
-          "ratio": 3.06
+          "ratio": 3.36
         },
         "lq": {
           "price": 101062,
-          "earnings": 27597,
-          "ratio": 3.66
+          "ratio": 2.99
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 115000,
-      "earnings": 37118,
-      "ratio": 3.1,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 99750,
-      "earnings": 27597,
-      "ratio": 3.61,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

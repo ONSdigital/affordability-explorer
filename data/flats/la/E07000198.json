@@ -3,6 +3,17 @@
   "name": "Staffordshire Moorlands",
   "region_code": "E12000005",
   "region_name": "West Midlands",
+  "earnings": 30895,
+  "affordability": {
+    "median": {
+      "price": 106500,
+      "ratio": 3.45
+    },
+    "lq": {
+      "price": 88000,
+      "ratio": 2.85
+    }
+  },
   "msoas": [
     {
       "code": "E02006206",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 88975,
-          "earnings": 38228,
-          "ratio": 2.33
+          "ratio": 2.88
         },
         "lq": {
           "price": 85750,
-          "earnings": 27737,
-          "ratio": 3.09
+          "ratio": 2.78
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 116500,
-          "earnings": 38228,
-          "ratio": 3.05
+          "ratio": 3.77
         },
         "lq": {
           "price": 81000,
-          "earnings": 27737,
-          "ratio": 2.92
+          "ratio": 2.62
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 115000,
-          "earnings": 38228,
-          "ratio": 3.01
+          "ratio": 3.72
         },
         "lq": {
           "price": 104000,
-          "earnings": 27737,
-          "ratio": 3.75
+          "ratio": 3.37
         }
       }
     },
@@ -58,29 +63,13 @@
       "affordability": {
         "median": {
           "price": 87500,
-          "earnings": 38228,
-          "ratio": 2.29
+          "ratio": 2.83
         },
         "lq": {
           "price": 80375,
-          "earnings": 27737,
-          "ratio": 2.9
+          "ratio": 2.6
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 107000,
-      "earnings": 38228,
-      "ratio": 2.8,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 88000,
-      "earnings": 27737,
-      "ratio": 3.17,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

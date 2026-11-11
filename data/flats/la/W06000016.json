@@ -3,6 +3,17 @@
   "name": "Rhondda Cynon Taf",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "earnings": 34020,
+  "affordability": {
+    "median": {
+      "price": 105000,
+      "ratio": 3.09
+    },
+    "lq": {
+      "price": 77000,
+      "ratio": 2.26
+    }
+  },
   "msoas": [
     {
       "code": "W02000263",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 95000,
-          "earnings": 34837,
-          "ratio": 2.73
+          "ratio": 2.79
         },
         "lq": {
           "price": 95000,
-          "earnings": 27333,
-          "ratio": 3.48
+          "ratio": 2.79
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 96750,
-          "earnings": 34837,
-          "ratio": 2.78
+          "ratio": 2.84
         },
         "lq": {
           "price": 94812,
-          "earnings": 27333,
-          "ratio": 3.47
+          "ratio": 2.79
         }
       }
     },
@@ -42,29 +49,13 @@
       "affordability": {
         "median": {
           "price": 168000,
-          "earnings": 34837,
-          "ratio": 4.82
+          "ratio": 4.94
         },
         "lq": {
           "price": 124250,
-          "earnings": 27333,
-          "ratio": 4.55
+          "ratio": 3.65
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 107000,
-      "earnings": 34837,
-      "ratio": 3.07,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 85750,
-      "earnings": 27333,
-      "ratio": 3.14,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

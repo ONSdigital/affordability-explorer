@@ -3,6 +3,17 @@
   "name": "Bolsover",
   "region_code": "E12000004",
   "region_name": "East Midlands",
+  "earnings": 36150,
+  "affordability": {
+    "median": {
+      "price": 98250,
+      "ratio": 2.72
+    },
+    "lq": {
+      "price": 65000,
+      "ratio": 1.8
+    }
+  },
   "msoas": [
     {
       "code": "E02004045",
@@ -10,29 +21,13 @@
       "affordability": {
         "median": {
           "price": 98500,
-          "earnings": 32897,
-          "ratio": 2.99
+          "ratio": 2.72
         },
         "lq": {
           "price": 98000,
-          "earnings": 25170,
-          "ratio": 3.89
+          "ratio": 2.71
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 100250,
-      "earnings": 32897,
-      "ratio": 3.05,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 81250,
-      "earnings": 25170,
-      "ratio": 3.23,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

@@ -3,6 +3,17 @@
   "name": "Torfaen",
   "region_code": "W92000004",
   "region_name": "Wales",
+  "earnings": 36070,
+  "affordability": {
+    "median": {
+      "price": 108250,
+      "ratio": 3
+    },
+    "lq": {
+      "price": 80000,
+      "ratio": 2.22
+    }
+  },
   "msoas": [
     {
       "code": "W02000329",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 112000,
-          "earnings": 39170,
-          "ratio": 2.86
+          "ratio": 3.11
         },
         "lq": {
           "price": 73500,
-          "earnings": 29551,
-          "ratio": 2.49
+          "ratio": 2.04
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 127500,
-          "earnings": 39170,
-          "ratio": 3.26
+          "ratio": 3.53
         },
         "lq": {
           "price": 120750,
-          "earnings": 29551,
-          "ratio": 4.09
+          "ratio": 3.35
         }
       }
     },
@@ -42,13 +49,11 @@
       "affordability": {
         "median": {
           "price": 104500,
-          "earnings": 39170,
-          "ratio": 2.67
+          "ratio": 2.9
         },
         "lq": {
           "price": 82750,
-          "earnings": 29551,
-          "ratio": 2.8
+          "ratio": 2.29
         }
       }
     },
@@ -58,13 +63,11 @@
       "affordability": {
         "median": {
           "price": 89500,
-          "earnings": 39170,
-          "ratio": 2.28
+          "ratio": 2.48
         },
         "lq": {
           "price": 59250,
-          "earnings": 29551,
-          "ratio": 2.01
+          "ratio": 1.64
         }
       }
     },
@@ -74,29 +77,13 @@
       "affordability": {
         "median": {
           "price": 130000,
-          "earnings": 39170,
-          "ratio": 3.32
+          "ratio": 3.6
         },
         "lq": {
           "price": 120000,
-          "earnings": 29551,
-          "ratio": 4.06
+          "ratio": 3.33
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 120000,
-      "earnings": 39170,
-      "ratio": 3.06,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 104000,
-      "earnings": 29551,
-      "ratio": 3.52,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

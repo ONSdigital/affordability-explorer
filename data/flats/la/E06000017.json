@@ -3,6 +3,17 @@
   "name": "Rutland",
   "region_code": "E12000004",
   "region_name": "East Midlands",
+  "earnings": 38216,
+  "affordability": {
+    "median": {
+      "price": 150000,
+      "ratio": 3.93
+    },
+    "lq": {
+      "price": 122500,
+      "ratio": 3.21
+    }
+  },
   "msoas": [
     {
       "code": "E02002864",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 191950,
-          "earnings": 42355,
-          "ratio": 4.53
+          "ratio": 5.02
         },
         "lq": {
           "price": 140000,
-          "earnings": 33539,
-          "ratio": 4.17
+          "ratio": 3.66
         }
       }
     },
@@ -26,13 +35,11 @@
       "affordability": {
         "median": {
           "price": 131250,
-          "earnings": 42355,
-          "ratio": 3.1
+          "ratio": 3.43
         },
         "lq": {
           "price": 119250,
-          "earnings": 33539,
-          "ratio": 3.56
+          "ratio": 3.12
         }
       }
     },
@@ -42,29 +49,13 @@
       "affordability": {
         "median": {
           "price": 136500,
-          "earnings": 42355,
-          "ratio": 3.22
+          "ratio": 3.57
         },
         "lq": {
           "price": 126750,
-          "earnings": 33539,
-          "ratio": 3.78
+          "ratio": 3.32
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 143750,
-      "earnings": 42355,
-      "ratio": 3.39,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 120625,
-      "earnings": 33539,
-      "ratio": 3.6,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

@@ -3,6 +3,17 @@
   "name": "North West Leicestershire",
   "region_code": "E12000004",
   "region_name": "East Midlands",
+  "earnings": 34144,
+  "affordability": {
+    "median": {
+      "price": 147000,
+      "ratio": 4.31
+    },
+    "lq": {
+      "price": 124250,
+      "ratio": 3.64
+    }
+  },
   "msoas": [
     {
       "code": "E02005399",
@@ -10,13 +21,11 @@
       "affordability": {
         "median": {
           "price": 145000,
-          "earnings": 38795,
-          "ratio": 3.74
+          "ratio": 4.25
         },
         "lq": {
           "price": 130000,
-          "earnings": 29403,
-          "ratio": 4.42
+          "ratio": 3.81
         }
       }
     },
@@ -26,29 +35,13 @@
       "affordability": {
         "median": {
           "price": 185000,
-          "earnings": 38795,
-          "ratio": 4.77
+          "ratio": 5.42
         },
         "lq": {
           "price": 136500,
-          "earnings": 29403,
-          "ratio": 4.64
+          "ratio": 4
         }
       }
     }
-  ],
-  "affordability": {
-    "median": {
-      "price": 158000,
-      "earnings": 38795,
-      "ratio": 4.07,
-      "period": "2026-Q1"
-    },
-    "lq": {
-      "price": 133000,
-      "earnings": 29403,
-      "ratio": 4.52,
-      "period": "2026-Q1"
-    }
-  }
+  ]
 }

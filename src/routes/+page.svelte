@@ -17,6 +17,8 @@
     Checkbox,
     Details,
     Em,
+    AnalyticsBanner,
+    analyticsEvent
   } from "@onsvisual/svelte-components";
   import {
     loadTopoJSON,
@@ -1610,6 +1612,51 @@
     closeSearchMenu();
   }
 
+  function trackInteraction(interactionType, interactionValue, interactionLabel, area = selectedBoundary) {
+    analyticsEvent({
+      event: "interaction",
+      interactionType,
+      interactionValue,
+      interactionLabel,
+      areaName: area?.name ?? null,
+      areaCode: area?.id ?? null,
+      areaType: area?.type === "la" ? "local-authority" : area?.type ?? null,
+    });
+  }
+
+  function handleDataDownload() {
+    const linkUrl = new URL(`${base}/data/datadownload.csv`, window.location.href);
+    analyticsEvent({
+      event: "fileDownload",
+      fileExtension: "csv",
+      filename: "datadownload.csv",
+      linkText: "Download all data",
+      linkUrl: linkUrl.href,
+      linkDomain: linkUrl.hostname,
+    });
+  }
+
+  function trackAreaSelection(interactionType) {
+    trackInteraction(interactionType, selectedBoundary.id, "Select area");
+  }
+
+  function handleFilterChange(event) {
+    const { name, value } = event.target;
+    if (name === "property-type") {
+      trackInteraction("radio", value, "Property type");
+    } else if (name === "price-level") {
+      trackInteraction("radio", value, "Price level");
+    }
+  }
+
+  function handleBeeswarmSelect({ code }) {
+    const msoaData = affordabilityData[code];
+    if (msoaData) {
+      selectMsoa(code, msoaData);
+      trackAreaSelection("beeswarm");
+    }
+  }
+
   function handleSelectChange(value) {
     if (!value) return;
 
@@ -1633,6 +1680,7 @@
       selectMsoa(resolvedMsoaCode, affordabilityData[resolvedMsoaCode], {
         zoomToParentLA: true,
       });
+      trackAreaSelection("search");
       return;
     }
 
@@ -1640,6 +1688,7 @@
     if (type === "ltla" || type === "area" || boundary) {
       if (boundary) {
         selectBoundary(boundary);
+        trackAreaSelection("search");
       }
       return;
     }
@@ -1759,11 +1808,13 @@
           zoomToParentLA: true,
           flyToPoint: null,
         });
+        trackAreaSelection("postcode-search");
       } else {
         // Fallback: find the LTLA boundary containing this postcode
         const ltla = findBoundaryAtPoint(lon, lat, "ltla");
         if (ltla) {
           selectBoundary(ltla);
+          trackAreaSelection("postcode-search");
         } else {
           error = "Area not found for this postcode";
         }
@@ -1775,6 +1826,9 @@
   }
 
   function clearSelection() {
+    if (selectedBoundary) {
+      trackInteraction("button", "clear", "Clear selection");
+    }
     clearSelectedMsoaFeatureState();
     selectedBoundary = null;
     selectedFeatureId = null;
@@ -1796,6 +1850,7 @@
   }
 </script>
 
+<AnalyticsBanner hideBanner={true} />
 <div class="page-container">
   <Section width="full">
     <Container width="full">
@@ -1832,9 +1887,14 @@
             </Button>
           </div>
         </div>
-        <div class="ons-u-mt-s">
+        <div class="ons-u-mt-s" on:change={handleFilterChange}>
           <Details
             title={`Property type: ${propertyTypeLabels[propertyType]} · Price: ${priceLevel === "lq" ? "Entry level" : "Average"}`}
+            on:toggle={({ detail }) => trackInteraction(
+              "accordion",
+              detail.e.target.open ? "open" : "close",
+              "Property and price filters",
+            )}
           >
             <ButtonGroup
               name="property-type"
@@ -1981,6 +2041,11 @@
                         id="first-time-buyer-checkbox"
                         label="I'm a first-time buyer"
                         bind:checked={isFirstTimeBuyer}
+                        on:change={({ detail }) => trackInteraction(
+                          "checkbox",
+                          detail.item.checked ? "checked" : "unchecked",
+                          "I'm a first-time buyer",
+                        )}
                         compact
                       />
                     </div>
@@ -2059,6 +2124,7 @@
                           selectMsoa(msoaCode, affordabilityData[msoaCode], {
                             zoomToParentLA: true,
                           });
+                          trackAreaSelection("map");
                         }
                       }}
                       paint={{
@@ -2211,12 +2277,7 @@
                 >
                   <BeeswarmMarkers
                     slot="svg"
-                    on:select={({ detail }) => {
-                      const msoaData = affordabilityData[detail.code];
-                      if (msoaData) {
-                        selectMsoa(detail.code, msoaData);
-                      }
-                    }}
+                    on:select={({ detail }) => handleBeeswarmSelect(detail)}
                   />
                 </ScatterChart>
                 <div class="beeswarm-key" aria-label="Beeswarm marker key">
@@ -2283,6 +2344,21 @@
       </Container>
     </div>
   {/if}
+  <Section width="full" marginTop={true} marginBottom={true}>
+    <Container width="full">
+      <Button
+        variant="primary"
+        type="button"
+        icon="download"
+        iconPosition="before"
+        href={`${base}/data/datadownload.csv`}
+        download="datadownload.csv"
+        on:click={handleDataDownload}
+      >
+        Download all data
+      </Button>
+    </Container>
+  </Section>
 </div>
 
 <style>
@@ -2295,9 +2371,10 @@
     width: 100%;
     max-width: 960px;
     margin: 0 auto;
+    padding-bottom: 8px;
   }
 
-  @media (min-width: 960px) {
+  @media (min-width: 900px) {
     :global(.three-column-grid .ons-grid__col) {
       flex-basis: 33.3333%;
       max-width: 33.3333%;
@@ -2543,7 +2620,7 @@
     padding: 12px;
   }
 
-  @media (max-width: 959px) {
+  @media (max-width: 899px) {
     :global(.three-column-grid .ons-grid__col) {
       flex-basis: 100%;
       max-width: 100%;
